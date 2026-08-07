@@ -4,6 +4,9 @@ A self-paced, build-first roadmap for **modern AI engineering** — the discipli
 
 This is **not** a machine learning or data science curriculum. There is no calculus, no training-from-scratch, no Kaggle. The premise: modern AI engineering is a *software engineering* discipline that treats models as components you build products around.
 
+> [!NOTE]
+> This roadmap was created based on my own research, then optimized and enhanced with Claude Fable 5.
+
 ## Who this is for
 
 Me — an Associate AI Engineer rebuilding skills from the ground up with current tools and current patterns. Python itself is taught from the start in Phase 1, scoped to exactly what AI engineering uses; prior ML theory is not required.
