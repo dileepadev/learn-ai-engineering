@@ -1,0 +1,61 @@
+# uv workspace root.
+#
+# This file holds no application code — it exists to (a) declare the workspace so every
+# phase project shares one lockfile and one environment, and (b) make the standards in
+# AGENTS.md executable rather than aspirational.
+#
+# Add a project:  uv init --package projects/01-wrangle
+# Add a dep:      uv add httpx --package wrangle
+
+[project]
+name = "learn-ai-engineering"
+version = "0.0.0"
+description = "A self-paced, build-first roadmap for modern AI engineering"
+requires-python = ">=3.12"
+dependencies = []
+
+[tool.uv]
+package = false
+
+[tool.uv.workspace]
+members = ["projects/*"]
+
+[dependency-groups]
+dev = [
+    "pytest>=8.0",
+    "pytest-asyncio>=0.24",
+    "ruff>=0.9",
+    "pyright>=1.1.390",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "E",    # pycodestyle errors
+    "F",    # pyflakes
+    "I",    # isort
+    "N",    # pep8-naming
+    "UP",   # pyupgrade
+    "B",    # flake8-bugbear (catches mutable defaults, among others)
+    "SIM",  # flake8-simplify
+    "ASYNC",# flake8-async (catches blocking calls in async code)
+    "T20",  # flake8-print (no stray print() in library code)
+    "RUF",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**" = ["T20"]  # printing in tests is fine
+
+[tool.pyright]
+include = ["projects"]
+typeCheckingMode = "strict"
+reportMissingTypeStubs = false
+pythonVersion = "3.12"
+
+[tool.pytest.ini_options]
+testpaths = ["projects"]
+asyncio_mode = "auto"
+addopts = "-q --strict-markers"

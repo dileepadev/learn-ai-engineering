@@ -1,0 +1,35 @@
+# Secrets — API keys live here and must never be committed.
+.env
+.env.*
+!.env.example
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+
+# uv / virtualenvs
+.venv/
+venv/
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local model / data artifacts (large, regenerable)
+*.gguf
+*.sqlite3
+data/raw/
+
+# Editors and OS
+.vscode/
+.idea/
+.DS_Store
+
+# Claude Code local settings (project .mcp.json IS committed; local overrides are not)
+.claude/settings.local.json
