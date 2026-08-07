@@ -1,0 +1,40 @@
+---
+description: Core rules for the learn-ai-engineering monorepo
+alwaysApply: true
+---
+
+# learn-ai-engineering
+
+**[AGENTS.md](mdc:AGENTS.md) is the single source of truth.** Read it for the full rules —
+teaching mode, layout, toolchain, standards, testing, docs, git, and anti-hallucination
+constraints. Change shared rules there, not here.
+
+## Context
+
+A **learning monorepo** for AI engineering. Roadmap docs in `phases/`; Python projects in
+`projects/<NN>-<name>/` as uv workspace members. Because the goal is learning, **explain what
+you generate** — what it does, why it is built that way, and what would go wrong otherwise.
+Prefer the clear implementation over the clever one.
+
+Not a data science repo: no NumPy, pandas, sklearn, notebooks, or training.
+
+## Non-negotiables
+
+- **uv** only — never pip/venv/poetry/conda.
+- **Pydantic v2** — `@field_validator`, `model_dump()`, `model_validate()`, `ConfigDict`.
+  v1 idioms are errors here.
+- Fully typed signatures; pyright strict; no `Any` escape hatches.
+- **async** for I/O; `httpx` not `requests`; every fan-out bounded by a `Semaphore`.
+- `src/` layout, absolute imports, `pathlib`, line length 100, no bare `except:`.
+- API keys from env via gitignored `.env` — **never** in code.
+- **No real provider API calls in tests.**
+
+## Claude model IDs
+
+`claude-fable-5`, `claude-opus-5`, `claude-sonnet-5`, `claude-haiku-4-5-20251001`.
+Older `claude-3-*` strings are wrong here.
+
+## Commits
+
+Per [COMMIT_MESSAGE_GUIDELINES.md](mdc:COMMIT_MESSAGE_GUIDELINES.md):
+`<type>(<scope>): <Short message>` — imperative, capitalized, no trailing period.
