@@ -1,8 +1,8 @@
 # Phase 1 — Foundations: Python for AI Engineering
 
-**Goal:** Learn Python from the ground up — scoped ruthlessly to what AI engineering actually uses — plus the engineering substrate every later phase leans on: typing, async, streaming, a little SQL, and containers.
-**You build:** `wrangle`, a typed data-cleaning CLI (warm-up), then `mockstream`, a streaming "fake LLM" web service — typed, tested, Dockerized.
-**Effort:** ~30–50 hours if Python is new territory; a fraction of that as a refresher. Either way, don't skip the projects.
+- **Goal:** Learn Python from the ground up — scoped ruthlessly to what AI engineering actually uses — plus the engineering substrate every later phase leans on: typing, async, streaming, a little SQL, and containers.  
+- **You build:** `wrangle`, a typed data-cleaning CLI (warm-up), then `mockstream`, a streaming "fake LLM" web service — typed, tested, Dockerized.  
+- **Effort:** ~30–50 hours if Python is new territory; a fraction of that as a refresher. Either way, don't skip the projects.
 
 ## Why this phase exists
 
