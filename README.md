@@ -14,11 +14,11 @@ Me — an Associate AI Engineer rebuilding skills from the ground up with curren
 ## Operating principles
 
 1. **Build first, read second.** Every phase is anchored to a project. Reading without shipping doesn't count as progress.
-2. **Raw APIs before frameworks.** Build the agent loop, the RAG pipeline, and structured-output parsing by hand once. Then adopt frameworks knowing exactly what they abstract.
+2. **Raw APIs before frameworks.** Build the agent loop, the RAG pipeline, and structured-output parsing directly against raw APIs once. Then adopt frameworks knowing exactly what they abstract.
 3. **One primary tool per category.** Depth in one vector DB, one agent framework, one eval tool beats surface familiarity with five. "Also know about" lists exist so you can navigate job descriptions and migrations, not so you learn them all.
 4. **Evals are the core skill.** The difference between a demo and a product is a test suite that tells you when you made things worse. This gets its own phase and shows up early in small ways.
 5. **Exit by competence, not calendar.** Each phase ends with exit criteria. Move on when you can do the things — whether that took a week or a month.
-6. **AI assistants, used deliberately.** Claude Code and friends are part of the modern workflow — use them for scaffolding, debugging, and explanations. But hand-write each phase's core learning target (the agent loop, the retrieval pipeline, the eval harness) at least once: you can't review AI-generated code in a domain you've never coded yourself.
+6. **AI assistants as teachers, not just typists.** Claude Code and friends are part of the modern workflow — this roadmap is built *with* them, agent-first. Let them write the code, including each phase's core learning target (the agent loop, the retrieval pipeline, the eval harness). The bar is comprehension, not authorship: every generated piece gets walked through — what it does, why it's built that way, what breaks without it — until you can explain it, modify it, and debug it unaided. Agent instructions live in [AGENTS.md](AGENTS.md), which encodes exactly that expectation.
 
 ## The map
 
@@ -121,11 +121,20 @@ Everything this roadmap uses, what it is, and why it earned the slot. Primary pi
 
 ## Project code
 
-Keep phase projects in their own repos (they're portfolio pieces) and link them here as you go:
+Phase projects live in this repo under `projects/`, as [uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/) members — one lockfile, one environment, one set of standards across all eight phases:
 
-- Phase 1 wrangle CLI + mockstream: *(link)*
-- Phase 2 chat client: *(link)*
-- Phase 3 extraction pipeline: *(link)*
-- Phase 4 docs-chat: *(link)*
-- Phase 5 agent + MCP server: *(link)*
-- Phase 8 capstone: *(link)*
+```text
+projects/
+  01-wrangle/        # Phase 1 — typed data-cleaning CLI
+  01-mockstream/     # Phase 1 — streaming SSE service
+  02-chat-client/    # Phase 2 — terminal chat client
+  ...                # one directory per phase project
+```
+
+Tick them off in **Progress** above as you go.
+
+## Working with AI agents
+
+This repo is set up agent-first. [AGENTS.md](AGENTS.md) is the single source of truth — project context, toolchain, coding standards, testing expectations, and the "explain what you generate" rule. [CLAUDE.md](CLAUDE.md), [.github/copilot-instructions.md](.github/copilot-instructions.md), and [.cursor/rules/](.cursor/rules/) are thin pointers to it, so the standards can't drift apart.
+
+`.mcp.json` configures [Context7](https://github.com/upstash/context7) for up-to-date library documentation — the stack here moves fast, and looking up a real signature beats guessing at one.
