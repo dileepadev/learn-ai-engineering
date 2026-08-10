@@ -1,0 +1,35 @@
+# Postgres for the topic 11 SQL drills.
+#
+#   docker compose -f sql/docker-compose.yml up -d
+#   docker compose -f sql/docker-compose.yml exec db psql -U learner -d learning
+#   docker compose -f sql/docker-compose.yml down -v     # wipe and re-seed
+#
+# Run from phases/01-foundations/part-a/.
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: part-a-sql
+    environment:
+      POSTGRES_USER: learner
+      POSTGRES_PASSWORD: learner
+      POSTGRES_DB: learning
+    ports:
+      # 5433 on the host, not 5432, so this cannot collide with a Postgres you
+      # already have running. Inside the container it is still 5432.
+      - "5433:5432"
+    volumes:
+      # Postgres runs every .sql file here in alphabetical order, but only when
+      # the data directory is empty -- i.e. on first start, or after `down -v`.
+      # Editing these files and re-running `up` does nothing on its own.
+      - ./schema.sql:/docker-entrypoint-initdb.d/01-schema.sql:ro
+      - ./seed.sql:/docker-entrypoint-initdb.d/02-seed.sql:ro
+      - part-a-pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U learner -d learning"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  part-a-pgdata:

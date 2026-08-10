@@ -12,6 +12,9 @@ AI engineering is 80% ordinary software engineering under unusual constraints: e
 
 Work through these in order, writing small scripts at every step. Type-hint everything from day one — in this field, schemas are the job.
 
+> [!TIP]
+> **[Part A is built out in `01-foundations/part-a/`](01-foundations/part-a/README.md)** — a lesson and a set of failing tests for each bullet below. Read the lesson, fill in the drills, run `uv run pytest phases/01-foundations/part-a` until it's green.
+
 - **Core mechanics:** variables, numbers, strings and f-strings, truthiness; `list`, `dict`, `set`, `tuple` and when each fits; slicing; control flow. Dicts get special attention — every API payload you'll ever touch is one.
 - **Functions, properly:** positional vs keyword args, defaults (and the mutable-default trap), `*args`/`**kwargs`, functions as values, closures. Provider SDKs and frameworks assume fluency here.
 - **Comprehensions & iteration:** list/dict comprehensions, `enumerate`, `zip`, sorting with `key=`.
