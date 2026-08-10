@@ -21,11 +21,12 @@ from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, field_validator
 
+
 class Item(BaseModel):
     model_config = ConfigDict(frozen=True, extra="forbid")
 
     name: str
-    kind: Literal["article", "video"]   # closed sets use Literal, not str
+    kind: Literal["article", "video"]  # closed sets use Literal, not str
 
     @field_validator("name")
     @classmethod
@@ -44,6 +45,7 @@ schemas with `model_json_schema()`.
 
 ```python
 sem = asyncio.Semaphore(20)  # provider allows 50 rpm; 20 leaves headroom for retries
+
 
 async def fetch(client: httpx.AsyncClient, url: str) -> Response:
     async with sem:

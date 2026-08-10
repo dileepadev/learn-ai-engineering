@@ -1,0 +1,2 @@
+# Phase projects land here as uv workspace members (see AGENTS.md).
+# Placeholder so pyright/pytest paths resolve before the first project exists.
