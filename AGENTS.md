@@ -190,9 +190,13 @@ Quick reference (the authority above still wins):
 
 - Commit: `<type>(<scope>): <Short message>` — imperative mood, capitalized, no trailing period.
 - Useful scopes here: `repo`, `docs`, `phases`, and the project name (e.g. `wrangle`).
-- Branch: `feat/x`, `fix/x`, `docs/x`, `chore/x`, …
-- `main` is protected. Never commit directly to it without the user explicitly asking.
-- **Never commit or push unless the user asks.**
+- Branch: `feat/x`, `fix/x`, `docs/x`, `chore/x`, … — for outside contributors, and for the
+  owner when a change is big enough to want reviewing in one piece.
+- **The owner commits directly to `main`.** This is a solo learning repo; do not create a
+  branch, and do not offer to, unless asked. The fork-and-PR flow in
+  [CONTRIBUTING.md](CONTRIBUTING.md) is for external contributors.
+- **Never commit or push unless the user asks.** Unchanged, and unrelated to the above — it is
+  about not acting unprompted, not about which branch you are on.
 
 ## Secrets and cost
 

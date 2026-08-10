@@ -2,18 +2,23 @@
 
 When creating a new branch, please follow this naming convention to maintain consistency and clarity in communication regarding the nature of changes.
 
-## Protected Branches
-
-These branches are protected and can only be updated by repository administrators. As a contributor, do **not** commit directly to these branches.
+## Long-lived Branches
 
 | Branch Name | Description                                                                            |
 | ----------- | -------------------------------------------------------------------------------------- |
 | `main`      | The stable, current version of the roadmap.                                            |
 | `dev`       | The development branch containing features and bug fixes not yet ready for production. |
 
+**The repository owner commits directly to `main`.** This is a solo learning repository, and
+the overhead of a branch and a pull request for every change is not worth paying here.
+
+**Outside contributors should not.** Fork the repository and open a pull request instead — see
+[CONTRIBUTING.md](CONTRIBUTING.md) for the full flow. The naming conventions below apply to
+those branches, and to any branch the owner chooses to create for a larger change.
+
 ## Contributing Branches
 
-These branches are open for contributions from all contributors. Follow these naming conventions when creating a new branch:
+Follow these naming conventions when creating a new branch:
 
 | Branch Name  | Description                                                                                            |
 | ------------ | ------------------------------------------------------------------------------------------------------ |

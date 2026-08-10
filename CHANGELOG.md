@@ -20,6 +20,7 @@ Changes are organized into the following categories:
 
 - `pyproject.toml`: pyright now type-checks `phases/` as well as `projects/`; ruff's `T20` (no `print`) is relaxed under `phases/` for teaching scripts.
 - `phases/01-foundations.md`: Part A now links to its worked-out drills.
+- Branch policy: `main` is no longer described as protected. The repository owner commits to it directly; outside contributors still fork and open a pull request. Updated in `BRANCH_NAMING_GUIDELINES.md`, `AGENTS.md`, and `CLAUDE.md`.
 
 <!-- e.g., -->
 <!-- Unreleased -->

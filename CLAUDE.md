@@ -50,4 +50,7 @@ Follow [COMMIT_MESSAGE_GUIDELINES.md](COMMIT_MESSAGE_GUIDELINES.md) and
 [BRANCH_NAMING_GUIDELINES.md](BRANCH_NAMING_GUIDELINES.md) — this repo's format is close to
 Conventional Commits but not identical, so read it rather than assuming.
 
-`main` is protected. **Never commit or push unless explicitly asked.**
+The owner works directly on `main` — do not create a branch unless asked for one.
+
+**Never commit or push unless explicitly asked.** That still holds; it is about not acting
+unprompted, not about which branch you are on.
