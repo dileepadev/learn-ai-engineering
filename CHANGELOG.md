@@ -11,7 +11,15 @@ Changes are organized into the following categories:
 
 ## [Unreleased]
 
-- Changes for the next release are available in development branches.
+### Added
+
+- Phase 1 Part A learning module under `phases/01-foundations/part-a/` — twelve topics, each with a lesson, a drill file of typed stubs, a pytest specification, and a commented reference solution. Topic 00 covers Python from scratch (variables, numbers, strings, conditionals, loops) for use as a refresher or a first encounter.
+- Postgres container, seeded schema, and query drills for the Part A SQL topic (`phases/01-foundations/part-a/sql/`).
+
+### Changed
+
+- `pyproject.toml`: pyright now type-checks `phases/` as well as `projects/`; ruff's `T20` (no `print`) is relaxed under `phases/` for teaching scripts.
+- `phases/01-foundations.md`: Part A now links to its worked-out drills.
 
 <!-- e.g., -->
 <!-- Unreleased -->
