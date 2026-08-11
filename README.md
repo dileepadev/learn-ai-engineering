@@ -146,3 +146,9 @@ Tick them off in **Progress** above as you go.
 This repo is set up agent-first. [AGENTS.md](AGENTS.md) is the single source of truth — project context, toolchain, coding standards, testing expectations, and the "explain what you generate" rule. [CLAUDE.md](CLAUDE.md), [.github/copilot-instructions.md](.github/copilot-instructions.md), and [.cursor/rules/](.cursor/rules/) are thin pointers to it, so the standards can't drift apart.
 
 `.mcp.json` configures [Context7](https://github.com/upstash/context7) for up-to-date library documentation — the stack here moves fast, and looking up a real signature beats guessing at one.
+
+## Interactive site deployment
+
+If you add the interactive learning site under `site/` (Astro static app), GitHub Pages deployment
+is handled by [.github/workflows/deploy-site.yml](.github/workflows/deploy-site.yml). It builds
+`site/` and deploys `site/dist` on pushes to `main`.
