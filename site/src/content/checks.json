@@ -1,0 +1,845 @@
+{
+  "00-python-basics": [
+    {
+      "kind": "predict",
+      "prompt": "What is the value of `batch_size` here?",
+      "code": "total = 10\nbatch_size = total / 5",
+      "options": [
+        {
+          "text": "`2.0` — a float",
+          "correct": true,
+          "explain": "`/` is true division and **always** returns a float, even when it divides evenly."
+        },
+        {
+          "text": "`2` — an int, since both operands are ints",
+          "correct": false,
+          "explain": "Python does not preserve int-ness here. Use `//` (floor division) when you need an int."
+        },
+        {
+          "text": "`2` or `2.0` depending on the Python version",
+          "correct": false,
+          "explain": "This has been consistent since Python 3.0 — `/` is always true division."
+        }
+      ],
+      "takeaway": "Passing a float where a provider expects an integer `max_tokens` is a 400 error. Reach for `//`."
+    },
+    {
+      "kind": "predict",
+      "prompt": "What does this print?",
+      "code": "text = \"  claude  \"\ntext.strip()\nprint(f\"[{text}]\")",
+      "options": [
+        {
+          "text": "`[  claude  ]` — unchanged",
+          "correct": true,
+          "explain": "Strings are immutable. `.strip()` returns a **new** string; on its own line it does nothing at all."
+        },
+        {
+          "text": "`[claude]`",
+          "correct": false,
+          "explain": "That would require `.strip()` to mutate in place, which no string method does."
+        },
+        {
+          "text": "`[]` — the value is consumed",
+          "correct": false,
+          "explain": "Nothing is consumed. The original string is untouched."
+        }
+      ],
+      "takeaway": "You must assign the result: `text = text.strip()`. Same for `.lower()`, `.replace()`, and every other string method."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "Why is the order of these two conditions load-bearing?",
+      "code": "if value is not None and value.strip():\n    ...",
+      "options": [
+        {
+          "text": "`and` short-circuits, so `.strip()` never runs when `value` is None",
+          "correct": true,
+          "explain": "Exactly. Once the left side is False, Python stops — `.strip()` is never reached."
+        },
+        {
+          "text": "It reads better, but either order works",
+          "correct": false,
+          "explain": "Reversed, `value.strip()` runs first and raises `AttributeError` on None."
+        },
+        {
+          "text": "Python evaluates `is not None` faster",
+          "correct": false,
+          "explain": "Speed is not the point — correctness is. The reversed order crashes."
+        }
+      ],
+      "takeaway": "You will use this guard constantly for optional fields in API responses."
+    }
+  ],
+
+  "01-core-mechanics": [
+    {
+      "kind": "predict",
+      "prompt": "A chat client trims history to the last `n` turns. What does it return when `n` is 0?",
+      "code": "items = [\"a\", \"b\", \"c\", \"d\", \"e\"]\nn = 0\nprint(items[-n:])",
+      "options": [
+        {
+          "text": "`['a', 'b', 'c', 'd', 'e']` — the whole list",
+          "correct": true,
+          "explain": "`-0 == 0`, so `items[-0:]` is `items[0:]`. You asked for nothing and got everything."
+        },
+        {
+          "text": "`[]` — an empty list",
+          "correct": false,
+          "explain": "That is what you meant, but not what Python does. There is no negative zero."
+        },
+        {
+          "text": "`IndexError`",
+          "correct": false,
+          "explain": "Slicing never raises for out-of-range bounds — it silently clamps, which is why this bug is quiet."
+        }
+      ],
+      "takeaway": "In a real chat client this sends the entire conversation at full token cost. Guard `n <= 0` explicitly."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "When should you read a dict key with `payload[\"role\"]` rather than `payload.get(\"role\")`?",
+      "options": [
+        {
+          "text": "When a missing key is a **bug** and you want it to fail loudly",
+          "correct": true,
+          "explain": "`[]` raises `KeyError` right where the problem is. That is a feature, not a hazard."
+        },
+        {
+          "text": "Always — `.get()` is slower",
+          "correct": false,
+          "explain": "Performance is not the distinction. Intent is."
+        },
+        {
+          "text": "Never — `.get()` is safer everywhere",
+          "correct": false,
+          "explain": "This is the common beginner reflex and it is wrong: it converts loud failures into silent `None`s that surface three functions later with no useful traceback."
+        }
+      ],
+      "takeaway": "Use `.get()` when a missing key is genuinely expected — optional fields in an API response."
+    },
+    {
+      "kind": "predict",
+      "prompt": "What is `merged` after this runs?",
+      "code": "defaults = {\"model\": \"haiku\"}\noverrides = {\"model\": \"opus\"}\nmerged = defaults.update(overrides)",
+      "options": [
+        {
+          "text": "`None`, and `defaults` has been mutated to `{'model': 'opus'}`",
+          "correct": true,
+          "explain": "`.update()` mutates in place and returns `None`. The caller's dict changed too — dicts are passed by reference."
+        },
+        {
+          "text": "`{'model': 'opus'}`",
+          "correct": false,
+          "explain": "That is what `{**defaults, **overrides}` gives you. `.update()` returns nothing."
+        },
+        {
+          "text": "`{'model': 'haiku'}`",
+          "correct": false,
+          "explain": "Later keys win in a merge, so `opus` would take precedence — but `.update()` returns `None` regardless."
+        }
+      ],
+      "takeaway": "Use `{**defaults, **overrides}` or `defaults | overrides` to build a **new** dict without touching either input."
+    }
+  ],
+
+  "02-functions": [
+    {
+      "kind": "predict",
+      "prompt": "The most famous Python gotcha. What does the second call return?",
+      "code": "def add_tag(tag: str, tags: list[str] = []) -> list[str]:\n    tags.append(tag)\n    return tags\n\nadd_tag(\"a\")   # ['a']\nadd_tag(\"b\")   # ?",
+      "options": [
+        {
+          "text": "`['a', 'b']` — the list survived between calls",
+          "correct": true,
+          "explain": "Default values are evaluated **once**, when the `def` statement runs. There is one list object, shared by every call."
+        },
+        {
+          "text": "`['b']` — a fresh list each call",
+          "correct": false,
+          "explain": "That is the intuition, and it is wrong. Defaults are not re-evaluated per call."
+        },
+        {
+          "text": "`TypeError` — mutable defaults are not allowed",
+          "correct": false,
+          "explain": "Python allows it silently. Only ruff's bugbear rules (`B006`) will complain."
+        }
+      ],
+      "takeaway": "Use a `None` sentinel: `tags: list[str] | None = None`, then `if tags is None: tags = []` inside the body."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "What does the bare `*` do in this signature?",
+      "code": "def send(model: str, *, temperature: float = 0.7, max_tokens: int = 1024) -> str: ...",
+      "options": [
+        {
+          "text": "Forces everything after it to be passed by keyword",
+          "correct": true,
+          "explain": "`send(\"opus\", 0.2)` becomes a `TypeError`; `send(\"opus\", temperature=0.2)` is required."
+        },
+        {
+          "text": "Collects extra positional arguments into a tuple",
+          "correct": false,
+          "explain": "That is `*args` — a star with a **name**. A bare `*` only marks the boundary."
+        },
+        {
+          "text": "Marks the remaining parameters as optional",
+          "correct": false,
+          "explain": "They are optional because they have defaults, not because of the `*`."
+        }
+      ],
+      "takeaway": "This makes reordering parameters safe: callers fail loudly instead of quietly passing temperature as max_tokens."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "Why does this counter need `nonlocal`?",
+      "code": "def make_counter():\n    count = 0\n    def increment() -> int:\n        nonlocal count\n        count += 1\n        return count\n    return increment",
+      "options": [
+        {
+          "text": "Without it, `count += 1` creates a new local and raises `UnboundLocalError`",
+          "correct": true,
+          "explain": "Assignment inside a function always creates a local unless declared otherwise. Reading alone would be fine; rebinding is not."
+        },
+        {
+          "text": "Without it, the inner function cannot see `count` at all",
+          "correct": false,
+          "explain": "It can *read* enclosing variables freely. `nonlocal` is only needed to **rebind** one."
+        },
+        {
+          "text": "It makes `count` survive after `make_counter` returns",
+          "correct": false,
+          "explain": "The closure does that on its own — `nonlocal` is purely about assignment scope."
+        }
+      ],
+      "takeaway": "Reading needs no declaration; assigning does."
+    }
+  ],
+
+  "03-comprehensions": [
+    {
+      "kind": "predict",
+      "prompt": "`names` has 10 entries and `scores` has 9. How many pairs does this produce?",
+      "code": "for name, score in zip(names, scores):\n    ...",
+      "options": [
+        {
+          "text": "9 — `zip` stops at the shortest input, silently",
+          "correct": true,
+          "explain": "No warning, no error. The tenth name is simply dropped."
+        },
+        {
+          "text": "10, with `None` for the missing score",
+          "correct": false,
+          "explain": "That is `itertools.zip_longest`. Plain `zip` truncates."
+        },
+        {
+          "text": "`ValueError` — lengths must match",
+          "correct": false,
+          "explain": "Only with `strict=True`, which is exactly why you should pass it."
+        }
+      ],
+      "takeaway": "In Phase 4 you zip text chunks against embedding vectors. One dropped chunk misaligns every pair after it, and retrieval goes quietly, unfixably wrong. Use `strict=True`."
+    },
+    {
+      "kind": "predict",
+      "prompt": "What is `results` after this line?",
+      "code": "results = results.sort()",
+      "options": [
+        {
+          "text": "`None` — and your data is gone",
+          "correct": true,
+          "explain": "`list.sort()` sorts in place and returns `None`. Assigning its result overwrites the list."
+        },
+        {
+          "text": "The sorted list",
+          "correct": false,
+          "explain": "That is `sorted(results)`, which returns a new list. `.sort()` returns nothing."
+        },
+        {
+          "text": "The original unsorted list",
+          "correct": false,
+          "explain": "The list *is* sorted in place — but the name now points at `None`."
+        }
+      ],
+      "takeaway": "Same distinction as `{**a, **b}` versus `.update()`, and the same failure mode."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "What does this sort by?",
+      "code": "sorted(results, key=lambda r: (-r[\"score\"], r[\"title\"]))",
+      "options": [
+        {
+          "text": "Score descending, then title ascending",
+          "correct": true,
+          "explain": "Tuples compare element by element, and negating the number reverses just that one field."
+        },
+        {
+          "text": "Score and title both descending",
+          "correct": false,
+          "explain": "Only `score` is negated, so only `score` is reversed."
+        },
+        {
+          "text": "Title ascending, then score descending",
+          "correct": false,
+          "explain": "The tuple is compared left to right, so `score` is the primary key."
+        }
+      ],
+      "takeaway": "Negating the numeric field is the standard way to sort by multiple fields in different directions."
+    }
+  ],
+
+  "04-errors": [
+    {
+      "kind": "mcq",
+      "prompt": "Why is a bare `except:` banned in this repo?",
+      "code": "try:\n    result = call_api(prompt)\nexcept:\n    result = None",
+      "options": [
+        {
+          "text": "It catches `KeyboardInterrupt` and your own typos, turning both into `result = None`",
+          "correct": true,
+          "explain": "Ctrl-C stops working during a long batch job, and a `NameError` three lines down becomes a silent None that fails somewhere unrelated."
+        },
+        {
+          "text": "It is slower than naming the exception",
+          "correct": false,
+          "explain": "Performance is not the issue. Swallowing the wrong exceptions is."
+        },
+        {
+          "text": "It only works in Python 2",
+          "correct": false,
+          "explain": "It is valid Python 3 syntax — which is the problem. Only ruff will flag it."
+        }
+      ],
+      "takeaway": "Catch the exception you know how to handle. If you cannot do anything useful about it, let it propagate."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "What does `from exc` add here?",
+      "code": "except json.JSONDecodeError as exc:\n    raise ExtractionError(f\"invalid JSON: {raw[:100]!r}\") from exc",
+      "options": [
+        {
+          "text": "It attaches the original exception, so the traceback shows both your message and the precise cause",
+          "correct": true,
+          "explain": "You get \"The above exception was the direct cause of the following exception\" — the domain-level message *and* the low-level detail."
+        },
+        {
+          "text": "It suppresses the original exception",
+          "correct": false,
+          "explain": "That is `from None`, used deliberately when the original really is noise."
+        },
+        {
+          "text": "It re-raises the original instead of yours",
+          "correct": false,
+          "explain": "Yours is raised; the original is attached as its cause."
+        }
+      ],
+      "takeaway": "Without `from exc`, Python prints \"During handling of the above exception, another exception occurred\" — its way of saying it suspects your handler is broken."
+    },
+    {
+      "kind": "predict",
+      "prompt": "Does `close_connection()` run when the `try` block returns successfully?",
+      "code": "try:\n    return call_api(prompt)\nfinally:\n    close_connection()",
+      "options": [
+        {
+          "text": "Yes — `finally` runs even when you `return` from the `try`",
+          "correct": true,
+          "explain": "`finally` always runs: on success, on exception, and on return. That is the entire point."
+        },
+        {
+          "text": "No — `return` exits the function immediately",
+          "correct": false,
+          "explain": "The return value is computed, then `finally` runs, then the function actually returns."
+        },
+        {
+          "text": "Only if an exception was raised",
+          "correct": false,
+          "explain": "That would be `except`. `finally` is unconditional."
+        }
+      ],
+      "takeaway": "`finally` is for cleanup you cannot afford to skip."
+    }
+  ],
+
+  "05-files-and-json": [
+    {
+      "kind": "mcq",
+      "prompt": "What is the difference between `json.load` and `json.loads`?",
+      "options": [
+        {
+          "text": "The **s** is for *string*: `loads` takes a `str`, `load` takes a file object",
+          "correct": true,
+          "explain": "Same for `dump`/`dumps` on the way out."
+        },
+        {
+          "text": "`loads` is the streaming version",
+          "correct": false,
+          "explain": "Neither streams. For line-by-line work you want JSONL."
+        },
+        {
+          "text": "`loads` is safe and `load` is not",
+          "correct": false,
+          "explain": "Both are equally safe — `json` never executes anything, unlike `pickle`."
+        }
+      ],
+      "takeaway": "It trips everyone up exactly once. The **s** is for string."
+    },
+    {
+      "kind": "predict",
+      "prompt": "What happens on a JSON round-trip of `{\"tags\": (\"a\", \"b\")}`?",
+      "options": [
+        {
+          "text": "The tuple comes back as a **list**",
+          "correct": true,
+          "explain": "JSON has no tuple type. It serialises as an array and deserialises as a `list`."
+        },
+        {
+          "text": "It comes back as a tuple",
+          "correct": false,
+          "explain": "JSON cannot express one, so the type information is lost in transit."
+        },
+        {
+          "text": "`TypeError` — tuples cannot be serialised",
+          "correct": false,
+          "explain": "Tuples serialise fine. It is `set` and `datetime` that raise `TypeError`."
+        }
+      ],
+      "takeaway": "JSON has no tuples, no sets, and no dates. That last one is why `wrangle` has a \"normalize dates\" step."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "Why pass `encoding=\"utf-8\"` explicitly to every read and write?",
+      "options": [
+        {
+          "text": "Without it Python uses a platform default that differs between your laptop and your container",
+          "correct": true,
+          "explain": "The failure then appears only when a document contains an em-dash — in production, not locally."
+        },
+        {
+          "text": "It makes file I/O faster",
+          "correct": false,
+          "explain": "The reason is correctness across platforms, not speed."
+        },
+        {
+          "text": "`pathlib` requires it",
+          "correct": false,
+          "explain": "It is optional, which is precisely the trap. Model outputs are full of non-ASCII."
+        }
+      ],
+      "takeaway": "Same reasoning applies to `json.dumps(..., ensure_ascii=False)` on the way out."
+    }
+  ],
+
+  "06-modules-and-structure": [
+    {
+      "kind": "mcq",
+      "prompt": "In `[project.scripts]`, what does the string `\"wrangle.cli:main\"` mean?",
+      "options": [
+        {
+          "text": "Import the module `wrangle.cli`, then call its `main` attribute",
+          "correct": true,
+          "explain": "`module.path:function_name` — that is the entire mechanism behind console scripts."
+        },
+        {
+          "text": "Run the file `wrangle/cli.py` as a script",
+          "correct": false,
+          "explain": "It is imported as a module, not executed as a file — which is why the `__main__` guard matters."
+        },
+        {
+          "text": "Look up a class named `main` in a plugin registry",
+          "correct": false,
+          "explain": "No registry involved; it is a plain import plus attribute access."
+        }
+      ],
+      "takeaway": "The same `module:object` syntax appears in `uvicorn mockstream.app:app` and across Python's plugin ecosystem."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "What breaks if you omit `if __name__ == \"__main__\":` around a CLI's `main()` call?",
+      "options": [
+        {
+          "text": "Importing the module executes the CLI",
+          "correct": true,
+          "explain": "A test that imports your CLI module would run the whole CLI. That is the reason the guard exists."
+        },
+        {
+          "text": "The script cannot be run directly",
+          "correct": false,
+          "explain": "It runs fine directly. The problem only shows up on import."
+        },
+        {
+          "text": "`__name__` is undefined",
+          "correct": false,
+          "explain": "`__name__` is always set — to `\"__main__\"` when run directly, and to the module's own name when imported."
+        }
+      ]
+    },
+    {
+      "kind": "mcq",
+      "prompt": "Why does this repo require a `src/` layout instead of a flat one?",
+      "options": [
+        {
+          "text": "`src/` is not on `sys.path`, so imports resolve to the **installed** package — you always test what you ship",
+          "correct": true,
+          "explain": "A flat layout lets tests pass against the source tree while the built wheel is missing a subpackage you forgot to declare."
+        },
+        {
+          "text": "It makes imports shorter",
+          "correct": false,
+          "explain": "Import paths are identical either way."
+        },
+        {
+          "text": "It is required by uv",
+          "correct": false,
+          "explain": "uv supports both. This repo picks `src/` for the packaging guarantee."
+        }
+      ],
+      "takeaway": "`uv sync` installs workspace members editable, so you get the safety without a round trip on every edit."
+    }
+  ],
+
+  "07-oop-just-enough": [
+    {
+      "kind": "mcq",
+      "prompt": "Why must a dataclass list field be written `field(default_factory=list[str])` rather than `= []`?",
+      "options": [
+        {
+          "text": "A bare `= []` would share one list across every instance — the mutable-default trap again",
+          "correct": true,
+          "explain": "Dataclasses detect this specific case and refuse at class-definition time, which is unusually kind of them."
+        },
+        {
+          "text": "Dataclasses cannot have list fields at all",
+          "correct": false,
+          "explain": "They can — they just need a factory to build a fresh one per instance."
+        },
+        {
+          "text": "It is purely a style preference",
+          "correct": false,
+          "explain": "It is the same shared-mutable bug from topic 02, in a new costume."
+        }
+      ],
+      "takeaway": "Write the factory as `list[str]`, not bare `list` — the bare form leaves pyright inferring `list[Unknown]` and fails strict mode."
+    },
+    {
+      "kind": "predict",
+      "prompt": "A `Bookmark` dataclass declares `url: str`. What happens here?",
+      "code": "Bookmark(url=42, title=None)",
+      "options": [
+        {
+          "text": "It constructs fine and fails much later, somewhere else",
+          "correct": true,
+          "explain": "A dataclass's type hints are **documentation only** — nothing is validated at runtime."
+        },
+        {
+          "text": "`ValidationError` — the types do not match",
+          "correct": false,
+          "explain": "That is Pydantic. A dataclass performs no runtime checking."
+        },
+        {
+          "text": "`TypeError` from the generated `__init__`",
+          "correct": false,
+          "explain": "The generated `__init__` only checks arity, never types."
+        }
+      ],
+      "takeaway": "The rule: data crossing a trust boundary gets Pydantic; data already inside your program gets a dataclass."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "`WordTokenizer` inherits from nothing, yet pyright accepts it where a `Tokenizer` Protocol is required. Why?",
+      "options": [
+        {
+          "text": "`Protocol` is structural — anything with a matching shape qualifies",
+          "correct": true,
+          "explain": "You describe the shape; implementers just have to *have* it. No import of your base class needed."
+        },
+        {
+          "text": "pyright infers the base class from the method names",
+          "correct": false,
+          "explain": "There is no inferred inheritance. The match is purely structural."
+        },
+        {
+          "text": "It only works because both are in the same file",
+          "correct": false,
+          "explain": "Location is irrelevant — that is the whole point."
+        }
+      ],
+      "takeaway": "You do not own the Anthropic client, the OpenAI client, or your test double — but they can all share a shape. That is the testing strategy for Phases 2 onward."
+    }
+  ],
+
+  "08-generators": [
+    {
+      "kind": "predict",
+      "prompt": "What does the **second** `list(gen)` return?",
+      "code": "gen = (x * 2 for x in [1, 2, 3])\nlist(gen)   # [2, 4, 6]\nlist(gen)   # ?",
+      "options": [
+        {
+          "text": "`[]` — and no error to tell you why",
+          "correct": true,
+          "explain": "A generator is exhausted after one pass. The failure is silent, not loud."
+        },
+        {
+          "text": "`[2, 4, 6]` again",
+          "correct": false,
+          "explain": "That would require restarting, which a generator cannot do — its frame is gone."
+        },
+        {
+          "text": "`StopIteration`",
+          "correct": false,
+          "explain": "`list()` handles `StopIteration` for you; it just gets nothing."
+        }
+      ],
+      "takeaway": "If you need the values twice, materialise once with `list(gen)` and reuse that."
+    },
+    {
+      "kind": "predict",
+      "prompt": "`stream_words` contains a `yield`. How much of its body runs on this line?",
+      "code": "gen = stream_words(\"hello world\")",
+      "options": [
+        {
+          "text": "None of it — calling a generator function just returns a generator object",
+          "correct": true,
+          "explain": "Code runs only when you iterate. That is what makes the laziness possible."
+        },
+        {
+          "text": "All of it, with the results buffered",
+          "correct": false,
+          "explain": "Buffering everything is exactly what generators exist to avoid."
+        },
+        {
+          "text": "Up to the first `yield`",
+          "correct": false,
+          "explain": "A reasonable guess, but no — it does not advance until the first `next()`."
+        }
+      ],
+      "takeaway": "This is why a `try` around the *call* catches nothing: exceptions surface where you iterate, not where you call."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "Which annotation belongs on a generator's return type?",
+      "options": [
+        {
+          "text": "`Iterator[str]` — with `Iterable[str]` for parameters",
+          "correct": true,
+          "explain": "Be specific in what you return, generous in what you accept. `Iterable` takes lists and generators alike."
+        },
+        {
+          "text": "`Generator[str, None, None]` everywhere",
+          "correct": false,
+          "explain": "The full form is noise for an ordinary generator — though it *is* required under `@contextmanager` (topic 09)."
+        },
+        {
+          "text": "`list[str]`, since that is what callers usually want",
+          "correct": false,
+          "explain": "That would be a lie: the caller cannot index a generator, and several drill tests assert on laziness itself."
+        }
+      ]
+    }
+  ],
+
+  "09-decorators-and-context-managers": [
+    {
+      "kind": "mcq",
+      "prompt": "What breaks if you omit `@functools.wraps(fn)` from a decorator?",
+      "options": [
+        {
+          "text": "The decorated function's `__name__` becomes `\"wrapper\"` and its docstring vanishes",
+          "correct": true,
+          "explain": "That breaks pytest (which finds tests by name), FastAPI (which builds OpenAPI docs from signatures), and every traceback you read."
+        },
+        {
+          "text": "The decorator silently stops being applied",
+          "correct": false,
+          "explain": "It still wraps correctly — only the metadata is lost."
+        },
+        {
+          "text": "Arguments are no longer forwarded",
+          "correct": false,
+          "explain": "Forwarding is `*args, **kwargs`'s job, not `wraps`'."
+        }
+      ],
+      "takeaway": "Drill 9.1 has a test that fails without it."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "Why is the `try`/`finally` around the `yield` load-bearing in a `@contextmanager`?",
+      "code": "@contextmanager\ndef timer(label: str) -> Generator[None, None, None]:\n    start = time.perf_counter()\n    try:\n        yield\n    finally:\n        print(f\"{label}: {time.perf_counter() - start:.2f}s\")",
+      "options": [
+        {
+          "text": "If the `with` body raises, the exception is thrown **into** the generator at the `yield` — without `finally`, teardown never runs",
+          "correct": true,
+          "explain": "Which defeats the entire purpose of the construct. This is the one mistake worth remembering from this topic."
+        },
+        {
+          "text": "It stops the exception escaping the `with` block",
+          "correct": false,
+          "explain": "`finally` does not swallow anything — the exception still propagates, but cleanup happens first."
+        },
+        {
+          "text": "It is stylistic; `@contextmanager` guarantees cleanup either way",
+          "correct": false,
+          "explain": "The decorator provides the protocol, not the guarantee. The `finally` is yours to write."
+        }
+      ]
+    },
+    {
+      "kind": "mcq",
+      "prompt": "Why does `@app.get(\"/health\")` have parentheses when `@dataclass` does not?",
+      "options": [
+        {
+          "text": "It is a decorator **factory** — `app.get(\"/health\")` runs first and returns the actual decorator",
+          "correct": true,
+          "explain": "That is the only reason some decorators take arguments and others do not."
+        },
+        {
+          "text": "FastAPI decorators are a special language feature",
+          "correct": false,
+          "explain": "Nothing special — plain functions returning functions."
+        },
+        {
+          "text": "The parentheses are optional there",
+          "correct": false,
+          "explain": "Drop them and you would decorate with the *method itself*, not the decorator it returns."
+        }
+      ]
+    }
+  ],
+
+  "10-type-hints": [
+    {
+      "kind": "predict",
+      "prompt": "This function is annotated `-> int` but returns a string. What happens when you run it?",
+      "code": "def count(text: str) -> int:\n    return \"not an int\"\n\nprint(count(\"hi\"))",
+      "options": [
+        {
+          "text": "It prints `not an int` — annotations are never enforced at runtime",
+          "correct": true,
+          "explain": "Annotations are metadata. pyright flags this; Python does not care."
+        },
+        {
+          "text": "`TypeError` at the return statement",
+          "correct": false,
+          "explain": "Python performs no type checking of its own, ever."
+        },
+        {
+          "text": "It coerces the value to `0`",
+          "correct": false,
+          "explain": "No coercion happens. Pydantic does that, at boundaries you choose."
+        }
+      ],
+      "takeaway": "Everything in this topic is a static-analysis contract. Runtime validation is Pydantic's job, in Part B."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "Why type a message role as `Literal[\"user\", \"assistant\", \"system\"]` rather than `str`?",
+      "options": [
+        {
+          "text": "`str` accepts `\"usr\"`, `\"User\"`, and `\"banana\"`; the `Literal` accepts exactly three strings",
+          "correct": true,
+          "explain": "And your editor autocompletes them. A wrong role is a 400 from the provider — after the round trip, after you paid for the tokens."
+        },
+        {
+          "text": "`Literal` validates the value at runtime",
+          "correct": false,
+          "explain": "Still static-only. pyright catches it in your editor, for free, before you ever call the API."
+        },
+        {
+          "text": "It makes the string comparison faster",
+          "correct": false,
+          "explain": "There is no runtime difference at all."
+        }
+      ],
+      "takeaway": "`Literal` also drives exhaustiveness checking via `assert_never` — add a fourth role and every function that stopped being exhaustive becomes a type error."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "At a JSON boundary where you genuinely do not know the type, why prefer `object` over `Any`?",
+      "options": [
+        {
+          "text": "`Any` means \"stop checking\" and spreads; `object` forces the caller to narrow with `isinstance` first",
+          "correct": true,
+          "explain": "`object` is honest. Every value derived from an `Any` is also unchecked, which is how type safety quietly evaporates."
+        },
+        {
+          "text": "They are equivalent; `object` is just the newer spelling",
+          "correct": false,
+          "explain": "Opposite ends of the spectrum: `Any` disables checking, `object` maximises it."
+        },
+        {
+          "text": "`Any` is deprecated",
+          "correct": false,
+          "explain": "It is not deprecated — just banned by AGENTS.md as a way to silence pyright."
+        }
+      ],
+      "takeaway": "That is why `json.loads` results are typed `object` in the topic 04 and 05 solutions."
+    }
+  ],
+
+  "11-a-little-sql": [
+    {
+      "kind": "predict",
+      "prompt": "Two documents have a NULL `published_on`. How many rows does this return?",
+      "code": "SELECT title FROM documents WHERE published_on = NULL;",
+      "options": [
+        {
+          "text": "Zero rows — and no error",
+          "correct": true,
+          "explain": "Comparing with NULL yields *unknown*, and `WHERE` keeps only rows where the predicate is true. That silence is the whole lesson."
+        },
+        {
+          "text": "Two rows — the ones with no date",
+          "correct": false,
+          "explain": "That needs `IS NULL`. `= NULL` never matches anything, including NULL."
+        },
+        {
+          "text": "A syntax error",
+          "correct": false,
+          "explain": "It is perfectly valid SQL, which is exactly why the bug is so quiet."
+        }
+      ],
+      "takeaway": "Use `IS NULL` and `IS NOT NULL`. Try the broken version in psql once so the silence is memorable."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "You want every document listed, including those with no comments. Which join?",
+      "options": [
+        {
+          "text": "`LEFT JOIN` — keeps every row from the left table, filling NULLs where there is no match",
+          "correct": true,
+          "explain": "An inner `JOIN` would silently drop documents that have no comments."
+        },
+        {
+          "text": "`JOIN` — the default keeps everything",
+          "correct": false,
+          "explain": "A plain `JOIN` is an *inner* join: rows without a match disappear."
+        },
+        {
+          "text": "`RIGHT JOIN`",
+          "correct": false,
+          "explain": "That preserves the right table instead — the reverse of what you want here."
+        }
+      ],
+      "takeaway": "`LEFT JOIN ... WHERE right.id IS NULL` is also the idiom for finding rows that have *no* match at all."
+    },
+    {
+      "kind": "mcq",
+      "prompt": "What is the difference between `WHERE` and `HAVING`?",
+      "options": [
+        {
+          "text": "`WHERE` filters rows before grouping; `HAVING` filters groups after aggregation",
+          "correct": true,
+          "explain": "So `HAVING COUNT(*) > 2` works, while `WHERE COUNT(*) > 2` is an error — the count does not exist yet."
+        },
+        {
+          "text": "They are interchangeable",
+          "correct": false,
+          "explain": "They run at different stages of the query, so only one can see aggregate values."
+        },
+        {
+          "text": "`HAVING` is just the older spelling of `WHERE`",
+          "correct": false,
+          "explain": "Both are current and do different jobs."
+        }
+      ],
+      "takeaway": "Filter with `WHERE` whenever you can — it runs first, so there is less to aggregate."
+    }
+  ]
+}
