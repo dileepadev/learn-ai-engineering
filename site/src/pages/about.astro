@@ -1,4 +1,5 @@
 ---
+import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import { href } from "../lib/href.ts";
 
@@ -35,64 +36,19 @@ const operatingPrinciples = [
   },
 ];
 
-const phases = [
-  {
-    num: "1",
-    title: "Foundations",
-    slug: "01-foundations",
-    focus: "Python for AI engineering, tooling, async, FastAPI, streaming, SQL, Docker",
-    builds: "Typed data-wrangling CLI & streaming SSE service — tested & containerized",
-  },
-  {
-    num: "2",
-    title: "LLMs & Model APIs",
-    slug: "02-llms-and-model-apis",
-    focus: "LLM behavior, provider APIs, open-weight models, cost & latency math",
-    builds: "Terminal chat client from scratch (hosted Anthropic/OpenAI + local Ollama)",
-  },
-  {
-    num: "3",
-    title: "Prompting & Structured Outputs",
-    slug: "03-prompting-and-structured-outputs",
-    focus: "Prompt engineering, JSON schema outputs, Instructor, tool calling by hand",
-    builds: "Document extraction pipeline with measured schema compliance & accuracy",
-  },
-  {
-    num: "4",
-    title: "RAG",
-    slug: "04-rag",
-    focus: "Embeddings, chunking, pgvector, hybrid search (BM25 + vector), reranking",
-    builds: "Docs-chat service over a real corpus, with citations & retrieval evaluation",
-  },
-  {
-    num: "5",
-    title: "Agents",
-    slug: "05-agents",
-    focus: "Agent loops, LangGraph, Model Context Protocol (MCP), human-in-the-loop",
-    builds: "An autonomous agent built three ways: raw loop, LangGraph, and MCP server",
-  },
-  {
-    num: "6",
-    title: "Evals & Observability",
-    slug: "06-evals-and-observability",
-    focus: "Golden test sets, LLM-as-judge, promptfoo, DeepEval, Langfuse tracing",
-    builds: "50+ case eval suite & full tracing harness on your Phase 4–5 applications",
-  },
-  {
-    num: "7",
-    title: "Production",
-    slug: "07-production",
-    focus: "Architecture, gateways (LiteLLM), vLLM, cloud platforms (Azure/AWS), caching",
-    builds: "Docs-chat deployed for real: gateway, queue, cloud leg, dashboards & alerts",
-  },
-  {
-    num: "8",
-    title: "Capstone",
-    slug: "08-capstone",
-    focus: "End-to-end integration, production deployment, evaluation & documentation",
-    builds: "A complete, deployed, evaluated, observable AI product",
-  },
-];
+// Pulled from the `phases` content collection (parsed from `phases/*.md` at build time),
+// the same source `index.astro` uses — never hand-duplicated, so a phase doc edit can't
+// leave this page out of sync the way a hardcoded array would.
+const phaseEntries = await getCollection("phases");
+const phases = phaseEntries
+  .sort((a, b) => a.id.localeCompare(b.id))
+  .map((entry) => ({
+    num: entry.data.number,
+    title: entry.data.title,
+    slug: entry.id,
+    focus: entry.data.goal ?? "",
+    builds: (entry.data.youBuild ?? "").replaceAll("`", ""),
+  }));
 
 const stackCategories = [
   {
@@ -182,7 +138,7 @@ const stackCategories = [
       <div class="grid sm:grid-cols-2 gap-6 text-sm text-muted leading-relaxed">
         <div class="space-y-2">
           <h3 class="font-semibold text-ink text-base flex items-center gap-2">
-            <span class="text-accent font-bold">✓</span> Software Engineering for AI
+            <span class="text-accent font-bold" aria-hidden="true">✓</span> Software Engineering for AI
           </h3>
           <p>
             Modern AI engineering treats models as software components you build products around.
@@ -191,7 +147,7 @@ const stackCategories = [
         </div>
         <div class="space-y-2">
           <h3 class="font-semibold text-ink text-base flex items-center gap-2">
-            <span class="text-faint font-bold">✕</span> Not ML Theory or Kaggle
+            <span class="text-faint font-bold" aria-hidden="true">✕</span> Not ML Theory or Kaggle
           </h3>
           <p>
             This is <strong>not</strong> a machine learning or data science curriculum.
@@ -255,14 +211,18 @@ const stackCategories = [
               </a>
             </div>
             <div class="grid sm:grid-cols-2 gap-2 text-xs">
-              <div>
-                <span class="font-medium text-muted">Focus:</span>{" "}
-                <span class="text-ink">{p.focus}</span>
-              </div>
-              <div>
-                <span class="font-medium text-muted">You build:</span>{" "}
-                <span class="text-ink">{p.builds}</span>
-              </div>
+              {p.focus ? (
+                <div>
+                  <span class="font-medium text-muted">Goal:</span>{" "}
+                  <span class="text-ink">{p.focus}</span>
+                </div>
+              ) : null}
+              {p.builds ? (
+                <div>
+                  <span class="font-medium text-muted">You build:</span>{" "}
+                  <span class="text-ink">{p.builds}</span>
+                </div>
+              ) : null}
             </div>
           </div>
         ))}
@@ -302,7 +262,10 @@ const stackCategories = [
     <!-- Interactive Execution in Browser -->
     <section class="rounded-2xl border border-line bg-sunken p-6 sm:p-8 space-y-4">
       <div class="flex items-center gap-3">
-        <div class="grid size-10 place-items-center rounded-xl bg-accent text-accent-ink font-mono font-bold text-sm">
+        <div
+          class="grid size-10 place-items-center rounded-xl bg-accent text-accent-ink font-mono font-bold text-sm"
+          aria-hidden="true"
+        >
           WASM
         </div>
         <div>
@@ -325,7 +288,7 @@ const stackCategories = [
       <div class="rounded-xl border border-line bg-raised p-5 space-y-2 shadow-xs">
         <h3 class="font-bold text-ink text-base">Rough Effort</h3>
         <p class="text-xs text-muted leading-relaxed">
-          Total commitment is roughly <strong>150–250 focused hours</strong>. At ~10 hours/week, that spans ~6 months to achieve a defensible, production-grade AI engineering skillset.
+          Phase 1 runs <strong>30–50 hours</strong> if Python is new (a fraction of that as a refresher); Phases 2–3 run 15–25 each, Phases 4–7 run 25–40 each, and the capstone is as big as you make it. At ~10 hours/week, that's roughly six months to a defensible, production-grade skillset.
         </p>
       </div>
 
