@@ -1,0 +1,52 @@
+{
+  "name": "learn-ai-engineering-site",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "prebuild": "npm run export",
+    "export": "uv run --project .. python ../scripts/export_curriculum.py",
+    "dev": "npm run export && astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run",
+    "verify:drills": "node scripts/verify-drills.mjs",
+    "verify:pages": "node scripts/audit-pages.mjs",
+    "verify:browser": "node scripts/smoke.mjs"
+  },
+  "dependencies": {
+    "@astrojs/react": "^5.0.7",
+    "@codemirror/commands": "^6.10.4",
+    "@codemirror/lang-python": "^6.2.1",
+    "@codemirror/language": "^6.12.4",
+    "@codemirror/state": "^6.7.1",
+    "@codemirror/view": "^6.43.8",
+    "@lezer/highlight": "^1.2.3",
+    "@tailwindcss/postcss": "^4.3.3",
+    "astro": "^6.4.8",
+    "codemirror": "^6.0.2",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tailwindcss": "^4.3.3"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "@types/node": "^26.2.0",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "jsdom": "^30.0.1",
+    "playwright": "^1.62.1",
+    "pyodide": "^314.0.4",
+    "typescript": "^6.0.3",
+    "vitest": "^4.1.10"
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "sharp": true
+  },
+  "//overrides": "Astro 6 requires Vite 7, but vitest 4 pulls Vite 8 and npm hoists it. Astro warns about this on every dev start, and it is what made @tailwindcss/vite bind to the wrong Vite copy and crash the build. Pinning one Vite for the whole tree resolves both.",
+  "overrides": {
+    "vite": "^7"
+  }
+}

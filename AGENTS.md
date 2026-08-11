@@ -55,13 +55,16 @@ learn-ai-engineering/
 ├── pyproject.toml                <- uv workspace root; shared ruff/pyright/pytest config
 ├── .mcp.json                     <- project-scoped MCP servers
 ├── phases/                       <- curriculum docs, 01..08
-│   └── 01-foundations.md
+│   ├── 01-foundations.md
+│   └── 01-foundations/part-a/    <- lessons, drills, tests, solutions
 ├── projects/                     <- phase projects (uv workspace members)
 │   └── <NN>-<name>/
 │       ├── pyproject.toml
 │       ├── README.md
 │       ├── src/<package>/
 │       └── tests/
+├── scripts/                      <- repo tooling (typed Python, pyright-checked)
+├── site/                         <- the learning site (see below)
 └── <community standards>         <- CONTRIBUTING, SECURITY, etc. (see Git workflow)
 ```
 
@@ -73,6 +76,52 @@ Phase projects are `projects/<NN>-<name>/` where `NN` is the zero-padded phase n
 
 Do not invent project names. They come from the phase docs. If a phase doc does not exist
 yet, ask rather than guessing at its contents.
+
+## The learning site (`site/`)
+
+`site/` is a static [Astro](https://astro.build) app that turns this curriculum into an
+interactive one, deployed to GitHub Pages. It is the **only** place TypeScript, React, or
+CSS belongs in this repo. It is not a uv workspace member and has no Python at runtime.
+
+The rule that matters: **`phases/` is the source of truth; the site is derived.**
+
+| Content | How the site gets it |
+| --- | --- |
+| Roadmap docs, Part A lessons (markdown) | Read at build time by the loaders in `site/src/lib/loaders.ts` |
+| Drills, tests, solutions (Python) | Parsed by `scripts/export_curriculum.py` into `site/src/generated/` |
+| Quizzes (the one site-only content type) | Authored in `site/src/content/checks.json` |
+
+So: **fix a lesson by editing the markdown in `phases/`, never by editing the site.**
+`site/src/generated/` is gitignored and rebuilt on every build; do not commit or hand-edit it.
+
+Drills run for real in the browser via [Pyodide](https://pyodide.org) — the same
+`conftest.py` and the same pytest suites, compiled to WASM. Two consequences:
+
+- Anything that breaks under WASM breaks the site, and `uv run pytest` will not tell you.
+  `cd site && npm run verify:drills` runs all 207 Part A tests through Pyodide; CI runs it too.
+- Drill stubs sometimes **omit an import on purpose** (topic 09 expects you to reach for
+  `functools`). The site exposes an editable module preamble for exactly this reason. Keep
+  that intentional omission when editing drills.
+
+Commands, all from `site/`:
+
+```bash
+npm run dev             # exports the curriculum, then serves with hot reload
+npm run build           # prebuild runs the exporter; output in site/dist/
+npm run check           # astro check (TypeScript)
+npm run test            # vitest — progress store, completion math, link rewriting
+npm run verify:drills   # every Part A test, executed in Pyodide
+npm run verify:pages    # every page swept for console errors and a11y issues
+npm run verify:browser  # end-to-end in real Firefox
+```
+
+The last two need a server already running (`npm run dev` or `npm run preview`).
+
+Note the exception this creates: the MCP section below says Playwright is not configured
+because "this roadmap builds CLIs and APIs, not browser UIs." That still holds for the
+*curriculum* — no phase project should acquire a browser dependency. `site/` is tooling for
+the curriculum, and Playwright is a `site/` devDependency used solely to prove the WASM
+drill runner works in a real browser, which nothing else can check.
 
 ## Toolchain (non-negotiable)
 

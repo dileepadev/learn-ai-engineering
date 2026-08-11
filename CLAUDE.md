@@ -41,6 +41,13 @@ uv run pyright
 uv run pytest
 ```
 
+If the change touched `phases/` or `site/`, also run, from `site/`:
+
+```bash
+npm run check && npm run test
+npm run verify:drills   # all 207 Part A tests, executed in Pyodide
+```
+
 Report real results. If something fails, say so and show the output — never claim a passing
 run you did not perform.
 

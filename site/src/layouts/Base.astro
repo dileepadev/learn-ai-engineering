@@ -1,0 +1,121 @@
+---
+import "../styles/global.css";
+import { href } from "../lib/href.ts";
+import { HeaderProgress } from "../components/HeaderProgress.tsx";
+import { ThemeToggle } from "../components/ThemeToggle.tsx";
+import { getCollection } from "astro:content";
+
+interface Props {
+  title: string;
+  description?: string;
+  /** Slug of the phase this page belongs to, so the header can show where you are. */
+  activePhase?: string;
+}
+
+const { title, description, activePhase } = Astro.props;
+
+const phases = await getCollection("phases");
+const criteriaCounts = Object.fromEntries(
+  phases.map((phase) => [phase.id, phase.data.exitCriteria.length]),
+);
+
+const fullTitle = title === "Learn AI Engineering" ? title : `${title} · Learn AI Engineering`;
+const summary =
+  description ?? "An interactive, build-first roadmap for modern AI engineering.";
+---
+
+<!doctype html>
+<html lang="en" class="h-full">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={summary} />
+    <meta name="color-scheme" content="light dark" />
+    <link rel="icon" href={href("/favicon.svg")} type="image/svg+xml" />
+
+    <!--
+      Theme must be resolved before first paint, or a learner with dark mode set sees a
+      white flash on every navigation. This is the one script that has to be inline and
+      render-blocking; it is deliberately tiny.
+    -->
+    <script is:inline>
+      (() => {
+        const stored = localStorage.getItem("lai:theme");
+        const dark =
+          stored === "dark" ||
+          (stored === null && window.matchMedia("(prefers-color-scheme: dark)").matches);
+        document.documentElement.classList.toggle("dark", dark);
+      })();
+    </script>
+  </head>
+
+  <body class="flex min-h-full flex-col">
+    <a
+      href="#main"
+      class="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-accent focus:px-4 focus:py-2 focus:text-accent-ink"
+    >
+      Skip to content
+    </a>
+
+    <header
+      class="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur-md"
+    >
+      <div class="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
+        <a
+          href={href("/")}
+          class="flex items-center gap-2.5 font-semibold tracking-tight transition-opacity hover:opacity-75"
+        >
+          <span
+            class="grid size-8 place-items-center rounded-lg bg-accent text-sm font-bold text-accent-ink"
+            aria-hidden="true">AI</span
+          >
+          <span class="hidden sm:inline">Learn AI Engineering</span>
+        </a>
+
+        <nav class="ml-auto flex items-center gap-1 text-sm" aria-label="Main">
+          <a
+            href={href("/")}
+            class="rounded-md px-3 py-1.5 text-muted transition-colors hover:bg-sunken hover:text-ink"
+          >
+            Dashboard
+          </a>
+          <a
+            href={href("/phases/01-foundations")}
+            class:list={[
+              "rounded-md px-3 py-1.5 transition-colors hover:bg-sunken hover:text-ink",
+              activePhase ? "text-ink" : "text-muted",
+            ]}
+          >
+            Phases
+          </a>
+          <HeaderProgress client:idle criteriaCounts={criteriaCounts} />
+          <ThemeToggle client:idle />
+        </nav>
+      </div>
+    </header>
+
+    <main id="main" class="flex-1">
+      <slot />
+    </main>
+
+    <footer class="mt-20 border-t border-line py-8 text-sm text-faint">
+      <div
+        class="mx-auto flex max-w-6xl flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+      >
+        <p>
+          Lessons and drills are generated from
+          <code class="rounded bg-sunken px-1 py-0.5 text-[0.8em]">phases/</code> in the repo.
+        </p>
+        <p class="flex items-center gap-4">
+          <a
+            class="transition-colors hover:text-ink"
+            href="https://github.com/dileepadev/learn-ai-engineering"
+            rel="noreferrer">Source on GitHub</a
+          >
+          <a class="transition-colors hover:text-ink" href={href("/progress")}>Manage progress</a>
+        </p>
+      </div>
+    </footer>
+  </body>
+</html>

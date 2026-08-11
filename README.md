@@ -7,6 +7,14 @@ This is **not** a machine learning or data science curriculum. There is no calcu
 > [!NOTE]
 > This roadmap was created based on my own research, then optimized and enhanced with Claude Fable 5.
 
+## Work through it interactively
+
+**[dileepadev.github.io/learn-ai-engineering →](https://dileepadev.github.io/learn-ai-engineering/)**
+
+The roadmap is also a learning app. It tracks your progress across all eight phases, and Phase 1's drills run **in your browser** — the same pytest suites that live in this repo, executed against your code via WebAssembly. No clone, no setup, no API keys, no account; progress is saved locally and exportable.
+
+Everything it shows is generated from `phases/`, so the site and the docs cannot drift apart. Source and build instructions in [site/](site/).
+
 ## Who this is for
 
 Me — an Associate AI Engineer rebuilding skills from the ground up with current tools and current patterns. Python itself is taught from the start in Phase 1, scoped to exactly what AI engineering uses; prior ML theory is not required.

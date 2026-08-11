@@ -1,0 +1,27 @@
+---
+import { getCollection } from "astro:content";
+import Base from "../layouts/Base.astro";
+import { Dashboard, type PhaseMeta } from "../components/Dashboard.tsx";
+
+const phaseEntries = await getCollection("phases");
+
+const phases: PhaseMeta[] = phaseEntries
+  .sort((a, b) => a.id.localeCompare(b.id))
+  .map((entry) => ({
+    slug: entry.id,
+    number: entry.data.number,
+    title: entry.data.title,
+    goal: entry.data.goal,
+    youBuild: entry.data.youBuild,
+    effort: entry.data.effort,
+    criteriaCount: entry.data.exitCriteria.length,
+  }));
+---
+
+<Base title="Learn AI Engineering">
+  <!--
+    `client:load` rather than `client:idle`: this island *is* the page, and every number
+    on it comes from localStorage. Deferring it would show a fully empty dashboard first.
+  -->
+  <Dashboard client:load phases={phases} />
+</Base>

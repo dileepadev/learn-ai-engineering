@@ -1,0 +1,50 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { LessonHeader, LessonNav } from "../../components/LessonHeader.tsx";
+import { DrillRunner } from "../../components/DrillRunner.tsx";
+import { LessonChecks, type CheckData } from "../../components/Check.tsx";
+import { topicByLessonSlug } from "../../lib/curriculum.ts";
+
+export async function getStaticPaths() {
+  const lessons = await getCollection("lessons");
+  return lessons.map((lesson) => ({ params: { slug: lesson.id }, props: { lesson } }));
+}
+
+const { lesson } = Astro.props;
+const { Content } = await render(lesson);
+const topic = topicByLessonSlug(lesson.id);
+
+// Checks are authored per lesson and keyed `<lesson-slug>--<n>`; keep their order.
+const checks: CheckData[] = (await getCollection("checks"))
+  .filter((entry) => entry.data.lesson === lesson.id)
+  .sort((a, b) => a.data.index - b.data.index)
+  .map((entry) => entry.data as CheckData);
+---
+
+<Base title={lesson.data.title} activePhase="01-foundations">
+  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    {topic && <LessonHeader client:load topicId={topic.id} lessonSlug={lesson.id} />}
+
+    <article class="prose mt-10">
+      <Content />
+    </article>
+
+    <!--
+      Checks sit between the lesson and the drills on purpose: they catch the specific
+      misconceptions the lesson just warned about, while it is still fresh, and before the
+      drills assume you absorbed them.
+    -->
+    {checks.length > 0 && <LessonChecks client:visible checks={checks} />}
+
+    <!--
+      `client:visible` on the runner: it pulls in CodeMirror and, on first run, ~10MB of
+      Pyodide. Loading that for someone who opened the page to re-read the lesson would be
+      wasteful, so it waits until the drills actually scroll into view. The component then
+      warms Pyodide on idle, so the wait is absorbed while they finish reading.
+    -->
+    {topic && <DrillRunner client:visible topicId={topic.id} />}
+
+    {topic && <LessonNav client:visible topicId={topic.id} />}
+  </div>
+</Base>
