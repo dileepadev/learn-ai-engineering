@@ -1,0 +1,81 @@
+name: Deploy site
+
+# The learning site is generated from `phases/`, so a lesson edit is a site change.
+# Both paths trigger a rebuild.
+on:
+  push:
+    branches: [main]
+    paths:
+      - "phases/**"
+      - "site/**"
+      - "scripts/export_curriculum.py"
+      - ".github/workflows/deploy-site.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Never let two deploys race. `cancel-in-progress: false` so a queued deploy finishes
+# rather than being dropped mid-publish.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+defaults:
+  run:
+    working-directory: site
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      # The curriculum exporter is Python: it parses the drills with `ast`, which is the
+      # only parser guaranteed to agree with the interpreter that later runs them.
+      - name: Set up uv
+        uses: astral-sh/setup-uv@v9
+        with:
+          enable-cache: true
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: site/package-lock.json
+
+      - run: npm ci
+
+      - name: Check types
+        run: npm run check
+
+      - name: Unit tests
+        run: npm run test
+
+      # Generates src/generated/** via the `prebuild` hook, then builds the static site.
+      - name: Build
+        run: npm run build
+
+      # Runs all 207 Part A tests through Pyodide against the answer key. This is the only
+      # thing that catches a drill edit which breaks the in-browser runner — a normal
+      # `uv run pytest` passes on CPython whether or not WASM agrees.
+      - name: Verify drills run in Pyodide
+        run: npm run verify:drills
+
+      - uses: actions/configure-pages@v6
+
+      - uses: actions/upload-pages-artifact@v5
+        with:
+          path: site/dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v5
