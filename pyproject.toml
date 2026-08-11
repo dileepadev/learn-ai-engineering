@@ -49,9 +49,10 @@ select = [
 [tool.ruff.lint.per-file-ignores]
 "tests/**" = ["T20"]   # printing in tests is fine
 "phases/**" = ["T20"]  # teaching scripts are meant to be run and print
+"scripts/**" = ["T20"] # build scripts report to the terminal; that is their output
 
 [tool.pyright]
-include = ["projects", "phases"]
+include = ["projects", "phases", "scripts"]
 typeCheckingMode = "strict"
 reportMissingTypeStubs = false
 pythonVersion = "3.12"
