@@ -6,6 +6,7 @@ on:
       - main
     paths:
       - "site/**"
+      - "phases/**"
       - ".github/workflows/deploy-site.yml"
   workflow_dispatch:
 
@@ -29,6 +30,14 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 22
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v5
 
       - name: Install dependencies
         working-directory: site
