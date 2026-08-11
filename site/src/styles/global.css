@@ -1,0 +1,315 @@
+@import "tailwindcss";
+
+/*
+ * Dark mode is a deliberate choice, not just the OS preference: someone working through a
+ * long lesson at night should be able to override it. The variant matches a `.dark` class
+ * that the inline script in Base.astro sets from either the stored choice or the system
+ * setting, so the two paths converge on one selector.
+ */
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans: "Inter var", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+
+  /* Status colours carry meaning across the whole app: complete, in progress, upcoming.
+     They are defined once here so a phase card, a topic row, and a test result cannot
+     drift apart. */
+  --color-done: oklch(0.72 0.17 156);
+  --color-doing: oklch(0.78 0.16 78);
+  --color-todo: oklch(0.62 0.02 260);
+}
+
+:root {
+  --surface: oklch(0.99 0.003 260);
+  --surface-raised: oklch(1 0 0);
+  --surface-sunken: oklch(0.96 0.005 260);
+  --border: oklch(0.9 0.008 260);
+  --border-strong: oklch(0.82 0.012 260);
+  --text: oklch(0.24 0.02 260);
+  --text-muted: oklch(0.52 0.015 260);
+  --text-faint: oklch(0.64 0.012 260);
+  --accent: oklch(0.55 0.19 274);
+  --accent-hover: oklch(0.48 0.2 274);
+  --accent-soft: oklch(0.95 0.03 274);
+  --accent-text: oklch(1 0 0);
+  --shadow: 0 1px 2px oklch(0.2 0.02 260 / 0.06), 0 4px 16px oklch(0.2 0.02 260 / 0.06);
+
+  /* Editor syntax colours. Defined as variables so CodeMirror follows the theme toggle
+     without rebuilding the editor or shipping a second highlight theme. */
+  --cm-keyword: oklch(0.52 0.19 300);
+  --cm-name: oklch(0.32 0.02 260);
+  --cm-function: oklch(0.52 0.16 255);
+  --cm-string: oklch(0.5 0.13 150);
+  --cm-number: oklch(0.55 0.15 45);
+  --cm-comment: oklch(0.6 0.02 260);
+  --cm-type: oklch(0.55 0.12 200);
+  --cm-operator: oklch(0.48 0.08 320);
+  --cm-property: oklch(0.45 0.1 250);
+}
+
+.dark {
+  --surface: oklch(0.17 0.012 265);
+  --surface-raised: oklch(0.21 0.014 265);
+  --surface-sunken: oklch(0.14 0.01 265);
+  --border: oklch(0.29 0.016 265);
+  --border-strong: oklch(0.38 0.02 265);
+  --text: oklch(0.94 0.008 265);
+  --text-muted: oklch(0.71 0.014 265);
+  --text-faint: oklch(0.58 0.014 265);
+  --accent: oklch(0.72 0.16 280);
+  --accent-hover: oklch(0.79 0.15 280);
+  --accent-soft: oklch(0.27 0.05 280);
+  --accent-text: oklch(0.16 0.02 280);
+  --shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 20px oklch(0 0 0 / 0.28);
+
+  --cm-keyword: oklch(0.76 0.15 305);
+  --cm-name: oklch(0.9 0.01 265);
+  --cm-function: oklch(0.78 0.13 245);
+  --cm-string: oklch(0.79 0.13 150);
+  --cm-number: oklch(0.8 0.12 60);
+  --cm-comment: oklch(0.56 0.02 265);
+  --cm-type: oklch(0.79 0.1 195);
+  --cm-operator: oklch(0.78 0.08 320);
+  --cm-property: oklch(0.8 0.08 250);
+}
+
+@theme inline {
+  --color-surface: var(--surface);
+  --color-raised: var(--surface-raised);
+  --color-sunken: var(--surface-sunken);
+  --color-line: var(--border);
+  --color-line-strong: var(--border-strong);
+  --color-ink: var(--text);
+  --color-muted: var(--text-muted);
+  --color-faint: var(--text-faint);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-ink: var(--accent-text);
+}
+
+@layer base {
+  html {
+    scroll-behavior: smooth;
+    /* Anchored headings otherwise land under the sticky header. */
+    scroll-padding-top: 5rem;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    html {
+      scroll-behavior: auto;
+    }
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--text);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /*
+   * Tailwind's preflight resets `button` to `cursor: default`, so every button in the app
+   * showed the plain arrow instead of a hand. This restores the pointer on every clickable
+   * control site-wide — buttons, links, and anything explicitly marked as a button role or
+   * given a click handler via `data-clickable` — so no individual component has to remember
+   * to add `cursor-pointer` by hand.
+   */
+  button:not(:disabled),
+  a[href],
+  [role="button"],
+  summary,
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="file"]::file-selector-button,
+  select,
+  label:has(input[type="checkbox"]),
+  label:has(input[type="radio"]) {
+    cursor: pointer;
+  }
+
+  button:disabled {
+    cursor: not-allowed;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+}
+
+@layer components {
+  /*
+   * Shiki emits both themes at once (see astro.config.mjs). These two rules pick one,
+   * which is what lets a single build serve light and dark without shipping the markup
+   * twice or re-highlighting on the client.
+   */
+  .dark .astro-code,
+  .dark .astro-code span {
+    color: var(--shiki-dark) !important;
+    background-color: var(--shiki-dark-bg) !important;
+    font-style: var(--shiki-dark-font-style) !important;
+    font-weight: var(--shiki-dark-font-weight) !important;
+    text-decoration: var(--shiki-dark-text-decoration) !important;
+  }
+
+  /*
+   * Typography for rendered lesson markdown. Written by hand rather than with the
+   * typography plugin because these documents have a specific vocabulary — wide
+   * comparison tables, GitHub callouts, dense fenced Python — and the defaults fight all
+   * three.
+   */
+  .prose {
+    color: var(--text);
+    line-height: 1.72;
+    font-size: 1.0625rem;
+  }
+
+  .prose > * + * {
+    margin-top: 1.15em;
+  }
+
+  .prose h2 {
+    margin-top: 2.75rem;
+    margin-bottom: 1rem;
+    font-size: 1.5rem;
+    font-weight: 650;
+    letter-spacing: -0.015em;
+    scroll-margin-top: 5rem;
+  }
+
+  .prose h3 {
+    margin-top: 2rem;
+    margin-bottom: 0.6rem;
+    font-size: 1.175rem;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    scroll-margin-top: 5rem;
+  }
+
+  .prose h4 {
+    margin-top: 1.5rem;
+    font-size: 1.02rem;
+    font-weight: 650;
+  }
+
+  .prose a {
+    color: var(--accent);
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+    text-decoration-color: color-mix(in oklch, var(--accent) 40%, transparent);
+  }
+
+  .prose a:hover {
+    text-decoration-color: var(--accent);
+  }
+
+  .prose strong {
+    font-weight: 650;
+    color: var(--text);
+  }
+
+  .prose ul,
+  .prose ol {
+    padding-left: 1.4rem;
+  }
+
+  .prose ul {
+    list-style: disc;
+  }
+
+  .prose ol {
+    list-style: decimal;
+  }
+
+  .prose li + li {
+    margin-top: 0.4rem;
+  }
+
+  .prose li::marker {
+    color: var(--text-faint);
+  }
+
+  .prose code {
+    font-family: var(--font-mono);
+    font-size: 0.855em;
+    background: var(--surface-sunken);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 0.1em 0.36em;
+    white-space: nowrap;
+  }
+
+  .prose pre {
+    background: var(--surface-sunken) !important;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 1rem 1.15rem;
+    /* Long lines scroll inside the block; the page itself must never scroll sideways. */
+    overflow-x: auto;
+    font-size: 0.875rem;
+    line-height: 1.65;
+  }
+
+  .prose pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: inherit;
+    white-space: pre;
+  }
+
+  .prose blockquote {
+    border-left: 3px solid var(--border-strong);
+    padding: 0.15rem 0 0.15rem 1.1rem;
+    color: var(--text-muted);
+  }
+
+  /* GitHub callouts (`> [!TIP]`) arrive as a blockquote whose first line is the marker.
+     Style the container; the marker paragraph is handled below. */
+  .prose blockquote p:first-child strong:only-child {
+    color: var(--accent);
+  }
+
+  .prose table {
+    display: block;
+    width: 100%;
+    overflow-x: auto;
+    border-collapse: collapse;
+    font-size: 0.92rem;
+  }
+
+  .prose th,
+  .prose td {
+    border: 1px solid var(--border);
+    padding: 0.5rem 0.75rem;
+    text-align: left;
+    vertical-align: top;
+  }
+
+  .prose th {
+    background: var(--surface-sunken);
+    font-weight: 620;
+    white-space: nowrap;
+  }
+
+  .prose hr {
+    border: 0;
+    border-top: 1px solid var(--border);
+    margin: 2.25rem 0;
+  }
+
+  .prose img {
+    max-width: 100%;
+    height: auto;
+  }
+}

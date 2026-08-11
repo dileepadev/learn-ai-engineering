@@ -26,6 +26,14 @@ htmlcov/
 *.sqlite3
 data/raw/
 
+# Learning site (site/) — Node toolchain and build output.
+# `src/generated/` is derived from phases/ on every build, so committing it would let a
+# stale copy drift away from the lessons it claims to mirror.
+site/node_modules/
+site/dist/
+site/.astro/
+site/src/generated/
+
 # Editors and OS
 .vscode/
 .idea/
