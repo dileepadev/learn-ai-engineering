@@ -10,9 +10,10 @@ interface Props {
   description?: string;
   /** Slug of the phase this page belongs to, so the header can show where you are. */
   activePhase?: string;
+  activePage?: string;
 }
 
-const { title, description, activePhase } = Astro.props;
+const { title, description, activePhase, activePage } = Astro.props;
 
 const phases = await getCollection("phases");
 const criteriaCounts = Object.fromEntries(
@@ -76,7 +77,10 @@ const summary =
         <nav class="ml-auto flex items-center gap-1 text-sm" aria-label="Main">
           <a
             href={href("/")}
-            class="rounded-md px-3 py-1.5 text-muted transition-colors hover:bg-sunken hover:text-ink"
+            class:list={[
+              "rounded-md px-3 py-1.5 transition-colors hover:bg-sunken hover:text-ink",
+              activePage === "dashboard" ? "text-ink font-medium" : "text-muted",
+            ]}
           >
             Dashboard
           </a>
@@ -84,10 +88,19 @@ const summary =
             href={href("/phases/01-foundations")}
             class:list={[
               "rounded-md px-3 py-1.5 transition-colors hover:bg-sunken hover:text-ink",
-              activePhase ? "text-ink" : "text-muted",
+              activePhase ? "text-ink font-medium" : "text-muted",
             ]}
           >
             Phases
+          </a>
+          <a
+            href={href("/about")}
+            class:list={[
+              "rounded-md px-3 py-1.5 transition-colors hover:bg-sunken hover:text-ink",
+              activePage === "about" ? "text-ink font-medium" : "text-muted",
+            ]}
+          >
+            About
           </a>
           <HeaderProgress client:idle criteriaCounts={criteriaCounts} />
           <ThemeToggle client:idle />
@@ -108,6 +121,7 @@ const summary =
           <code class="rounded bg-sunken px-1 py-0.5 text-[0.8em]">phases/</code> in the repo.
         </p>
         <p class="flex items-center gap-4">
+          <a class="transition-colors hover:text-ink" href={href("/about")}>About</a>
           <a
             class="transition-colors hover:text-ink"
             href="https://github.com/dileepadev/learn-ai-engineering"

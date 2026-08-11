@@ -1,0 +1,370 @@
+---
+import Base from "../layouts/Base.astro";
+import { href } from "../lib/href.ts";
+
+const operatingPrinciples = [
+  {
+    num: "1",
+    title: "Build first, read second",
+    desc: "Every phase is anchored to a real project. Reading without shipping code doesn't count as progress.",
+  },
+  {
+    num: "2",
+    title: "Raw APIs before frameworks",
+    desc: "Build the agent loop, RAG pipeline, and structured-output parsing directly against raw APIs once. Then adopt frameworks knowing exactly what they abstract.",
+  },
+  {
+    num: "3",
+    title: "One primary tool per category",
+    desc: "Depth in one vector DB, one agent framework, and one eval tool beats surface familiarity with five. Learn one deeply before comparing alternatives.",
+  },
+  {
+    num: "4",
+    title: "Evals are the core skill",
+    desc: "The difference between a weekend demo and a production product is a test suite that tells you when you made things worse. Evals start early and stay load-bearing.",
+  },
+  {
+    num: "5",
+    title: "Exit by competence, not calendar",
+    desc: "Each phase ends with concrete exit criteria. Move on when you can build and explain the deliverables — whether that takes one week or one month.",
+  },
+  {
+    num: "6",
+    title: "AI assistants as teachers, not typists",
+    desc: "LLMs and coding agents are built into the workflow. The bar is total comprehension: every piece of generated code must be understood, explainable, and debuggable.",
+  },
+];
+
+const phases = [
+  {
+    num: "1",
+    title: "Foundations",
+    slug: "01-foundations",
+    focus: "Python for AI engineering, tooling, async, FastAPI, streaming, SQL, Docker",
+    builds: "Typed data-wrangling CLI & streaming SSE service — tested & containerized",
+  },
+  {
+    num: "2",
+    title: "LLMs & Model APIs",
+    slug: "02-llms-and-model-apis",
+    focus: "LLM behavior, provider APIs, open-weight models, cost & latency math",
+    builds: "Terminal chat client from scratch (hosted Anthropic/OpenAI + local Ollama)",
+  },
+  {
+    num: "3",
+    title: "Prompting & Structured Outputs",
+    slug: "03-prompting-and-structured-outputs",
+    focus: "Prompt engineering, JSON schema outputs, Instructor, tool calling by hand",
+    builds: "Document extraction pipeline with measured schema compliance & accuracy",
+  },
+  {
+    num: "4",
+    title: "RAG",
+    slug: "04-rag",
+    focus: "Embeddings, chunking, pgvector, hybrid search (BM25 + vector), reranking",
+    builds: "Docs-chat service over a real corpus, with citations & retrieval evaluation",
+  },
+  {
+    num: "5",
+    title: "Agents",
+    slug: "05-agents",
+    focus: "Agent loops, LangGraph, Model Context Protocol (MCP), human-in-the-loop",
+    builds: "An autonomous agent built three ways: raw loop, LangGraph, and MCP server",
+  },
+  {
+    num: "6",
+    title: "Evals & Observability",
+    slug: "06-evals-and-observability",
+    focus: "Golden test sets, LLM-as-judge, promptfoo, DeepEval, Langfuse tracing",
+    builds: "50+ case eval suite & full tracing harness on your Phase 4–5 applications",
+  },
+  {
+    num: "7",
+    title: "Production",
+    slug: "07-production",
+    focus: "Architecture, gateways (LiteLLM), vLLM, cloud platforms (Azure/AWS), caching",
+    builds: "Docs-chat deployed for real: gateway, queue, cloud leg, dashboards & alerts",
+  },
+  {
+    num: "8",
+    title: "Capstone",
+    slug: "08-capstone",
+    focus: "End-to-end integration, production deployment, evaluation & documentation",
+    builds: "A complete, deployed, evaluated, observable AI product",
+  },
+];
+
+const stackCategories = [
+  {
+    category: "Languages & Core Engineering",
+    tools: [
+      { name: "Python", desc: "The core language; every major AI framework is Python-first" },
+      { name: "PostgreSQL / SQL", desc: "Relational data, pgvector embeddings & full-text search" },
+      { name: "uv", desc: "Fast Python package manager replacing pip, venv, and poetry" },
+      { name: "ruff & pyright", desc: "Instant linting, formatting & strict static type checking" },
+      { name: "Pydantic & FastAPI", desc: "Data validation, schemas & async API web services" },
+      { name: "Docker & GitHub Actions", desc: "Containerized local infra & automated CI test/eval gates" },
+    ],
+  },
+  {
+    category: "Models & Access",
+    tools: [
+      { name: "Anthropic & OpenAI APIs", desc: "Frontier model APIs for streaming, tool use & prompt caching" },
+      { name: "Ollama", desc: "Local runner for open-weight models (Llama, Qwen, DeepSeek)" },
+      { name: "Microsoft Foundry & Bedrock", desc: "Enterprise cloud model platforms with private governance" },
+    ],
+  },
+  {
+    category: "Structured Outputs, RAG & Agents",
+    tools: [
+      { name: "Instructor", desc: "Pydantic-validated LLM structured outputs with automatic retries" },
+      { name: "pgvector & Cohere Rerank", desc: "Vector similarity search and cross-encoder reranking" },
+      { name: "LangGraph & MCP", desc: "Stateful agent graphs and Model Context Protocol servers" },
+    ],
+  },
+  {
+    category: "Evals, Observability & Production",
+    tools: [
+      { name: "promptfoo & DeepEval", desc: "Automated regression testing and pytest-native LLM metrics" },
+      { name: "Langfuse", desc: "Open-source LLM tracing, latency tracking & cost monitoring" },
+      { name: "LiteLLM & vLLM", desc: "Unified API gateway and high-throughput GPU model serving" },
+      { name: "Redis & Modal", desc: "Async task queues and serverless GPU execution" },
+    ],
+  },
+];
+---
+
+<Base
+  title="About the Roadmap"
+  description="A self-paced, build-first curriculum for modern AI engineering — LLMs, RAG, agents, evals, and production deployment."
+  activePage="about"
+>
+  <div class="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14 space-y-16">
+    <!-- Hero Section -->
+    <header class="space-y-4 text-center sm:text-left">
+      <div class="inline-flex items-center gap-2 rounded-full border border-line bg-sunken px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted">
+        <span class="size-2 rounded-full bg-accent"></span>
+        Build-First Curriculum
+      </div>
+      <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink">
+        About Learn AI Engineering
+      </h1>
+      <p class="text-lg text-muted max-w-3xl leading-relaxed">
+        A self-paced, build-first roadmap for <strong class="text-ink font-semibold">modern AI engineering</strong> —
+        the software engineering discipline as practiced in industry today: LLM applications, agents, RAG, structured outputs, evals, and production deployment.
+      </p>
+
+      <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-4 text-left">
+        <div class="rounded-xl border border-line bg-raised p-3.5 shadow-xs">
+          <div class="text-xs font-medium text-muted">Curriculum</div>
+          <div class="text-lg font-bold text-ink">8 Phases</div>
+        </div>
+        <div class="rounded-xl border border-line bg-raised p-3.5 shadow-xs">
+          <div class="text-xs font-medium text-muted">Execution</div>
+          <div class="text-lg font-bold text-ink">Browser WASM</div>
+        </div>
+        <div class="rounded-xl border border-line bg-raised p-3.5 shadow-xs">
+          <div class="text-xs font-medium text-muted">Focus</div>
+          <div class="text-lg font-bold text-ink">Projects & Evals</div>
+        </div>
+        <div class="rounded-xl border border-line bg-raised p-3.5 shadow-xs">
+          <div class="text-xs font-medium text-muted">Language</div>
+          <div class="text-lg font-bold text-ink">Python Native</div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Scope / What this is and is NOT -->
+    <section class="rounded-2xl border border-line bg-raised p-6 sm:p-8 space-y-6 shadow-xs">
+      <h2 class="text-2xl font-bold tracking-tight text-ink">
+        What This Roadmap Is (And What It Is Not)
+      </h2>
+      <div class="grid sm:grid-cols-2 gap-6 text-sm text-muted leading-relaxed">
+        <div class="space-y-2">
+          <h3 class="font-semibold text-ink text-base flex items-center gap-2">
+            <span class="text-accent font-bold">✓</span> Software Engineering for AI
+          </h3>
+          <p>
+            Modern AI engineering treats models as software components you build products around.
+            This roadmap covers building real software: async API handling, structured validation, retrieval pipelines, agentic execution loops, evaluation suites, and scalable cloud deployments.
+          </p>
+        </div>
+        <div class="space-y-2">
+          <h3 class="font-semibold text-ink text-base flex items-center gap-2">
+            <span class="text-faint font-bold">✕</span> Not ML Theory or Kaggle
+          </h3>
+          <p>
+            This is <strong>not</strong> a machine learning or data science curriculum.
+            There is no calculus, no model training from scratch, no pandas/NumPy notebook loops, and no Kaggle competitions.
+            Prior ML theory is not required; Python is taught from Phase 1 scoped to AI engineering.
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- Operating Principles -->
+    <section class="space-y-6">
+      <div class="space-y-1">
+        <h2 class="text-2xl font-bold tracking-tight text-ink">
+          Operating Principles
+        </h2>
+        <p class="text-sm text-muted">
+          Six non-negotiable guidelines that shape how this curriculum is built and learned.
+        </p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        {operatingPrinciples.map((item) => (
+          <div class="flex gap-4 rounded-xl border border-line bg-raised p-5 shadow-xs transition-colors hover:border-line-strong">
+            <div class="flex size-9 shrink-0 items-center justify-center rounded-lg bg-accent/10 font-mono font-bold text-accent text-sm">
+              0{item.num}
+            </div>
+            <div class="space-y-1">
+              <h3 class="font-semibold text-ink text-base">{item.title}</h3>
+              <p class="text-xs text-muted leading-relaxed">{item.desc}</p>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- The 8-Phase Map -->
+    <section class="space-y-6">
+      <div class="space-y-1">
+        <h2 class="text-2xl font-bold tracking-tight text-ink">
+          The 8-Phase Curriculum
+        </h2>
+        <p class="text-sm text-muted">
+          Phases build directly on each other — projects from early phases are instrumented and deployed in later phases.
+        </p>
+      </div>
+
+      <div class="space-y-3">
+        {phases.map((p) => (
+          <div class="rounded-xl border border-line bg-raised p-4 sm:p-5 shadow-xs transition-colors hover:border-line-strong space-y-2">
+            <div class="flex flex-wrap items-center justify-between gap-2">
+              <a
+                href={href(`/phases/${p.slug}`)}
+                class="font-bold text-ink text-base hover:text-accent transition-colors flex items-center gap-2"
+              >
+                <span class="rounded bg-sunken px-2 py-0.5 font-mono text-xs text-muted border border-line">
+                  Phase {p.num}
+                </span>
+                {p.title}
+                <span class="text-muted text-xs font-normal">→</span>
+              </a>
+            </div>
+            <div class="grid sm:grid-cols-2 gap-2 text-xs">
+              <div>
+                <span class="font-medium text-muted">Focus:</span>{" "}
+                <span class="text-ink">{p.focus}</span>
+              </div>
+              <div>
+                <span class="font-medium text-muted">You build:</span>{" "}
+                <span class="text-ink">{p.builds}</span>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- The Stack & Toolchain -->
+    <section class="space-y-6">
+      <div class="space-y-1">
+        <h2 class="text-2xl font-bold tracking-tight text-ink">
+          The Toolchain & Technology Stack
+        </h2>
+        <p class="text-sm text-muted">
+          One primary tool per category for deep mastery, avoiding tool-hopping fatigue.
+        </p>
+      </div>
+
+      <div class="grid sm:grid-cols-2 gap-4">
+        {stackCategories.map((cat) => (
+          <div class="rounded-xl border border-line bg-raised p-5 space-y-3 shadow-xs">
+            <h3 class="font-bold text-ink text-base border-b border-line pb-2">
+              {cat.category}
+            </h3>
+            <ul class="space-y-2.5 text-xs">
+              {cat.tools.map((t) => (
+                <li>
+                  <strong class="font-semibold text-ink">{t.name}:</strong>{" "}
+                  <span class="text-muted">{t.desc}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </section>
+
+    <!-- Interactive Execution in Browser -->
+    <section class="rounded-2xl border border-line bg-sunken p-6 sm:p-8 space-y-4">
+      <div class="flex items-center gap-3">
+        <div class="grid size-10 place-items-center rounded-xl bg-accent text-accent-ink font-mono font-bold text-sm">
+          WASM
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-ink">Interactive Browser Execution</h2>
+          <p class="text-xs text-muted">Powered by Pyodide & WebAssembly</p>
+        </div>
+      </div>
+      <p class="text-sm text-muted leading-relaxed">
+        This site is not just static documentation. Phase 1's Python drills run <strong>directly in your browser</strong> using Pyodide (WASM).
+        The exact same <code class="rounded bg-raised px-1 py-0.5 text-xs border border-line">pytest</code> test suites that live in this repository execute against your submitted code right inside your tab.
+        No local Python installation, cloning, API keys, or accounts are required to start learning.
+      </p>
+      <p class="text-xs text-faint">
+        All site content and drills are derived from <code class="rounded bg-raised px-1 py-0.5 text-xs border border-line">phases/</code> in the git repository, ensuring the site and curriculum documentation never drift apart.
+      </p>
+    </section>
+
+    <!-- Effort & Cost Reality -->
+    <section class="grid sm:grid-cols-2 gap-4">
+      <div class="rounded-xl border border-line bg-raised p-5 space-y-2 shadow-xs">
+        <h3 class="font-bold text-ink text-base">Rough Effort</h3>
+        <p class="text-xs text-muted leading-relaxed">
+          Total commitment is roughly <strong>150–250 focused hours</strong>. At ~10 hours/week, that spans ~6 months to achieve a defensible, production-grade AI engineering skillset.
+        </p>
+      </div>
+
+      <div class="rounded-xl border border-line bg-raised p-5 space-y-2 shadow-xs">
+        <h3 class="font-bold text-ink text-base">Budget & Hardware</h3>
+        <p class="text-xs text-muted leading-relaxed">
+          Designed to run on ordinary laptop hardware (local Ollama models on CPU). Total API spend is roughly <strong>$50–$150</strong> plus ~$10–$30 for rented serverless GPUs in Phase 7.
+        </p>
+      </div>
+    </section>
+
+    <!-- Call to Action -->
+    <footer class="rounded-2xl border border-line bg-raised p-6 sm:p-8 text-center space-y-4 shadow-xs">
+      <h2 class="text-2xl font-bold text-ink">Ready to Start Building?</h2>
+      <p class="text-sm text-muted max-w-xl mx-auto">
+        Begin with Phase 1 to master Python tooling, async concurrency, FastAPI, streaming SSE, and Docker.
+      </p>
+      <div class="flex flex-wrap items-center justify-center gap-3 pt-2">
+        <a
+          href={href("/phases/01-foundations")}
+          class="inline-flex items-center gap-2 rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-accent-ink transition-colors hover:bg-accent-hover"
+        >
+          Start Phase 1: Foundations →
+        </a>
+        <a
+          href={href("/")}
+          class="inline-flex items-center gap-2 rounded-lg border border-line bg-sunken px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-raised"
+        >
+          View Dashboard
+        </a>
+        <a
+          href="https://github.com/dileepadev/learn-ai-engineering"
+          target="_blank"
+          rel="noreferrer"
+          class="inline-flex items-center gap-2 rounded-lg border border-line bg-sunken px-4 py-2.5 text-sm font-medium text-ink transition-colors hover:bg-raised"
+        >
+          GitHub Repository
+        </a>
+      </div>
+    </footer>
+  </div>
+</Base>

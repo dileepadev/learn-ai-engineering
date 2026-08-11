@@ -22,6 +22,7 @@ const PAGES = [
   ["lesson 01", "/learn/01-core-mechanics"],
   ["lesson 07 (classes)", "/learn/07-oop-just-enough"],
   ["lesson 11 (sql, ungraded)", "/learn/11-a-little-sql"],
+  ["about", "/about"],
   ["progress", "/progress"],
   ["404", "/does-not-exist"],
 ];
