@@ -48,13 +48,20 @@ jobs:
 
       - run: npm ci
 
+      # `src/generated/**` is gitignored — it is derived from `phases/`, so a fresh
+      # checkout does not have it. `npm run build` would create it via its `prebuild`
+      # hook, but `check` and `test` both import those JSON modules and run first, so
+      # the export has to happen up front or they fail on a missing module.
+      - name: Export curriculum
+        run: npm run export
+
       - name: Check types
         run: npm run check
 
       - name: Unit tests
         run: npm run test
 
-      # Generates src/generated/** via the `prebuild` hook, then builds the static site.
+      # Re-runs the export via the `prebuild` hook (cheap and idempotent), then builds.
       - name: Build
         run: npm run build
 
