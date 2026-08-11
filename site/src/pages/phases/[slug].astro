@@ -1,0 +1,49 @@
+---
+import { getCollection, render } from "astro:content";
+import Base from "../../layouts/Base.astro";
+import { ExitCriteria } from "../../components/ExitCriteria.tsx";
+import { PhaseHeader } from "../../components/PhaseHeader.tsx";
+import { PartATopicList } from "../../components/PartATopicList.tsx";
+import { PHASE_WITH_LESSONS } from "../../lib/curriculum.ts";
+
+export async function getStaticPaths() {
+  const phases = await getCollection("phases");
+  return phases.map((phase) => ({ params: { slug: phase.id }, props: { phase } }));
+}
+
+const { phase } = Astro.props;
+const { Content } = await render(phase);
+const hasLessons = phase.id === PHASE_WITH_LESSONS;
+---
+
+<Base title={`Phase ${phase.data.number} — ${phase.data.title}`} activePhase={phase.id}>
+  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
+    <PhaseHeader
+      client:load
+      slug={phase.id}
+      number={phase.data.number}
+      title={phase.data.title}
+      goal={phase.data.goal}
+      youBuild={phase.data.youBuild}
+      effort={phase.data.effort}
+      criteriaCount={phase.data.exitCriteria.length}
+    />
+
+    {hasLessons && <PartATopicList client:load />}
+
+    <article class="prose mt-12">
+      <Content />
+    </article>
+
+    {
+      phase.data.exitCriteria.length > 0 && (
+        <ExitCriteria
+          client:visible
+          phaseSlug={phase.id}
+          criteria={phase.data.exitCriteria}
+          heading={phase.data.exitCriteriaHeading}
+        />
+      )
+    }
+  </div>
+</Base>

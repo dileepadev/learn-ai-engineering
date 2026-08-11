@@ -1,0 +1,20 @@
+---
+import Base from "../layouts/Base.astro";
+import { href } from "../lib/href.ts";
+---
+
+<Base title="Page not found">
+  <div class="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6">
+    <p class="font-mono text-sm text-accent">404</p>
+    <h1 class="mt-3 text-3xl font-bold tracking-tight">That page isn't here</h1>
+    <p class="mt-3 text-muted">
+      The link may be out of date, or the lesson may not be written yet.
+    </p>
+    <a
+      href={href("/")}
+      class="mt-8 inline-block rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-ink transition-colors hover:bg-accent-hover"
+    >
+      Back to the dashboard
+    </a>
+  </div>
+</Base>

@@ -1,0 +1,8 @@
+---
+import Base from "../layouts/Base.astro";
+import { ProgressManager } from "../components/ProgressManager.tsx";
+---
+
+<Base title="Your progress" description="Export, import, or reset your saved learning progress.">
+  <ProgressManager client:load />
+</Base>
