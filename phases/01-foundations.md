@@ -6,7 +6,7 @@
 
 ## Why this phase exists
 
-AI engineering is 80% ordinary software engineering under unusual constraints: everything is async and streamed, everything is untyped JSON until you force types onto it, and everything talks to slow, expensive, flaky external APIs. This phase teaches exactly the Python that serves those constraints — and skips the rest of the language's folklore. The filter for every topic below: *will a later phase use this?* If not, it's out.
+AI engineering is 80% ordinary software engineering under unusual constraints: everything is async and streamed, everything is untyped JSON until you force types onto it, and everything talks to slow, expensive, flaky external APIs. This phase teaches exactly the Python that serves those constraints — and skips the rest of the language's folklore. The filter for every topic below: *will a later phase use this?* If not, it's out. The job market agrees on the weighting: Python appears in 59–82.5% of 2026 AI Engineer postings, and most interview loops still include a standard coding round ([the role](the-role.md)).
 
 ## Part A — Python, from the start (the AI engineering subset)
 

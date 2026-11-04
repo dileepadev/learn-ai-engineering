@@ -7,11 +7,14 @@ This is **not** a machine learning or data science curriculum. There is no calcu
 > [!NOTE]
 > This roadmap was created based on my own research, then optimized and enhanced with Claude Fable 5.
 
+> [!IMPORTANT]
+> **This is the 2026 edition**, built to be finished by **31 December 2026** — see [Finishing in 2026](#finishing-in-2026). The 2027 edition will be a new release with a refreshed curriculum.
+
 ## Work through it interactively
 
 **[dileepadev.github.io/learn-ai-engineering →](https://dileepadev.github.io/learn-ai-engineering/)**
 
-The roadmap is also a learning app. It tracks your progress across all eight phases, and Phase 1's drills run **in your browser** — the same pytest suites that live in this repo, executed against your code via WebAssembly. No clone, no setup, no API keys, no account; progress is saved locally and exportable.
+The roadmap is also a learning app. **Every part of every phase is trackable** — each skill bullet, project step, and resource is a checkbox, each section has a one-click "mark section done", and Part A topics you already know can be tested out. A **2026 sprint planner** on the dashboard turns what is left into the hours a week it takes and a finish-by date for each phase. Phase 1's drills run **in your browser** — the same pytest suites that live in this repo, executed against your code via WebAssembly. No clone, no setup, no API keys, no account; progress is saved locally and exportable.
 
 Everything it shows is generated from `phases/`, so the site and the docs cannot drift apart. Source and build instructions in [site/](site/).
 
@@ -43,9 +46,42 @@ Me — an Associate AI Engineer rebuilding skills from the ground up with curren
 
 Phases build on each other — projects from 4 and 5 get instrumented in 6 and deployed in 7. Work them in order. Phase 1 teaches the language itself, scoped to this field: skim what you already know, drill what you don't.
 
+## What the 2026 market asks for
+
+The phases are weighted the way 2026 job postings are. [The role](phases/the-role.md) has the full research — what the job is, how it differs from ML engineering, what it pays, and how interviews run — with every figure linked to its source.
+
+| Skill | Share of 2026 AI Engineer postings | Taught in |
+| ----- | ----- | ----- |
+| Python | 59–82.5% across three studies | Phase 1 |
+| LLMs / LLM integration | 63% / 25.4% | Phases 2–3 |
+| Evals | 56% | Phase 6, seeded from Phase 3 |
+| Agents | 14.4–50% | Phase 5 |
+| RAG | 26–35.9% | Phase 4 |
+| AWS · Docker · CI/CD | 40.1% · 31.0% · 29.3% | Phases 1, 7 |
+| Fine-tuning | 8.5–26% | Phase 7, deliberately brief |
+
+LinkedIn's *Jobs on the Rise 2026* ranks AI Engineer first among the fastest-growing US jobs (its category includes machine learning engineers). Typical US pay is $167K–$176K across three 2026 datasets, and a full interview loop runs 3–6 rounds over 2–6 weeks — Phase 8's "Turning it into a job" covers the parts the capstone doesn't.
+
 ## Rough effort
 
 Self-paced, but for planning: Phase 1 runs ~30–50 hours if Python is genuinely new territory (a fraction of that as a refresher), phases 2–3 run ~15–25 focused hours each, phases 4–7 run ~25–40 each, and the capstone is as big as you make it (aim for 40+). At ~10 hours/week that's roughly six months to a strong, defensible skill set.
+
+## Finishing in 2026
+
+The 2026 edition runs to **31 December 2026**. From 4 November that is eight weeks, and at the midpoints above — with Phase 1 as a refresher — the full scope is about 220 hours, or roughly **27 hours a week**. If you already work in the field, tick or test out what you know and that number falls. The dashboard's sprint planner starts from every phase's full budget (Phase 1 included, so it reads higher until you test out) and recalculates from your own progress every time you open it.
+
+| Dates (2026) | Phase |
+| ----- | ----- |
+| Nov 4–8 | Phase 1 — test out what you know, drill the rest |
+| Nov 9–15 | Phase 2 — LLMs & Model APIs |
+| Nov 16–22 | Phase 3 — Prompting & Structured Outputs |
+| Nov 23–29 | Phase 4 — RAG |
+| Nov 30–Dec 6 | Phase 5 — Agents |
+| Dec 7–13 | Phase 6 — Evals & Observability |
+| Dec 14–20 | Phase 7 — Production |
+| Dec 21–31 | Phase 8 — Capstone, then "Turning it into a job" |
+
+Skipping is not covering: test out only what you could do unaided today. Every part still has a checkbox, so nothing is missed by accident — an unticked part is a part you have not done.
 
 ## Before you start
 
@@ -95,7 +131,7 @@ Everything this roadmap uses, what it is, and why it earned the slot. Primary pi
 | [pgvector](https://github.com/pgvector/pgvector) | Vector extension for Postgres | Vectors + metadata + BM25 in one boring, correct database | 4+ |
 | [sentence-transformers](https://sbert.net) | Open-source embeddings & rerankers | Local embedding and cross-encoder reranking without API costs | 4 |
 | [Cohere Rerank](https://docs.cohere.com/docs/rerank-overview) | Hosted reranker | The biggest retrieval-quality jump per line of code | 4 |
-| [LangGraph](https://langchain-ai.github.io/langgraph/) | Agent orchestration framework | Primary framework: durable state, human-in-the-loop, streaming | 5 |
+| [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview) | Agent orchestration framework | Primary framework: durable state, human-in-the-loop, streaming | 5 |
 | [MCP](https://modelcontextprotocol.io) | Model Context Protocol | The open standard for exposing tools to AI apps; you build a server | 5, 8 |
 | [Pydantic AI](https://ai.pydantic.dev) | Type-safe agent framework | Aware: the lighter-weight alternative worth watching | 5 |
 | [Claude Agent SDK](https://docs.anthropic.com/en/api/agent-sdk/overview) | Agent harness SDK | Aware: the production harness behind Claude Code | 5 |

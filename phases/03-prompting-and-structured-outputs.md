@@ -6,7 +6,7 @@
 
 ## Why this phase exists
 
-Structured output is the hinge between "chatbot" and "software component." The moment a model returns JSON your code parses, you've turned it into a callable function — and everything in phases 4–8 (RAG, agents, evals) is built out of exactly that move. Prompting, meanwhile, is unglamorous but has the highest ROI-per-hour of any skill in this roadmap; most production "model problems" are prompt problems.
+Structured output is the hinge between "chatbot" and "software component." The moment a model returns JSON your code parses, you've turned it into a callable function — and everything in phases 4–8 (RAG, agents, evals) is built out of exactly that move. Prompting, meanwhile, is unglamorous but has the highest ROI-per-hour of any skill in this roadmap; most production "model problems" are prompt problems. Employers ask for both: prompt engineering appears in 29.1% and LLM integration in 25.4% of 889 AI Engineer roles studied in January 2026 ([the role](the-role.md)).
 
 ## Core skills
 
@@ -18,7 +18,7 @@ Structured output is the hinge between "chatbot" and "software component." The m
 - Task decomposition: one prompt doing five things poorly → five small prompts doing one thing well, chained in code.
 - Prompt layout for caching: static instructions and examples first, variable input last (this is why — see Phase 2's caching notes).
 - Prompt hygiene: prompts live in version control as templates (Jinja or f-strings), never inline string soup; every change is diffable.
-- Prompt injection: understand the attack class now — untrusted input mixed with instructions — because it shapes tool design in Phase 5 and guardrails in Phase 6.
+- Prompt injection: understand the attack class now — untrusted input mixed with instructions — because it shapes tool design in Phase 5 and guardrails in Phase 6. It is LLM01, the top entry, in the [OWASP Top 10 for LLM Applications 2025](https://genai.owasp.org/llm-top-10/).
 
 ### Structured outputs
 
