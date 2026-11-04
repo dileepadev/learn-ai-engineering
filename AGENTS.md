@@ -56,7 +56,8 @@ learn-ai-engineering/
 ├── .mcp.json                     <- project-scoped MCP servers
 ├── phases/                       <- curriculum docs, 01..08
 │   ├── 01-foundations.md
-│   └── 01-foundations/part-a/    <- lessons, drills, tests, solutions
+│   ├── 01-foundations/part-a/    <- lessons, drills, tests, solutions
+│   └── the-role.md               <- the 2026 research on the role; rendered at /role, not a phase
 ├── projects/                     <- phase projects (uv workspace members)
 │   └── <NN>-<name>/
 │       ├── pyproject.toml
@@ -88,11 +89,48 @@ The rule that matters: **`phases/` is the source of truth; the site is derived.*
 | Content | How the site gets it |
 | --- | --- |
 | Roadmap docs, Part A lessons (markdown) | Read at build time by the loaders in `site/src/lib/loaders.ts` |
+| Trackable parts of each phase doc | Extracted from its list items by `site/src/lib/parts.ts` at build time |
+| The role research (`phases/the-role.md`) | The `role` collection, rendered at `/role` |
 | Drills, tests, solutions (Python) | Parsed by `scripts/export_curriculum.py` into `site/src/generated/` |
 | Quizzes (the one site-only content type) | Authored in `site/src/content/checks.json` |
 
 So: **fix a lesson by editing the markdown in `phases/`, never by editing the site.**
 `site/src/generated/` is gitignored and rebuilt on every build; do not commit or hand-edit it.
+
+### Tracking: parts and exit criteria
+
+Every top-level list item in a phase doc — each skill bullet, project step, and resource — is
+a **part**: the site renders it with a checkbox and saves the tick. Rules when editing a doc:
+
+- **Want something tracked? Make it a list item.** Paragraphs (intros, `**Stretch:**` lines)
+  are not tracked. Stretch goals are optional by design; keep them as paragraphs.
+- **Options are not tasks.** A section whose bullets are choices (Phase 8's "Alternatives")
+  opts out with `<!-- track: off -->` on its own line under the heading; a reason may follow
+  the word `off`.
+- **Part keys are hashed from the wording.** Inserting or reordering bullets keeps every
+  tick; *rewording* a bullet retires its tick (the learner re-ticks it). That trade is
+  deliberate — a stale tick must never claim work that was not done.
+- **Exit criteria are keyed by position** (`criterionKey(slug, index)`), so only ever
+  **append** criteria to the end of a list. Inserting or reordering shifts saved ticks onto
+  the wrong criterion.
+- The build fails if a doc's parts and rendered checkboxes disagree in number — fix the doc's
+  list syntax rather than the check.
+
+### Editions
+
+The roadmap ships as a yearly edition. This one is the **2026 edition**, built to be finished
+by 31 December 2026; the 2027 edition is a new release. `site/src/lib/edition.ts` holds the
+edition, its deadline, and the next edition's name — the only year-specific values the site
+reads. Saved progress records the edition it was made against. To cut the next edition:
+
+1. Refresh the curriculum in `phases/` and the research in `phases/the-role.md`, re-checking
+   every figure against its source.
+2. Bump `EDITION`, `EDITION_DEADLINE`, and `NEXT_EDITION` in `site/src/lib/edition.ts`, and the
+   edition notes in the README.
+3. Decide what happens to the previous edition's progress (keep, archive via export, or start
+   fresh), and implement it in `progress.ts` with a test that loads an old save.
+4. Release it per [VERSIONING.md](VERSIONING.md): the 2026 edition is `v1.0.0`; the 2027
+   edition, a breaking curriculum change, is `v2.0.0`.
 
 Drills run for real in the browser via [Pyodide](https://pyodide.org) — the same
 `conftest.py` and the same pytest suites, compiled to WASM. Two consequences:

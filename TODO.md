@@ -21,6 +21,8 @@ This file tracks tasks, improvements, and features planned for upcoming updates 
       `verify:browser` (Firefox e2e)
 - [x] CI: `.github/workflows/deploy-site.yml` — type-check, test, build, verify drills, deploy
       to GitHub Pages
+- [x] 2026 edition — `phases/the-role.md` and the `/role` page, every part of every phase
+      trackable, Part A test-out, and the year-end sprint planner on the dashboard
 
 ## Upcoming Tasks
 
@@ -52,6 +54,8 @@ This file tracks tasks, improvements, and features planned for upcoming updates 
 
 - [ ] Keep `CHANGELOG.md` updated as each phase's content/projects land
 - [ ] Keep README **Progress** checklist and **Project code** links in sync with `projects/`
+- [ ] Tag `v1.0.0` for the 2026 edition once it is merged (see `CHANGELOG.md`)
+- [ ] Cut the 2027 edition as a new release — the steps are in `AGENTS.md` under "Editions"
 
 <!-- Example Task List Format
 
