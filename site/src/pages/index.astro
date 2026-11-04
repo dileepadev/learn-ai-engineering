@@ -14,7 +14,10 @@ const phases: PhaseMeta[] = phaseEntries
     goal: entry.data.goal,
     youBuild: entry.data.youBuild,
     effort: entry.data.effort,
-    criteriaCount: entry.data.exitCriteria.length,
+    counts: {
+      criteria: entry.data.exitCriteria.length,
+      parts: entry.data.parts.map((part) => part.key),
+    },
   }));
 ---
 

@@ -15,6 +15,12 @@ No backend, no database, no accounts. Everything runs in the browser.
   You get the real assertion, the real traceback, in about a second.
 - **Comprehension checks** between each lesson and its drills, aimed at the specific
   misconceptions the lesson warns about.
+- **Every part is trackable.** Each skill bullet, project step, and resource in a phase doc
+  renders with a checkbox (extracted at build time by `src/lib/parts.ts`), sections have a
+  "mark section done" control, and Part A topics can be tested out.
+- **A year-end sprint planner** on the dashboard: days left in the edition, hours left, the
+  pace it takes, and a finish-by date per phase (`src/lib/sprint.ts`). The edition and its
+  deadline live in `src/lib/edition.ts`.
 - **Progress that persists**, in `localStorage`, with export/import so it is not trapped in
   one browser.
 

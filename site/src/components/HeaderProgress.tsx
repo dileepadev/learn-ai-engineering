@@ -1,28 +1,29 @@
 import { useProgress, useHydrated } from "../lib/useProgress.ts";
-import { overallProgress } from "../lib/curriculum.ts";
+import { overallProgress, type PhaseCounts } from "../lib/curriculum.ts";
 
 interface HeaderProgressProps {
-  criteriaCounts: Record<string, number>;
+  phaseCounts: Record<string, PhaseCounts>;
 }
 
 /**
  * A compact overall-progress readout, always visible in the header.
  *
  * Its job is to answer "how much progress have I made?" from any page without a trip back
- * to the dashboard. Hidden on narrow screens, where the space belongs to navigation.
+ * to the dashboard. Hidden below `md`, where the space belongs to navigation: at 640px the
+ * site name, four links, and this gauge do not fit on one row.
  */
-export function HeaderProgress({ criteriaCounts }: HeaderProgressProps) {
+export function HeaderProgress({ phaseCounts }: HeaderProgressProps) {
   const state = useProgress();
   const hydrated = useHydrated();
-  const { percent, done, total } = overallProgress(state, criteriaCounts);
+  const { percent, done, total } = overallProgress(state, phaseCounts);
 
   if (!hydrated) {
-    return <div className="ml-2 hidden h-8 w-28 animate-pulse rounded-md bg-sunken sm:block" />;
+    return <div className="ml-2 hidden h-8 w-28 animate-pulse rounded-md bg-sunken md:block" />;
   }
 
   return (
     <div
-      className="ml-2 hidden items-center gap-2.5 rounded-md border border-line px-3 py-1.5 sm:flex"
+      className="ml-2 hidden items-center gap-2.5 rounded-md border border-line px-3 py-1.5 md:flex"
       title={`${done} of ${total} items complete across the roadmap`}
     >
       <div className="h-1.5 w-16 overflow-hidden rounded-full bg-sunken">

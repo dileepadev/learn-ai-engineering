@@ -2,6 +2,19 @@
 import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import { href } from "../lib/href.ts";
+import { EDITION, NEXT_EDITION } from "../lib/edition.ts";
+
+// Mirrors the README's "What the 2026 market asks for" table; the sources behind every
+// figure are on the /role page (`phases/the-role.md`).
+const marketRows = [
+  { skill: "Python", share: "59–82.5%", phase: "Phase 1" },
+  { skill: "LLMs / LLM integration", share: "63% / 25.4%", phase: "Phases 2–3" },
+  { skill: "Evals", share: "56%", phase: "Phase 6" },
+  { skill: "Agents", share: "14.4–50%", phase: "Phase 5" },
+  { skill: "RAG", share: "26–35.9%", phase: "Phase 4" },
+  { skill: "AWS · Docker · CI/CD", share: "40.1% · 31.0% · 29.3%", phase: "Phases 1, 7" },
+  { skill: "Fine-tuning", share: "8.5–26%", phase: "Phase 7, deliberately brief" },
+];
 
 const operatingPrinciples = [
   {
@@ -100,7 +113,7 @@ const stackCategories = [
     <header class="space-y-4 text-center sm:text-left">
       <div class="inline-flex items-center gap-2 rounded-full border border-line bg-sunken px-3 py-1 text-xs font-semibold uppercase tracking-wider text-muted">
         <span class="size-2 rounded-full bg-accent"></span>
-        Build-First Curriculum
+        Build-First Curriculum · {EDITION} edition
       </div>
       <h1 class="text-3xl sm:text-4xl font-extrabold tracking-tight text-ink">
         About Learn AI Engineering
@@ -155,6 +168,40 @@ const stackCategories = [
             Prior ML theory is not required; Python is taught from Phase 1 scoped to AI engineering.
           </p>
         </div>
+      </div>
+    </section>
+
+    <!-- What the market asks for -->
+    <section class="space-y-6">
+      <div class="space-y-1">
+        <h2 class="text-2xl font-bold tracking-tight text-ink">
+          What the {EDITION} Market Asks For
+        </h2>
+        <p class="text-sm text-muted">
+          The phases are weighted the way {EDITION} AI Engineer job postings are.
+          <a href={href("/role")} class="text-accent hover:underline">The role</a> has the full
+          research — pay, interviews, titles — with every figure linked to its source.
+        </p>
+      </div>
+      <div class="overflow-x-auto rounded-xl border border-line bg-raised shadow-xs">
+        <table class="w-full text-left text-sm">
+          <thead class="border-b border-line text-xs uppercase tracking-wide text-muted">
+            <tr>
+              <th scope="col" class="px-4 py-3 font-semibold">Skill</th>
+              <th scope="col" class="px-4 py-3 font-semibold">Share of postings</th>
+              <th scope="col" class="px-4 py-3 font-semibold">Taught in</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-line">
+            {marketRows.map((row) => (
+              <tr>
+                <td class="px-4 py-2.5 font-medium text-ink">{row.skill}</td>
+                <td class="px-4 py-2.5 tabular-nums text-muted">{row.share}</td>
+                <td class="px-4 py-2.5 text-muted">{row.phase}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </section>
 
@@ -289,6 +336,11 @@ const stackCategories = [
         <h3 class="font-bold text-ink text-base">Rough Effort</h3>
         <p class="text-xs text-muted leading-relaxed">
           Phase 1 runs <strong>30–50 hours</strong> if Python is new (a fraction of that as a refresher); Phases 2–3 run 15–25 each, Phases 4–7 run 25–40 each, and the capstone is as big as you make it. At ~10 hours/week, that's roughly six months to a defensible, production-grade skillset.
+        </p>
+        <p class="text-xs text-muted leading-relaxed">
+          The {EDITION} edition is built to be finished by <strong>31 December {EDITION}</strong>. The
+          dashboard's sprint planner turns what you have left into the hours a week it takes, and
+          the {NEXT_EDITION} edition will be a new release with a refreshed curriculum.
         </p>
       </div>
 

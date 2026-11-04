@@ -10,12 +10,21 @@ const exitCriterion = z.object({
   text: z.string(),
 });
 
+/** One trackable part of a phase doc — see `lib/parts.ts`. */
+const part = z.object({
+  key: z.string(),
+  section: z.string(),
+  sectionTitle: z.string(),
+  text: z.string(),
+});
+
 /** The eight roadmap docs, `phases/NN-name.md`. */
 const phases = defineCollection({
   loader: curriculumLoader({
     dir: "phases",
     match: /^\d{2}-.+\.md$/,
     hoistCriteria: true,
+    trackParts: true,
   }),
   schema: z.object({
     title: z.string(),
@@ -26,6 +35,27 @@ const phases = defineCollection({
     exitCriteria: z.array(exitCriterion),
     /** The doc's own wording: "Exit criteria" everywhere except the capstone's "Done means". */
     exitCriteriaHeading: z.string().default("Exit criteria"),
+    /** Every skill bullet, project step, and resource, in document order. */
+    parts: z.array(part).default([]),
+    sourcePath: z.string(),
+  }),
+});
+
+/**
+ * `phases/the-role.md` — the 2026 research on the AI Engineer role, rendered at `/role`.
+ *
+ * It lives in `phases/` so it rides the same loader, link rewriting, and deploy trigger as
+ * the curriculum, but its name has no `NN-` prefix, so the `phases` collection above never
+ * mistakes it for a ninth phase. It is reference material: nothing on it is tracked.
+ */
+const role = defineCollection({
+  loader: curriculumLoader({
+    dir: "phases",
+    match: /^the-role\.md$/,
+    hoistCriteria: false,
+  }),
+  schema: z.object({
+    title: z.string(),
     sourcePath: z.string(),
   }),
 });
@@ -93,4 +123,4 @@ const checks = defineCollection({
   }),
 });
 
-export const collections = { phases, lessons, checks };
+export const collections = { phases, lessons, role, checks };

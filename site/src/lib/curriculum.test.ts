@@ -1,6 +1,7 @@
 import { beforeEach, describe, expect, it } from "vitest";
 import {
   criterionKey,
+  describeBreakdown,
   exerciseKey,
   nextUp,
   overallProgress,
@@ -10,6 +11,7 @@ import {
   topics,
   TOTAL_EXERCISES,
   workableExercises,
+  type PhaseCounts,
 } from "./curriculum.ts";
 import { emptyState, type ProgressState } from "./progress.ts";
 
@@ -105,35 +107,88 @@ describe("topicProgress", () => {
     const topic = topics.find((candidate) => candidate.number === "11")!;
     expect(topicProgress(topic, withTopicsComplete(topic.id)).status).toBe("complete");
   });
+
+  it("counts a tested-out topic as complete, and says so", () => {
+    const topic = topics[3]!;
+    state.testedOut[topic.id] = { at: new Date().toISOString() };
+    expect(topicProgress(topic, state)).toMatchObject({
+      done: topic.exerciseCount,
+      percent: 100,
+      status: "complete",
+      testedOut: true,
+    });
+  });
+
+  it("never shows 100% for unfinished work", () => {
+    // 83 of 84 rounds to 99%, not 100%.
+    const topic = topics.find((candidate) => candidate.exerciseCount > 1)!;
+    const [first] = workableExercises(topic);
+    state.exercises[exerciseKey(topic.id, first!.name)] = { passed: true };
+    expect(topicProgress(topic, state).percent).toBeLessThan(100);
+  });
 });
 
 describe("phaseProgress", () => {
-  it("scores Phase 1 on exercises", () => {
-    const progress = phaseProgress("01-foundations", 8, state);
-    expect(progress.unit).toBe("exercises");
-    expect(progress.total).toBe(TOTAL_EXERCISES);
+  const counts = (criteria: number, parts: string[] = []): PhaseCounts => ({ criteria, parts });
+
+  it("scores Phase 1 on drills, parts, and criteria together", () => {
+    const progress = phaseProgress("01-foundations", counts(8, ["p1", "p2"]), state);
+    expect(progress.total).toBe(TOTAL_EXERCISES + 8 + 2);
+    expect(progress.breakdown.drills).toEqual({ done: 0, total: TOTAL_EXERCISES });
   });
 
-  it("scores other phases on their exit criteria", () => {
+  it("scores other phases on parts plus exit criteria", () => {
     state.criteria[criterionKey("02-llms-and-model-apis", 0)] = true;
     state.criteria[criterionKey("02-llms-and-model-apis", 3)] = true;
-    const progress = phaseProgress("02-llms-and-model-apis", 5, state);
-    expect(progress).toMatchObject({ done: 2, total: 5, percent: 40, unit: "criteria" });
+    state.parts.a = true;
+    const progress = phaseProgress("02-llms-and-model-apis", counts(5, ["a", "b", "c"]), state);
+    expect(progress).toMatchObject({ done: 3, total: 8, percent: 38 });
+    expect(progress.breakdown).toEqual({
+      parts: { done: 1, total: 3 },
+      criteria: { done: 2, total: 5 },
+    });
+    expect(describeBreakdown(progress)).toBe("1/3 parts · 2/5 criteria");
   });
 
-  it("is complete only when every criterion is ticked", () => {
+  it("ignores ticks for parts that no longer exist", () => {
+    // A reworded bullet retires its key; the old tick must not inflate the new total.
+    state.parts["retired-key"] = true;
+    expect(phaseProgress("02-x", counts(0, ["current-key"]), state).done).toBe(0);
+  });
+
+  it("is complete only when every part and criterion is ticked", () => {
     for (let i = 0; i < 5; i += 1) state.criteria[criterionKey("02-x", i)] = true;
-    expect(phaseProgress("02-x", 5, state).status).toBe("complete");
+    expect(phaseProgress("02-x", counts(5, ["a"]), state).status).toBe("in-progress");
+    state.parts.a = true;
+    expect(phaseProgress("02-x", counts(5, ["a"]), state).status).toBe("complete");
   });
 
-  it("does not call a phase with no criteria complete", () => {
-    expect(phaseProgress("07-production", 0, state).status).toBe("upcoming");
+  it("does not call an empty phase complete", () => {
+    expect(phaseProgress("07-production", counts(0), state).status).toBe("upcoming");
+  });
+
+  it("counts tested-out Part A topics toward Phase 1", () => {
+    for (const topic of topics) state.testedOut[topic.id] = { at: new Date().toISOString() };
+    const progress = phaseProgress("01-foundations", counts(0), state);
+    expect(progress.breakdown.drills).toEqual({ done: TOTAL_EXERCISES, total: TOTAL_EXERCISES });
+    expect(progress.status).toBe("complete");
   });
 });
 
 describe("nextUp", () => {
   const slugs = ["01-foundations", "02-llms-and-model-apis"];
-  const counts = { "01-foundations": 8, "02-llms-and-model-apis": 5 };
+  const counts: Record<string, PhaseCounts> = {
+    "01-foundations": { criteria: 8, parts: ["p1"] },
+    "02-llms-and-model-apis": { criteria: 5, parts: ["q1", "q2"] },
+  };
+
+  /** Everything in Phase 1 finished: every topic, its part, and its criteria. */
+  function withPhaseOneDone(): ProgressState {
+    const done = withTopicsComplete(...topics.map((topic) => topic.id));
+    done.parts.p1 = true;
+    for (let i = 0; i < 8; i += 1) done.criteria[criterionKey("01-foundations", i)] = true;
+    return done;
+  }
 
   it("points at the first topic for a brand-new learner", () => {
     const next = nextUp(state, slugs, counts);
@@ -152,14 +207,29 @@ describe("nextUp", () => {
     expect(nextUp(completed, slugs, counts)?.href).toBe("/learn/01-core-mechanics");
   });
 
-  it("moves on to the next phase once every topic is done", () => {
+  it("skips topics the learner tested out of", () => {
+    state.testedOut["00_python_basics"] = { at: new Date().toISOString() };
+    expect(nextUp(state, slugs, counts)?.href).toBe("/learn/01-core-mechanics");
+  });
+
+  it("sends you back to Phase 1 while its own parts and criteria remain", () => {
     const done = withTopicsComplete(...topics.map((topic) => topic.id));
-    const next = nextUp(done, slugs, counts);
+    expect(nextUp(done, slugs, counts)).toMatchObject({
+      kind: "phase",
+      href: "/phases/01-foundations",
+    });
+  });
+
+  it("moves on to the next phase once Phase 1 is complete", () => {
+    const next = nextUp(withPhaseOneDone(), slugs, counts);
     expect(next).toMatchObject({ kind: "phase", href: "/phases/02-llms-and-model-apis" });
+    expect(next?.detail).toBe("7 of 7 items left");
   });
 
   it("returns null when everything is complete", () => {
-    const done = withTopicsComplete(...topics.map((topic) => topic.id));
+    const done = withPhaseOneDone();
+    done.parts.q1 = true;
+    done.parts.q2 = true;
     for (let i = 0; i < 5; i += 1) {
       done.criteria[criterionKey("02-llms-and-model-apis", i)] = true;
     }
@@ -168,19 +238,27 @@ describe("nextUp", () => {
 });
 
 describe("overallProgress", () => {
-  const counts = { "01-foundations": 8, "02-llms-and-model-apis": 5 };
+  const counts: Record<string, PhaseCounts> = {
+    "01-foundations": { criteria: 8, parts: ["p1"] },
+    "02-llms-and-model-apis": { criteria: 5, parts: ["q1"] },
+  };
 
-  it("pools exercises and criteria", () => {
+  it("pools drills, parts, and criteria", () => {
     expect(overallProgress(state, counts)).toEqual({
       done: 0,
-      total: TOTAL_EXERCISES + 5,
+      total: TOTAL_EXERCISES + 8 + 1 + 5 + 1,
       percent: 0,
     });
   });
 
-  it("reaches 100% only when both halves are complete", () => {
+  it("reaches 100% only when everything is complete", () => {
     const done = withTopicsComplete(...topics.map((topic) => topic.id));
-    for (let i = 0; i < 5; i += 1) done.criteria[criterionKey("02-llms-and-model-apis", i)] = true;
+    done.parts.p1 = true;
+    done.parts.q1 = true;
+    for (let i = 0; i < 8; i += 1) done.criteria[criterionKey("01-foundations", i)] = true;
+    for (let i = 0; i < 4; i += 1) done.criteria[criterionKey("02-llms-and-model-apis", i)] = true;
+    expect(overallProgress(done, counts).percent).toBeLessThan(100);
+    done.criteria[criterionKey("02-llms-and-model-apis", 4)] = true;
     expect(overallProgress(done, counts).percent).toBe(100);
   });
 

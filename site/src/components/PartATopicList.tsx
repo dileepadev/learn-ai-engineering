@@ -55,7 +55,7 @@ export function PartATopicList() {
                 </span>
 
                 <span className="shrink-0 text-xs tabular-nums text-faint">
-                  {progress.done}/{progress.total}
+                  {progress.testedOut ? "tested out" : `${progress.done}/${progress.total}`}
                 </span>
               </a>
             </li>

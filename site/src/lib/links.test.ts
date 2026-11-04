@@ -18,6 +18,10 @@ describe("routeForRepoPath", () => {
     expect(routeForRepoPath("phases/01-foundations/part-a/README.md")).toBe("/phases/01-foundations");
   });
 
+  it("maps the role research doc to its own page", () => {
+    expect(routeForRepoPath("phases/the-role.md")).toBe("/role");
+  });
+
   it("has no route for source files", () => {
     expect(routeForRepoPath("phases/01-foundations/part-a/drills/d01_core_mechanics.py")).toBeNull();
   });

@@ -63,6 +63,9 @@ export function routeForRepoPath(repoPath: string): string | null {
   // Part A's own index page is folded into the Phase 1 overview.
   if (repoPath === "phases/01-foundations/part-a/README.md") return "/phases/01-foundations";
 
+  // The research behind the roadmap, rendered on its own page (see `pages/role.astro`).
+  if (repoPath === "phases/the-role.md") return "/role";
+
   if (repoPath === "README.md") return "/";
 
   return null;

@@ -73,15 +73,33 @@ export function criterionKey(phaseSlug: string, index_: number): string {
 
 export type Status = "complete" | "in-progress" | "upcoming";
 
+/**
+ * A rounded percentage that never claims 100% for unfinished work.
+ *
+ * Plain `Math.round` turns 199/200 into "100%", which reads as done when it is not. A bar
+ * only reaches 100 when every item is.
+ */
+function percentOf(done: number, total: number): number {
+  if (total === 0) return 0;
+  if (done >= total) return 100;
+  return Math.min(99, Math.round((done / total) * 100));
+}
+
 export interface TopicProgress {
   done: number;
   total: number;
   percent: number;
   status: Status;
+  /** True when the learner marked the topic as already known instead of passing it. */
+  testedOut: boolean;
 }
 
 /**
  * How far through a topic the learner is.
+ *
+ * A topic the learner has *tested out of* counts as complete — that is the point of the
+ * option for someone who already knows the material — but the result says so, so the UI
+ * can show "tested out" rather than "passed".
  *
  * @param topic - The topic to score.
  * @param state - The current progress snapshot.
@@ -89,6 +107,10 @@ export interface TopicProgress {
  */
 export function topicProgress(topic: TopicSummary, state: ProgressState): TopicProgress {
   const total = topic.exerciseCount;
+
+  if (state.testedOut[topic.id]) {
+    return { done: total, total, percent: percentOf(total, total), status: "complete", testedOut: true };
+  }
 
   const done = topic.graded
     ? workableExercises(topic).filter(
@@ -103,9 +125,29 @@ export function topicProgress(topic: TopicSummary, state: ProgressState): TopicP
   return {
     done,
     total,
-    percent: total === 0 ? 0 : Math.round((done / total) * 100),
+    percent: percentOf(done, total),
     status: done === total && total > 0 ? "complete" : started ? "in-progress" : "upcoming",
+    testedOut: false,
   };
+}
+
+/**
+ * What a phase contains, as the pages know it at build time.
+ *
+ * `parts` is the list of part keys rather than a count, because a count cannot tell a
+ * current part from a *retired* one: rewording a bullet changes its key (see `parts.ts`),
+ * and an old tick still sitting in storage must not count toward the new total.
+ */
+export interface PhaseCounts {
+  criteria: number;
+  parts: readonly string[];
+}
+
+export const NO_COUNTS: PhaseCounts = { criteria: 0, parts: [] };
+
+export interface Tally {
+  done: number;
+  total: number;
 }
 
 export interface PhaseProgress {
@@ -113,50 +155,59 @@ export interface PhaseProgress {
   total: number;
   percent: number;
   status: Status;
-  /** What the denominator counts, for the label under the bar. */
-  unit: "exercises" | "criteria";
+  /** The pieces the headline number pools, for the label under each bar. */
+  breakdown: { parts: Tally; criteria: Tally; drills?: Tally };
 }
 
 /**
  * How far through a phase the learner is.
  *
- * Phase 1 is scored on its 84 Part A exercises, because that is the real work and it can
- * be measured objectively. Phases 2-8 have no lessons yet, so they are scored on their
- * exit criteria — self-assessed, but the only honest signal available for them.
+ * Every phase is scored on its **parts** (each skill bullet, project step, and resource)
+ * plus its **exit criteria**. Phase 1 also counts its Part A **drills**, where a tested-out
+ * topic counts as done. These are pooled into one number: they are not equal units of work
+ * and the breakdown is shown alongside so the headline never has to pretend they are.
  */
 export function phaseProgress(
   phaseSlug: string,
-  criteriaCount: number,
+  counts: PhaseCounts,
   state: ProgressState,
 ): PhaseProgress {
-  if (phaseSlug === PHASE_WITH_LESSONS) {
-    const done = topics.reduce((sum, topic) => sum + topicProgress(topic, state).done, 0);
-    const total = TOTAL_EXERCISES;
-    return {
-      done,
-      total,
-      percent: total === 0 ? 0 : Math.round((done / total) * 100),
-      status: done === total ? "complete" : done > 0 ? "in-progress" : "upcoming",
-      unit: "exercises",
-    };
-  }
+  const parts: Tally = {
+    done: counts.parts.filter((key) => state.parts[key]).length,
+    total: counts.parts.length,
+  };
+  const criteria: Tally = {
+    done: Array.from({ length: counts.criteria }).filter(
+      (_, i) => state.criteria[criterionKey(phaseSlug, i)],
+    ).length,
+    total: counts.criteria,
+  };
+  const drills: Tally | undefined =
+    phaseSlug === PHASE_WITH_LESSONS
+      ? {
+          done: topics.reduce((sum, topic) => sum + topicProgress(topic, state).done, 0),
+          total: TOTAL_EXERCISES,
+        }
+      : undefined;
 
-  const done = Array.from({ length: criteriaCount }).filter(
-    (_, i) => state.criteria[criterionKey(phaseSlug, i)],
-  ).length;
+  const done = parts.done + criteria.done + (drills?.done ?? 0);
+  const total = parts.total + criteria.total + (drills?.total ?? 0);
 
   return {
     done,
-    total: criteriaCount,
-    percent: criteriaCount === 0 ? 0 : Math.round((done / criteriaCount) * 100),
-    status:
-      criteriaCount > 0 && done === criteriaCount
-        ? "complete"
-        : done > 0
-          ? "in-progress"
-          : "upcoming",
-    unit: "criteria",
+    total,
+    percent: percentOf(done, total),
+    status: total > 0 && done === total ? "complete" : done > 0 ? "in-progress" : "upcoming",
+    breakdown: drills ? { parts, criteria, drills } : { parts, criteria },
   };
+}
+
+/** "12/71 parts · 2/5 criteria" — the label under a phase's bar. */
+export function describeBreakdown(progress: PhaseProgress): string {
+  const { parts, criteria, drills } = progress.breakdown;
+  const pieces = [`${parts.done}/${parts.total} parts`, `${criteria.done}/${criteria.total} criteria`];
+  if (drills) pieces.unshift(`${drills.done}/${drills.total} drills`);
+  return pieces.join(" · ");
 }
 
 export interface NextUp {
@@ -170,14 +221,15 @@ export interface NextUp {
  * The single most useful thing to do next.
  *
  * The rule, in order: finish the topic you last touched; otherwise start the first topic
- * that is not complete; otherwise move on to the first unfinished phase. This is what
- * makes the dashboard a guide rather than a menu — there is always exactly one obvious
- * next action.
+ * that is not complete (tested-out topics count as complete); otherwise open the first
+ * phase that still has unticked parts or criteria — Phase 1 included, since its own parts
+ * and criteria outlive its drills. This is what makes the dashboard a guide rather than a
+ * menu — there is always exactly one obvious next action.
  */
 export function nextUp(
   state: ProgressState,
   phaseSlugs: string[],
-  criteriaCounts: Record<string, number>,
+  counts: Record<string, PhaseCounts>,
 ): NextUp | null {
   const unfinished = topics.filter((topic) => topicProgress(topic, state).status !== "complete");
 
@@ -199,39 +251,42 @@ export function nextUp(
   }
 
   const nextPhase = phaseSlugs.find(
-    (slug) =>
-      slug !== PHASE_WITH_LESSONS &&
-      phaseProgress(slug, criteriaCounts[slug] ?? 0, state).status !== "complete",
+    (slug) => phaseProgress(slug, counts[slug] ?? NO_COUNTS, state).status !== "complete",
   );
   if (!nextPhase) return null;
 
+  const progress = phaseProgress(nextPhase, counts[nextPhase] ?? NO_COUNTS, state);
+  const left = progress.total - progress.done;
   return {
     kind: "phase",
     href: `/phases/${nextPhase}`,
     label: nextPhase.replace(/^\d{2}-/, "").replace(/-/g, " "),
-    detail: "Part A complete — on to the next phase",
+    detail:
+      nextPhase === PHASE_WITH_LESSONS
+        ? `Part A done — ${left} parts and criteria left in this phase`
+        : `${left} of ${progress.total} items left`,
   };
 }
 
 /**
  * Overall progress across the whole roadmap.
  *
- * Part A's exercises and the 47 exit criteria are pooled into one number. They are not
- * equivalent units of work and this does not pretend otherwise — it is a motivation
- * gauge, and the per-phase bars carry the honest detail.
+ * Every phase's parts, criteria, and (for Phase 1) drills, pooled into one number. They are
+ * not equivalent units of work and this does not pretend otherwise — it is a motivation
+ * gauge, and the per-phase breakdowns carry the honest detail.
  */
 export function overallProgress(
   state: ProgressState,
-  criteriaCounts: Record<string, number>,
+  counts: Record<string, PhaseCounts>,
 ): { done: number; total: number; percent: number } {
   let done = 0;
   let total = 0;
 
-  for (const [slug, count] of Object.entries(criteriaCounts)) {
-    const progress = phaseProgress(slug, count, state);
+  for (const [slug, phaseCounts] of Object.entries(counts)) {
+    const progress = phaseProgress(slug, phaseCounts, state);
     done += progress.done;
     total += progress.total;
   }
 
-  return { done, total, percent: total === 0 ? 0 : Math.round((done / total) * 100) };
+  return { done, total, percent: percentOf(done, total) };
 }

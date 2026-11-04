@@ -1,12 +1,16 @@
 import { href } from "../lib/href.ts";
 import { useProgress, useHydrated } from "../lib/useProgress.ts";
 import { ProgressRing, ProgressBar } from "./ProgressRing.tsx";
+import { SprintPanel } from "./SprintPanel.tsx";
+import { EDITION } from "../lib/edition.ts";
 import {
+  describeBreakdown,
   nextUp,
   overallProgress,
   phaseProgress,
   topicProgress,
   topics,
+  type PhaseCounts,
   type Status,
 } from "../lib/curriculum.ts";
 
@@ -17,7 +21,7 @@ export interface PhaseMeta {
   goal?: string;
   youBuild?: string;
   effort?: string;
-  criteriaCount: number;
+  counts: PhaseCounts;
 }
 
 interface DashboardProps {
@@ -71,14 +75,12 @@ export function Dashboard({ phases }: DashboardProps) {
   const state = useProgress();
   const hydrated = useHydrated();
 
-  const criteriaCounts = Object.fromEntries(
-    phases.map((phase) => [phase.slug, phase.criteriaCount]),
-  );
-  const overall = overallProgress(state, criteriaCounts);
+  const counts = Object.fromEntries(phases.map((phase) => [phase.slug, phase.counts]));
+  const overall = overallProgress(state, counts);
   const next = nextUp(
     state,
     phases.map((phase) => phase.slug),
-    criteriaCounts,
+    counts,
   );
 
   const started = overall.done > 0;
@@ -88,14 +90,17 @@ export function Dashboard({ phases }: DashboardProps) {
       {/* ---- Hero: what am I learning, and how far along am I ---- */}
       <section className="flex flex-col-reverse items-start gap-8 sm:flex-row sm:items-center sm:justify-between">
         <div className="max-w-2xl">
-          <p className="text-sm font-medium text-accent">Interactive roadmap</p>
+          <p className="text-sm font-medium text-accent">
+            {EDITION} edition · finish by 31 December
+          </p>
           <h1 className="mt-2 text-4xl font-bold tracking-tight sm:text-5xl">
             Learn AI engineering by building
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-muted">
-            Eight phases, from Python fundamentals to a deployed capstone. Phase 1 runs
-            entirely in your browser — read the lesson, write the code, and the real pytest
-            suite grades it here. No setup, no API keys.
+            Eight phases, from Python fundamentals to a deployed capstone. Every skill,
+            project step, and resource is a part you can tick, and Phase 1’s drills run in
+            your browser against the real pytest suite. Already know something? Tick it or
+            test out, and the plan below moves.
           </p>
         </div>
 
@@ -141,6 +146,9 @@ export function Dashboard({ phases }: DashboardProps) {
         </div>
       )}
 
+      {/* ---- The year-end plan: how much is left, and the pace it takes ---- */}
+      <SprintPanel phases={phases} />
+
       {/* ---- Phase 1 topic strip: what have I done, what remains ---- */}
       <section className="mt-14">
         <div className="flex items-baseline justify-between gap-4">
@@ -184,7 +192,7 @@ export function Dashboard({ phases }: DashboardProps) {
                   <ProgressBar percent={progress.percent} status={progress.status} />
                   <div className="flex items-center justify-between text-xs text-faint">
                     <span className="tabular-nums">
-                      {progress.done}/{progress.total} drills
+                      {progress.testedOut ? "tested out" : `${progress.done}/${progress.total} drills`}
                     </span>
                     {topic.graded ? null : <span>self-assessed</span>}
                   </div>
@@ -199,12 +207,12 @@ export function Dashboard({ phases }: DashboardProps) {
       <section className="mt-16">
         <h2 className="text-xl font-semibold tracking-tight">The roadmap</h2>
         <p className="mt-1 text-sm text-muted">
-          Phases 2–8 track their exit criteria. Lessons appear as they are written.
+          Every phase tracks its parts and exit criteria; Phase 1 also counts its drills.
         </p>
 
         <ul className="mt-5 grid gap-4 md:grid-cols-2">
           {phases.map((phase) => {
-            const progress = phaseProgress(phase.slug, phase.criteriaCount, state);
+            const progress = phaseProgress(phase.slug, phase.counts, state);
             return (
               <li key={phase.slug}>
                 <a
@@ -228,9 +236,7 @@ export function Dashboard({ phases }: DashboardProps) {
                   <div className="mt-auto pt-4">
                     <ProgressBar percent={progress.percent} status={progress.status} />
                     <div className="mt-2 flex items-center justify-between gap-3 text-xs text-faint">
-                      <span className="tabular-nums">
-                        {progress.done}/{progress.total} {progress.unit}
-                      </span>
+                      <span className="tabular-nums">{describeBreakdown(progress)}</span>
                       {shortEffort(phase.effort) ? (
                         <span className="shrink-0">{shortEffort(phase.effort)}</span>
                       ) : null}

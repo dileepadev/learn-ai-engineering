@@ -10,15 +10,29 @@ import { topics, topicProgress, TOTAL_EXERCISES } from "../lib/curriculum.ts";
  * localStorage and a cleared cache takes it with it. A download button is the whole
  * backup story, so it needs to be obvious and it needs to round-trip exactly.
  */
-export function ProgressManager() {
+interface ProgressManagerProps {
+  /** Every exit criterion across the eight phases, counted at build time. */
+  criteriaTotal: number;
+  /** Every current part key, so retired keys left in storage are not counted. */
+  partKeys: string[];
+}
+
+export function ProgressManager({ criteriaTotal, partKeys }: ProgressManagerProps) {
   const state = useProgress();
   const hydrated = useHydrated();
   const fileInput = useRef<HTMLInputElement | null>(null);
   const [message, setMessage] = useState<{ tone: "ok" | "bad"; text: string } | null>(null);
   const [confirmingReset, setConfirmingReset] = useState(false);
 
-  const exercisesDone = topics.reduce((sum, topic) => sum + topicProgress(topic, state).done, 0);
+  // "Passed" means passed: a tested-out topic counts toward progress elsewhere, but its
+  // drills were never run, so they are not reported here as passed.
+  const exercisesDone = topics.reduce((sum, topic) => {
+    const progress = topicProgress(topic, state);
+    return progress.testedOut ? sum : sum + progress.done;
+  }, 0);
+  const testedOutCount = topics.filter((topic) => state.testedOut[topic.id]).length;
   const criteriaDone = Object.keys(state.criteria).length;
+  const partsDone = partKeys.filter((key) => state.parts[key]).length;
 
   const download = (): void => {
     const blob = new Blob([exportState()], { type: "application/json" });
@@ -62,7 +76,21 @@ export function ProgressManager() {
           <dt className="text-sm text-muted">Exit criteria ticked</dt>
           <dd className="mt-1 text-3xl font-semibold tabular-nums">
             {hydrated ? criteriaDone : "—"}
-            <span className="text-lg font-normal text-faint"> / 47</span>
+            <span className="text-lg font-normal text-faint"> / {criteriaTotal}</span>
+          </dd>
+        </div>
+        <div className="rounded-xl border border-line bg-raised p-5">
+          <dt className="text-sm text-muted">Parts ticked</dt>
+          <dd className="mt-1 text-3xl font-semibold tabular-nums">
+            {hydrated ? partsDone : "—"}
+            <span className="text-lg font-normal text-faint"> / {partKeys.length}</span>
+          </dd>
+        </div>
+        <div className="rounded-xl border border-line bg-raised p-5">
+          <dt className="text-sm text-muted">Part A topics tested out</dt>
+          <dd className="mt-1 text-3xl font-semibold tabular-nums">
+            {hydrated ? testedOutCount : "—"}
+            <span className="text-lg font-normal text-faint"> / {topics.length}</span>
           </dd>
         </div>
       </dl>

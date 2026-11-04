@@ -239,6 +239,41 @@
     color: var(--text-faint);
   }
 
+  /*
+   * Tracked parts. The loader turns every list item in a phase doc into a task item (see
+   * `lib/parts.ts`) and `PartsTracker` enables the boxes once the page hydrates. Bullets
+   * give way to the checkbox, but ordered lists keep their numbers: step order is part of
+   * a project spec. The hanging indent keeps wrapped lines aligned with the text, not the
+   * box.
+   */
+  .prose ul.contains-task-list {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .prose ul.contains-task-list > .task-list-item {
+    padding-left: 1.75rem;
+    text-indent: -1.75rem;
+  }
+
+  .prose .task-list-item > input[type="checkbox"] {
+    width: 1.05rem;
+    height: 1.05rem;
+    margin: 0 0.7rem 0 0;
+    vertical-align: -0.16em;
+    accent-color: var(--accent);
+  }
+
+  /* Before hydration the boxes are inert; say so rather than looking broken. */
+  .prose .task-list-item > input[type="checkbox"]:disabled {
+    opacity: 0.45;
+    cursor: default;
+  }
+
+  .prose .task-list-item:has(> input[type="checkbox"]:checked) {
+    color: var(--text-muted);
+  }
+
   .prose code {
     font-family: var(--font-mono);
     font-size: 0.855em;
@@ -246,7 +281,10 @@
     border: 1px solid var(--border);
     border-radius: 5px;
     padding: 0.1em 0.36em;
-    white-space: nowrap;
+    /* Inline code may wrap. `nowrap` here pushed long spans, such as the pytest commands in
+       Phase 1, past a phone's edge and scrolled the whole page sideways. `anywhere` only
+       splits a token that cannot fit on a line by itself. */
+    overflow-wrap: anywhere;
   }
 
   .prose pre {
@@ -266,6 +304,7 @@
     padding: 0;
     font-size: inherit;
     white-space: pre;
+    overflow-wrap: normal;
   }
 
   .prose blockquote {

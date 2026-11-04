@@ -9,6 +9,9 @@
  *  2. Their links are repo-relative and must be rewritten (see `links.ts`).
  *  3. Their `- [ ]` exit criteria and `**Goal:**` lines need to come out of the prose and
  *     become interactive UI — that is the difference between this site and a docs mirror.
+ *  4. Every remaining list item in a phase doc is a trackable *part* (see `parts.ts`): it
+ *     is turned into a task item before rendering, and its checkbox is stamped with a key
+ *     afterwards so the page can save it.
  *
  * Everything below reads the real files. Nothing is copied into the site, so editing a
  * lesson in `phases/` is the only way to change what the site shows.
@@ -19,6 +22,7 @@ import { readdir, readFile } from "node:fs/promises";
 import { basename, dirname, join, relative, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { rewriteLinks, splitTitle } from "./links.ts";
+import { annotateCheckboxes, extractParts, type Part } from "./parts.ts";
 
 const SITE_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 const REPO_ROOT = resolve(SITE_ROOT, "..");
@@ -90,6 +94,11 @@ interface MarkdownLoaderOptions {
   match: RegExp;
   /** Phase docs get their exit criteria hoisted; lessons have none. */
   hoistCriteria: boolean;
+  /**
+   * Turn every list item into a trackable part. Phase docs only: lessons are tracked by
+   * their drills, and reference pages like `the-role.md` are read, not worked through.
+   */
+  trackParts?: boolean;
 }
 
 /**
@@ -99,7 +108,7 @@ interface MarkdownLoaderOptions {
  * @returns An Astro content loader.
  */
 export function curriculumLoader(options: MarkdownLoaderOptions): Loader {
-  const { dir, match, hoistCriteria } = options;
+  const { dir, match, hoistCriteria, trackParts = false } = options;
 
   // Watchers survive across loader runs, so registering handlers on every `load` would
   // stack duplicates and re-process each edit N times.
@@ -125,15 +134,25 @@ export function curriculumLoader(options: MarkdownLoaderOptions): Loader {
           ? extractExitCriteria(withoutTitle)
           : { criteria: [] as ExitCriterion[], heading: "Exit criteria", body: withoutTitle };
 
-        const markdown = rewriteLinks(stripMeta(withoutCriteria), {
+        const id = file.replace(/\.md$/, "");
+        const prepared = rewriteLinks(stripMeta(withoutCriteria), {
           sourceDir: dir,
           base: config.base,
         });
 
-        const id = file.replace(/\.md$/, "");
+        // Parts are extracted *after* the criteria are hoisted, so the only task items
+        // left in the prose are the ones made here — that is what lets the checkboxes and
+        // the parts be paired up by position below.
+        const { markdown, parts } = trackParts
+          ? extractParts(prepared, id)
+          : { markdown: prepared, parts: [] as Part[] };
+
         const rendered = await renderMarkdown(markdown, {
           fileURL: new URL(`file://${absolutePath}`),
         });
+        if (trackParts) {
+          rendered.html = annotateCheckboxes(rendered.html, parts);
+        }
 
         const data = await parseData({
           id,
@@ -146,6 +165,7 @@ export function curriculumLoader(options: MarkdownLoaderOptions): Loader {
             effort: extractMeta(raw, "Effort"),
             exitCriteria: criteria,
             exitCriteriaHeading: criteriaHeading,
+            parts,
             sourcePath: `${dir}/${file}`,
           },
         });
