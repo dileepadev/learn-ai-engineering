@@ -12,7 +12,15 @@
  *    browser storage is easy to clear by accident and there is no server copy.
  *
  * Only raw facts live here. Percentages and statuses are computed in `curriculum.ts`.
+ *
+ * New fields are added **additively**: `reconcile` fills in a default for anything an
+ * older save lacks, so `SCHEMA_VERSION` only needs to move when an existing field changes
+ * meaning. That is why the 2026 edition's `parts`, `testedOut`, `plan`, and `edition`
+ * fields did not need a migration — a save from before them loads with every old tick
+ * intact and the new fields empty.
  */
+
+import { EDITION } from "./edition.ts";
 
 const STORAGE_KEY = "lai:progress:v1";
 const SCHEMA_VERSION = 1;
@@ -24,24 +32,63 @@ export interface ExerciseRecord {
   draft?: string;
 }
 
+/**
+ * Year-end planner settings — see `sprint.ts`.
+ *
+ * Only the learner's own input is stored. The plan itself is recomputed from today on every
+ * view, so it can never go stale: tick something and every date moves.
+ */
+export interface PlanSettings {
+  /** How many hours a week the learner says they have, or null if never set. */
+  hoursPerWeek: number | null;
+}
+
 export interface ProgressState {
   version: number;
+  /** The roadmap edition this progress was made against — see `edition.ts`. */
+  edition: string;
   exercises: Record<string, ExerciseRecord>;
   lessons: Record<string, { readAt: string }>;
   checks: Record<string, { correct: boolean; attempts: number }>;
   criteria: Record<string, boolean>;
+  /** Ticked parts of the phase docs, keyed by `Part.key` (see `parts.ts`). */
+  parts: Record<string, boolean>;
+  /**
+   * Part A topics the learner already knows, keyed by topic id. Counted as complete but
+   * kept apart from `exercises`, so "tested out" is never mistaken for "passed the tests".
+   */
+  testedOut: Record<string, { at: string }>;
   sqlDrills: Record<string, { done: boolean }>;
+  plan: PlanSettings;
   lastVisited?: { lessonSlug: string; at: string };
 }
 
 export function emptyState(): ProgressState {
   return {
     version: SCHEMA_VERSION,
+    edition: EDITION,
     exercises: {},
     lessons: {},
     checks: {},
     criteria: {},
+    parts: {},
+    testedOut: {},
     sqlDrills: {},
+    plan: { hoursPerWeek: null },
+  };
+}
+
+/** A week has 168 hours; anything outside 1–112 (16 a day) is a typo, not a plan. */
+export const MAX_HOURS_PER_WEEK = 112;
+
+function reconcilePlan(value: unknown): PlanSettings {
+  const plan = typeof value === "object" && value !== null ? (value as Partial<PlanSettings>) : {};
+  const hours = plan.hoursPerWeek;
+  return {
+    hoursPerWeek:
+      typeof hours === "number" && Number.isFinite(hours) && hours >= 1 && hours <= MAX_HOURS_PER_WEEK
+        ? Math.round(hours)
+        : null,
   };
 }
 
@@ -61,11 +108,17 @@ function reconcile(input: unknown): ProgressState {
 
   return {
     version: SCHEMA_VERSION,
+    // A save from before editions existed was made against the 2026 curriculum.
+    edition:
+      typeof candidate.edition === "string" && candidate.edition !== "" ? candidate.edition : EDITION,
     exercises: record<ExerciseRecord>(candidate.exercises),
     lessons: record<{ readAt: string }>(candidate.lessons),
     checks: record<{ correct: boolean; attempts: number }>(candidate.checks),
     criteria: record<boolean>(candidate.criteria),
+    parts: record<boolean>(candidate.parts),
+    testedOut: record<{ at: string }>(candidate.testedOut),
     sqlDrills: record<{ done: boolean }>(candidate.sqlDrills),
+    plan: reconcilePlan(candidate.plan),
     lastVisited: candidate.lastVisited,
   };
 }
@@ -204,6 +257,44 @@ export function setSqlDrillDone(key: string, done: boolean): void {
   commit({ ...state, sqlDrills });
 }
 
+/** Tick or untick one part. */
+export function setPart(key: string, done: boolean): void {
+  setParts([key], done);
+}
+
+/**
+ * Tick or untick many parts in one write — "mark this section done".
+ *
+ * One commit rather than a loop of `setPart` calls: every commit notifies every island on
+ * the page and rewrites localStorage, and a section can hold a dozen parts.
+ */
+export function setParts(keys: readonly string[], done: boolean): void {
+  const parts = { ...getState().parts };
+  for (const key of keys) {
+    if (done) parts[key] = true;
+    else delete parts[key];
+  }
+  commit({ ...state, parts });
+}
+
+/**
+ * Mark a Part A topic as already known — or take that back.
+ *
+ * Testing out counts the topic as complete for progress, but nothing is written to
+ * `exercises`: the drills stay unpassed, so undoing it restores exactly the previous state.
+ */
+export function setTestedOut(topicId: string, testedOut: boolean): void {
+  const next = { ...getState().testedOut };
+  if (testedOut) next[topicId] = { at: new Date().toISOString() };
+  else delete next[topicId];
+  commit({ ...state, testedOut: next });
+}
+
+/** Save the hours a week the learner can give the sprint; null (or nonsense) clears it. */
+export function setHoursPerWeek(hours: number | null): void {
+  commit({ ...getState(), plan: reconcilePlan({ hoursPerWeek: hours }) });
+}
+
 export function resetAll(): void {
   commit(emptyState());
 }
@@ -226,7 +317,7 @@ export function importState(json: string): boolean {
   try {
     const parsed: unknown = JSON.parse(json);
     if (typeof parsed !== "object" || parsed === null) return false;
-    if (!("exercises" in parsed) && !("criteria" in parsed)) return false;
+    if (!("exercises" in parsed) && !("criteria" in parsed) && !("parts" in parsed)) return false;
     commit(reconcile(parsed));
     return true;
   } catch {

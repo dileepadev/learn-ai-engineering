@@ -4,6 +4,7 @@ import Base from "../../layouts/Base.astro";
 import { ExitCriteria } from "../../components/ExitCriteria.tsx";
 import { PhaseHeader } from "../../components/PhaseHeader.tsx";
 import { PartATopicList } from "../../components/PartATopicList.tsx";
+import { PartsTracker } from "../../components/PartsTracker.tsx";
 import { PHASE_WITH_LESSONS } from "../../lib/curriculum.ts";
 
 export async function getStaticPaths() {
@@ -14,6 +15,16 @@ export async function getStaticPaths() {
 const { phase } = Astro.props;
 const { Content } = await render(phase);
 const hasLessons = phase.id === PHASE_WITH_LESSONS;
+const counts = {
+  criteria: phase.data.exitCriteria.length,
+  parts: phase.data.parts.map((part) => part.key),
+};
+// The island only needs what it pairs boxes with — not the text, which is in the HTML.
+const partRefs = phase.data.parts.map(({ key, section, sectionTitle }) => ({
+  key,
+  section,
+  sectionTitle,
+}));
 ---
 
 <Base title={`Phase ${phase.data.number} — ${phase.data.title}`} activePhase={phase.id}>
@@ -26,7 +37,7 @@ const hasLessons = phase.id === PHASE_WITH_LESSONS;
       goal={phase.data.goal}
       youBuild={phase.data.youBuild}
       effort={phase.data.effort}
-      criteriaCount={phase.data.exitCriteria.length}
+      counts={counts}
     />
 
     {hasLessons && <PartATopicList client:load />}
@@ -34,6 +45,9 @@ const hasLessons = phase.id === PHASE_WITH_LESSONS;
     <article class="prose mt-12">
       <Content />
     </article>
+
+    {/* Enhances the checkboxes already in the article above; renders only section controls. */}
+    <PartsTracker client:idle parts={partRefs} />
 
     {
       phase.data.exitCriteria.length > 0 && (

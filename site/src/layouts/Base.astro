@@ -4,6 +4,7 @@ import { href } from "../lib/href.ts";
 import { HeaderProgress } from "../components/HeaderProgress.tsx";
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
 import { getCollection } from "astro:content";
+import { EDITION, NEXT_EDITION } from "../lib/edition.ts";
 
 interface Props {
   title: string;
@@ -16,8 +17,12 @@ interface Props {
 const { title, description, activePhase, activePage } = Astro.props;
 
 const phases = await getCollection("phases");
-const criteriaCounts = Object.fromEntries(
-  phases.map((phase) => [phase.id, phase.data.exitCriteria.length]),
+// Part *keys*, not counts: a retired key left in storage must not count (see curriculum.ts).
+const phaseCounts = Object.fromEntries(
+  phases.map((phase) => [
+    phase.id,
+    { criteria: phase.data.exitCriteria.length, parts: phase.data.parts.map((part) => part.key) },
+  ]),
 );
 
 const fullTitle = title === "Learn AI Engineering" ? title : `${title} · Learn AI Engineering`;
@@ -71,14 +76,28 @@ const summary =
             class="grid size-8 place-items-center rounded-lg bg-accent text-sm font-bold text-accent-ink"
             aria-hidden="true">AI</span
           >
-          <span class="hidden sm:inline">Learn AI Engineering</span>
+          <!--
+            Below `sm` the logo is the only way home (the Dashboard link is dropped to make
+            room), so the name stays in the accessibility tree via sr-only instead of
+            display:none — otherwise the link would have no accessible name on phones.
+          -->
+          <span class="sr-only sm:not-sr-only">Learn AI Engineering</span>
+          <span
+            class="hidden rounded-full border border-line px-1.5 py-0.5 text-[0.7rem] font-medium leading-none text-muted lg:inline"
+            title={`The ${EDITION} edition of the roadmap`}>{EDITION}</span
+          >
         </a>
 
+        <!--
+          The header must fit one row from 320px up (WCAG 1.4.10 reflow), so it sheds pieces
+          by width: below sm the Dashboard link (the logo covers it) and tighter padding;
+          below md the progress gauge; below lg the edition badge.
+        -->
         <nav class="ml-auto flex items-center gap-1 text-sm" aria-label="Main">
           <a
             href={href("/")}
             class:list={[
-              "rounded-md px-3 py-1.5 transition-colors hover:bg-sunken hover:text-ink",
+              "hidden rounded-md px-2 py-1.5 transition-colors hover:bg-sunken hover:text-ink sm:block sm:px-3",
               activePage === "dashboard" ? "text-ink font-medium" : "text-muted",
             ]}
           >
@@ -87,22 +106,31 @@ const summary =
           <a
             href={href("/phases/01-foundations")}
             class:list={[
-              "rounded-md px-3 py-1.5 transition-colors hover:bg-sunken hover:text-ink",
+              "rounded-md px-2 py-1.5 transition-colors hover:bg-sunken hover:text-ink sm:px-3",
               activePhase ? "text-ink font-medium" : "text-muted",
             ]}
           >
             Phases
           </a>
           <a
+            href={href("/role")}
+            class:list={[
+              "rounded-md px-2 py-1.5 transition-colors hover:bg-sunken hover:text-ink sm:px-3",
+              activePage === "role" ? "text-ink font-medium" : "text-muted",
+            ]}
+          >
+            Role
+          </a>
+          <a
             href={href("/about")}
             class:list={[
-              "rounded-md px-3 py-1.5 transition-colors hover:bg-sunken hover:text-ink",
+              "rounded-md px-2 py-1.5 transition-colors hover:bg-sunken hover:text-ink sm:px-3",
               activePage === "about" ? "text-ink font-medium" : "text-muted",
             ]}
           >
             About
           </a>
-          <HeaderProgress client:idle criteriaCounts={criteriaCounts} />
+          <HeaderProgress client:idle phaseCounts={phaseCounts} />
           <ThemeToggle client:idle />
         </nav>
       </div>
@@ -116,11 +144,15 @@ const summary =
       <div
         class="mx-auto flex max-w-6xl flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
       >
-        <p>
-          Lessons and drills are generated from
-          <code class="rounded bg-sunken px-1 py-0.5 text-[0.8em]">phases/</code> in the repo.
-        </p>
-        <p class="flex items-center gap-4">
+        <div class="space-y-1">
+          <p>
+            Lessons and drills are generated from
+            <code class="rounded bg-sunken px-1 py-0.5 text-[0.8em]">phases/</code> in the repo.
+          </p>
+          <p>{EDITION} edition, finishing 31 December. The {NEXT_EDITION} edition will be a new release.</p>
+        </div>
+        <p class="flex flex-wrap items-center gap-4">
+          <a class="transition-colors hover:text-ink" href={href("/role")}>The role</a>
           <a class="transition-colors hover:text-ink" href={href("/about")}>About</a>
           <a
             class="transition-colors hover:text-ink"

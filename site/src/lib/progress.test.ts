@@ -11,7 +11,11 @@ import {
   saveDraft,
   setCriterion,
   setExerciseResult,
+  setHoursPerWeek,
+  setPart,
+  setParts,
   setSqlDrillDone,
+  setTestedOut,
 } from "./progress.ts";
 
 const STORAGE_KEY = "lai:progress:v1";
@@ -135,8 +139,99 @@ describe("emptyState", () => {
   it("is versioned and fully populated", () => {
     const state = emptyState();
     expect(state.version).toBe(1);
-    for (const key of ["exercises", "lessons", "checks", "criteria", "sqlDrills"] as const) {
+    expect(state.edition).toBe("2026");
+    expect(state.plan).toEqual({ hoursPerWeek: null });
+    for (const key of [
+      "exercises",
+      "lessons",
+      "checks",
+      "criteria",
+      "parts",
+      "testedOut",
+      "sqlDrills",
+    ] as const) {
       expect(state[key]).toEqual({});
     }
+  });
+});
+
+describe("parts, testing out, and the plan", () => {
+  it("ticks and unticks one part, deleting rather than storing false", () => {
+    setPart("04-rag/resources/abc", true);
+    expect(getState().parts["04-rag/resources/abc"]).toBe(true);
+    setPart("04-rag/resources/abc", false);
+    expect("04-rag/resources/abc" in getState().parts).toBe(false);
+  });
+
+  it("marks a whole section in one write", () => {
+    let writes = 0;
+    const original = Storage.prototype.setItem;
+    Storage.prototype.setItem = function (this: Storage, ...args: [string, string]) {
+      writes += 1;
+      return original.apply(this, args);
+    };
+    try {
+      setParts(["a", "b", "c"], true);
+    } finally {
+      Storage.prototype.setItem = original;
+    }
+    expect(writes).toBe(1);
+    expect(Object.keys(getState().parts).sort()).toEqual(["a", "b", "c"]);
+    setParts(["a", "c"], false);
+    expect(Object.keys(getState().parts)).toEqual(["b"]);
+  });
+
+  it("tests out of a topic without touching its drill results", () => {
+    setExerciseResult("01_core_mechanics.x", true);
+    setTestedOut("01_core_mechanics", true);
+    expect(getState().testedOut["01_core_mechanics"]?.at).toBeTypeOf("string");
+    setTestedOut("01_core_mechanics", false);
+    expect(getState().testedOut).toEqual({});
+    expect(getState().exercises["01_core_mechanics.x"]?.passed).toBe(true);
+  });
+
+  it("keeps sensible hours a week and drops nonsense", () => {
+    setHoursPerWeek(25);
+    expect(getState().plan.hoursPerWeek).toBe(25);
+    setHoursPerWeek(0);
+    expect(getState().plan.hoursPerWeek).toBeNull();
+    setHoursPerWeek(500);
+    expect(getState().plan.hoursPerWeek).toBeNull();
+    setHoursPerWeek(12.6);
+    expect(getState().plan.hoursPerWeek).toBe(13);
+  });
+
+  it("loads a save from before the 2026 edition with every old tick intact", () => {
+    // Exactly the shape the site wrote before parts, testing out, and the plan existed.
+    const legacy = JSON.stringify({
+      version: 1,
+      exercises: { "t.a": { passed: true } },
+      lessons: {},
+      checks: {},
+      criteria: { "02-llms-and-model-apis.0": true },
+      sqlDrills: {},
+    });
+    expect(importState(legacy)).toBe(true);
+    const state = getState();
+    expect(state.exercises["t.a"]?.passed).toBe(true);
+    expect(state.criteria["02-llms-and-model-apis.0"]).toBe(true);
+    expect(state).toMatchObject({ edition: "2026", parts: {}, testedOut: {}, plan: { hoursPerWeek: null } });
+  });
+
+  it("round-trips the new fields through export and import", () => {
+    setPart("01-foundations/resources/x", true);
+    setTestedOut("00_python_basics", true);
+    setHoursPerWeek(30);
+    const exported = exportState();
+    resetAll();
+    expect(importState(exported)).toBe(true);
+    expect(getState().parts["01-foundations/resources/x"]).toBe(true);
+    expect(getState().testedOut["00_python_basics"]).toBeDefined();
+    expect(getState().plan.hoursPerWeek).toBe(30);
+  });
+
+  it("accepts an export that only holds parts", () => {
+    expect(importState('{"parts": {"a": true}}')).toBe(true);
+    expect(getState().parts.a).toBe(true);
   });
 });

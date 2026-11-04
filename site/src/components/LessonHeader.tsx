@@ -1,7 +1,7 @@
 import { useEffect } from "react";
 import { href } from "../lib/href.ts";
 import { useProgress, useHydrated } from "../lib/useProgress.ts";
-import { markLessonRead } from "../lib/progress.ts";
+import { markLessonRead, setTestedOut } from "../lib/progress.ts";
 import { topics, topicProgress } from "../lib/curriculum.ts";
 import { ProgressBar } from "./ProgressRing.tsx";
 
@@ -55,13 +55,34 @@ export function LessonHeader({ topicId, lessonSlug }: LessonHeaderProps) {
         <div className="mt-6">
           <div className="mb-2 flex items-center justify-between text-sm">
             <span className="text-muted">
-              {progress.done} of {progress.total} drills complete
+              {progress.testedOut
+                ? "Tested out — counted as complete"
+                : `${progress.done} of ${progress.total} drills complete`}
             </span>
             <a href="#drills" className="text-accent hover:underline">
               Jump to drills ↓
             </a>
           </div>
           <ProgressBar percent={progress.percent} status={progress.status} />
+          {/*
+            The fast path for an experienced learner. It is a separate fact from passing:
+            drill results are untouched, so unticking restores exactly what was there.
+          */}
+          <label className="mt-3 inline-flex items-start gap-2.5 text-sm text-muted">
+            <input
+              id={`test-out-${topic.id}`}
+              type="checkbox"
+              checked={progress.testedOut}
+              onChange={(event) => setTestedOut(topic.id, event.target.checked)}
+              className="mt-0.5 size-4 shrink-0 accent-accent"
+            />
+            <span>
+              I already know this — test out.{" "}
+              <span className="text-faint">
+                Counts the topic as done; the drills stay here if you want them.
+              </span>
+            </span>
+          </label>
         </div>
       ) : (
         <div className="mt-6 h-1.5 w-full animate-pulse rounded-full bg-sunken" />

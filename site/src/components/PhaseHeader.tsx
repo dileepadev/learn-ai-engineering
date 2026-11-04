@@ -1,6 +1,6 @@
 import { href } from "../lib/href.ts";
 import { useProgress, useHydrated } from "../lib/useProgress.ts";
-import { phaseProgress } from "../lib/curriculum.ts";
+import { describeBreakdown, phaseProgress, type PhaseCounts } from "../lib/curriculum.ts";
 import { ProgressBar } from "./ProgressRing.tsx";
 
 interface PhaseHeaderProps {
@@ -10,7 +10,7 @@ interface PhaseHeaderProps {
   goal?: string;
   youBuild?: string;
   effort?: string;
-  criteriaCount: number;
+  counts: PhaseCounts;
 }
 
 /**
@@ -27,11 +27,11 @@ export function PhaseHeader({
   goal,
   youBuild,
   effort,
-  criteriaCount,
+  counts,
 }: PhaseHeaderProps) {
   const state = useProgress();
   const hydrated = useHydrated();
-  const progress = phaseProgress(slug, criteriaCount, state);
+  const progress = phaseProgress(slug, counts, state);
 
   return (
     <header>
@@ -71,13 +71,15 @@ export function PhaseHeader({
 
       {hydrated && progress.total > 0 ? (
         <div className="mt-5">
-          <div className="mb-2 flex items-center justify-between text-sm">
-            <span className="font-medium">Progress</span>
-            <span className="tabular-nums text-muted">
-              {progress.done}/{progress.total} {progress.unit} · {progress.percent}%
-            </span>
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 text-sm">
+            <span className="font-medium">Progress · {progress.percent}%</span>
+            <span className="tabular-nums text-muted">{describeBreakdown(progress)}</span>
           </div>
           <ProgressBar percent={progress.percent} status={progress.status} />
+          <p className="mt-2 text-xs text-faint">
+            Tick each part below as you cover it. Every bullet, project step, and resource
+            counts, and each section has a one-click “mark section done”.
+          </p>
         </div>
       ) : null}
     </header>

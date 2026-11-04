@@ -1,8 +1,15 @@
 ---
+import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
 import { ProgressManager } from "../components/ProgressManager.tsx";
+
+// Totals come from the docs at build time, so they move when a criterion or part is added
+// instead of going stale as a hand-typed number.
+const phases = await getCollection("phases");
+const criteriaTotal = phases.reduce((sum, phase) => sum + phase.data.exitCriteria.length, 0);
+const partKeys = phases.flatMap((phase) => phase.data.parts.map((part) => part.key));
 ---
 
 <Base title="Your progress" description="Export, import, or reset your saved learning progress.">
-  <ProgressManager client:load />
+  <ProgressManager client:load criteriaTotal={criteriaTotal} partKeys={partKeys} />
 </Base>
