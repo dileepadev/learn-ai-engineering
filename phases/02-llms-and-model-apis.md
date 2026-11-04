@@ -6,7 +6,7 @@
 
 ## Why this phase exists
 
-Everything downstream — prompting, RAG, agents — is shaped by a few mechanical facts: models see tokens (not characters), context windows are finite and cost money, output is sampled (not deterministic), and latency scales with output length. Engineers who internalize these facts design better systems; engineers who don't fight mysterious bugs. You need the mental model at the "explain it in an interview and use it in a design doc" level — not the "derive attention" level.
+Everything downstream — prompting, RAG, agents — is shaped by a few mechanical facts: models see tokens (not characters), context windows are finite and cost money, output is sampled (not deterministic), and latency scales with output length. Engineers who internalize these facts design better systems; engineers who don't fight mysterious bugs. You need the mental model at the "explain it in an interview and use it in a design doc" level — not the "derive attention" level. It is also the most-asked-for thing on the job: LLMs are the most-mentioned skill in a July 2026 study of AI Engineer postings, at 63% ([the role](the-role.md)).
 
 ## Core skills
 
@@ -25,7 +25,7 @@ Everything downstream — prompting, RAG, agents — is shaped by a few mechanic
 - **Know well — OpenAI API:** the de facto compatibility standard; most tools and gateways speak "OpenAI-shaped" requests. Understand the shape even if you default to Claude.
 - **Know it exists — Google Gemini,** plus OpenAI-compatible aggregators like **OpenRouter** for accessing many models behind one key.
 - **Enterprise routes — [Microsoft Foundry](https://learn.microsoft.com/en-us/azure/foundry/) (formerly Azure AI Foundry, renamed January 2026) and [Amazon Bedrock](https://aws.amazon.com/bedrock/):** the same frontier models (Claude is on both) consumed through a cloud platform for governance reasons — quotas, content filtering, private networking, unified billing, compliance. The API concepts are identical to what you're learning here; you'll work with these hands-on in Phase 7.
-- Model tiers: every provider has a frontier tier, a fast/cheap tier, and something between (e.g., Claude Opus / Sonnet / Haiku). Choosing tier per task is a core cost lever.
+- Model tiers: every provider has a frontier tier, a fast/cheap tier, and something between (e.g., Claude Opus / Sonnet / Haiku). Choosing tier per task is a core cost lever — and mixing them is the norm: 87% of teams in Amplify's 2026 survey use more than one model together.
 - Production client behavior: timeouts, retries with exponential backoff and jitter, respecting 429/`Retry-After`, idempotent request design, never logging API keys.
 
 ### Open-weight models
@@ -54,7 +54,7 @@ Spec:
 - [Anthropic docs](https://docs.anthropic.com) — Messages API, streaming, vision, prompt caching, batches
 - [anthropics/courses](https://github.com/anthropics/courses) — free, hands-on, notebook-based API fundamentals
 - [OpenAI Cookbook](https://cookbook.openai.com) — skim for API patterns; many recipes generalize across providers
-- Andrej Karpathy, ["Intro to Large Language Models"](https://www.youtube.com/watch?v=zjkBMFhNj_g) and "Deep Dive into LLMs like ChatGPT" — the best intuition-without-homework explainers; optional but excellent
+- Andrej Karpathy, ["Intro to Large Language Models"](https://www.youtube.com/watch?v=zjkBMFhNj_g) and ["Deep Dive into LLMs like ChatGPT"](https://www.youtube.com/watch?v=7xTGNNLPyMI) — the best intuition-without-homework explainers; optional but excellent
 - [Ollama docs](https://docs.ollama.com) — quickstart plus the OpenAI-compatibility page
 - Tokenizer playgrounds (any provider's) — spend 15 minutes breaking your intuitions about what a "word" is
 

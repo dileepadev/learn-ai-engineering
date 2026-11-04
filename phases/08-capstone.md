@@ -31,6 +31,8 @@ You have a `bookmark-manager` project — turn it into the capstone. It's genuin
 
 ## Alternatives (same bar, different shape)
 
+<!-- track: off — these are options to choose between, not parts to complete (see site/src/lib/parts.ts) -->
+
 - **Support copilot:** ingest a real product's docs + changelog; answer with citations; escalation workflow with human-in-the-loop gate; eval on a golden set harvested from real questions.
 - **Personal ops agent:** email/calendar triage with approval gates on every outbound action — heavier on agent safety, lighter on RAG.
 - **Codebase Q&A service:** docs-chat pointed at a large OSS repo with code-aware chunking — heavier on retrieval engineering.
@@ -43,6 +45,19 @@ You have a `bookmark-manager` project — turn it into the capstone. It's genuin
 4. **Harden:** red-team pass, load test, cost review, runbook.
 5. **Present:** README + architecture diagram + honest eval table + demo video/GIF. Then show it to people and watch it break — every failure is a new eval case, which is the whole methodology in one sentence.
 
+## Turning it into a job
+
+The capstone is your strongest interview artifact; this section is the rest of the loop. A full AI Engineer loop runs 3–6 rounds over 2–6 weeks, and junior openings are rare (1–6% of postings), so most people get in by moving over from an adjacent role with evidence in hand. [The role](the-role.md) has the data behind every bullet here.
+
+- **LLM system design, out loud.** Practice "design a chatbot over our internal docs" and "design an agent that books meetings across calendars and email" in 45–60 minutes, covering the six areas interviewers probe: data flow, retrieval, evaluation, failure modes, cost and latency, and safety.
+- **Coding rounds, both kinds.** Standard data-structures problems still appear in most loops, and some companies now run one round with AI tools and one without. Practice arrays, hash maps, strings, and trees at medium difficulty unaided, and an AI-assisted round where you have to review and correct the model's code.
+- **A timed take-home.** Build a small RAG or agent task with an eval suite in 2–3 hours — the typical take-home — and write up the trade-offs. Scope tightly and write the evals first.
+- **Portfolio write-ups.** For the capstone and one earlier project: a README, a demo, the eval table, and a short "what failed and how I fixed it" — the part reviewers actually read.
+- **Explain it to a non-engineer.** Five minutes on what your system does, how you know it works, and what it costs. Forward-deployed and customer-facing roles test exactly this.
+- **Behavioral stories.** Three stories about ownership in ambiguous AI work: a failure you diagnosed from traces, a trade-off you defended with eval numbers, a change you rejected because of them.
+- **Know the titles.** Search for Applied AI Engineer, AI Product Engineer, Agentic AI Engineer, and Forward Deployed Engineer — the same job with different emphases.
+- **Prep resources.** Alexey Grigorev's [AI Engineering Field Guide](https://github.com/alexeygrigorev/ai-engineering-field-guide) for real interview loops and take-homes, [AI Engineer Interview Questions (2026)](https://aiengineerinsights.com/blog/ai-engineer-interview-questions/) round by round, and the [NeetCode roadmap](https://neetcode.io/roadmap) for coding practice.
+
 ## Done means
 
 - [ ] Live at a URL I'd put in a job application
@@ -51,6 +66,7 @@ You have a `bookmark-manager` project — turn it into the capstone. It's genuin
 - [ ] Dashboard + budget alarm + runbook exist; a week of my own real usage has produced trace-driven fixes
 - [ ] MCP surface works from a real host app
 - [ ] README tells the story: architecture, decisions, eval results, known limitations — honestly
+- [ ] I can design a RAG assistant and an agent out loud in 45–60 minutes, covering data flow, retrieval, evaluation, failure modes, cost and latency, and safety
 
 ## After the capstone
 

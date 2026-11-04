@@ -6,7 +6,7 @@
 
 ## Why this phase exists
 
-The gap between "works on my machine" and "runs for strangers" is where AI engineers earn the title. AI workloads bend normal web architecture in specific ways — requests take 30 seconds and stream, dependencies rate-limit you, marginal cost per request is real money, and a misbehaving prompt can burn a budget overnight. The patterns here are the difference between an app and a liability.
+The gap between "works on my machine" and "runs for strangers" is where AI engineers earn the title. AI workloads bend normal web architecture in specific ways — requests take 30 seconds and stream, dependencies rate-limit you, marginal cost per request is real money, and a misbehaving prompt can burn a budget overnight. The patterns here are the difference between an app and a liability. Teams shipping agents in 2026 name quality as the biggest barrier to production and latency as the second, and three in four say cost shapes how ambitiously they use AI ([the role](the-role.md)).
 
 ## Core skills
 
@@ -24,13 +24,14 @@ The gap between "works on my machine" and "runs for strangers" is where AI engin
 - The injection perimeter, now for real: outputs are untrusted (escape/validate before they touch HTML, SQL, or shells), tool-bearing agents run least-privilege, retrieved content is data-not-instructions (Phases 3/5 lens, enforced at the boundary).
 - PII discipline: what enters prompts, what persists in traces/logs, retention policy on both. Know your provider's data-usage terms cold.
 - Abuse controls: auth in front of anything that spends tokens, per-IP/user throttles, hard budget kill-switches.
+- Walk the [OWASP Top 10 for LLM Applications 2025](https://genai.owasp.org/llm-top-10/) against your own app — prompt injection (LLM01), sensitive information disclosure, excessive agency, unbounded consumption, and the rest — and write down which control covers each. An empty row is a finding.
 
 ### Serving open-weight models
 
 - **[vLLM](https://docs.vllm.ai)** as the standard self-hosted inference server: OpenAI-compatible endpoint, continuous batching, PagedAttention — understand *what* those buy you (high-throughput GPU serving) at the operator level, not the implementer level.
 - Quantization in practice: AWQ/GPTQ-class 4-bit for GPU serving, GGUF for CPU/edge; the VRAM arithmetic (params × bytes + KV cache) that tells you what fits on what GPU.
 - Where the GPUs live: serverless GPU platforms (**[Modal](https://modal.com)**, RunPod, Replicate) for spiky workloads vs reserved instances for steady ones; per-token API pricing vs per-hour GPU math for the build-vs-buy call.
-- **Fine-tuning, honestly:** the last resort after prompting, RAG, and routing — legitimate for style consistency, narrow high-volume tasks on small models, and latency/cost crunches. Know LoRA conceptually and that hosted fine-tuning services exist; spend an afternoon here, not a month. Your evals (Phase 6) are the prerequisite — without them you can't even tell if fine-tuning helped.
+- **Fine-tuning, honestly:** the last resort after prompting, RAG, and routing — legitimate for style consistency, narrow high-volume tasks on small models, and latency/cost crunches. Know LoRA conceptually and that hosted fine-tuning services exist; spend an afternoon here, not a month. Your evals (Phase 6) are the prerequisite — without them you can't even tell if fine-tuning helped. The industry agrees: 57% of organizations in LangChain's 2026 survey don't fine-tune at all, and fine-tuning shows up in only 8.5–26% of AI Engineer postings.
 
 ### Cloud AI platforms (Azure & AWS)
 
@@ -46,7 +47,7 @@ Enterprise employers hire against these by name, and everything you've built by 
 
 - Deployment targets, pick one and go deep: **Fly.io or Railway** for containerized simplicity, **Modal** for Python-native + GPU, or **Azure Container Apps** if you want the cloud line on your CV to be load-bearing. Your Phase 1 Docker skills carry you regardless.
 - CI/CD: tests + evals gate → build → deploy → smoke test; prompt changes ride the same pipeline as code changes (they *are* code changes).
-- SLOs that fit AI: time-to-first-token, tokens/sec, p95 end-to-end, error rate, cost per request, eval pass rate. Alert on cost anomalies as seriously as on errors.
+- SLOs that fit AI: time-to-first-token, tokens/sec, p95 end-to-end, error rate, cost per request *and per successful task* (a cheap request that fails is not cheap), eval pass rate. Alert on cost anomalies as seriously as on errors.
 - Load behavior: use your Phase 1 concurrent client (or Locust/k6) to find where streaming concurrency breaks and what the provider rate limit does to p95 under burst.
 
 ## Hands-on project: `docs-chat`, productionized
@@ -70,6 +71,7 @@ Enterprise employers hire against these by name, and everything you've built by 
 - [Microsoft Foundry docs](https://learn.microsoft.com/en-us/azure/foundry/) and [Amazon Bedrock docs](https://docs.aws.amazon.com/bedrock/) — quickstarts for the cloud leg; skim the service overviews with your architecture diagram open and do the mapping exercise
 - Microsoft Learn's [AI-103 (Azure AI App and Agent Developer Associate) path](https://learn.microsoft.com/en-us/credentials/certifications/azure-ai-app-agent-developer-associate/) — optional; replaced AI-102 as of mid-2026 and is a better fit for this roadmap (it centers on generative AI apps, agents, and RAG on Microsoft Foundry rather than wiring up pre-built services). The cert itself matters less than it being the fastest structured tour of Microsoft's AI platform, and it's a recognizable line for Azure-shops
 - [applied-llms.org](https://applied-llms.org) — the operational/product sections
+- [OWASP Top 10 for LLM Applications 2025](https://genai.owasp.org/llm-top-10/) — the security checklist for the injection-perimeter work above
 - Chip Huyen, *AI Engineering* — inference optimization and architecture chapters
 - Your deployment platform's production checklist — actually read it
 

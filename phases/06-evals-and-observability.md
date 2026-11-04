@@ -6,7 +6,7 @@
 
 ## Why this phase exists
 
-This is the highest-leverage phase in the roadmap. LLM outputs are non-deterministic and failure is silent — no stack trace fires when an answer is subtly wrong. Teams without evals iterate by vibes, fear every prompt change, and plateau; teams with evals change models in an afternoon with confidence. Industry consensus (Hamel Husain, Eugene Yan, every serious AI team's postmortems) is unanimous: **systematic evaluation is the differentiating skill of AI engineering.** You've been seeding this since Phase 3's golden set; now it becomes a system.
+This is the highest-leverage phase in the roadmap. LLM outputs are non-deterministic and failure is silent — no stack trace fires when an answer is subtly wrong. Teams without evals iterate by vibes, fear every prompt change, and plateau; teams with evals change models in an afternoon with confidence. Industry consensus (Hamel Husain, Eugene Yan, every serious AI team's postmortems) is unanimous: **systematic evaluation is the differentiating skill of AI engineering.** You've been seeding this since Phase 3's golden set; now it becomes a system. The market says the same thing: evals appear in 56% of July 2026 AI Engineer postings, yet only 52.4% of teams in LangChain's survey run offline evals at all ([the role](the-role.md)). That gap is your edge.
 
 ## Core skills
 
@@ -20,7 +20,7 @@ This is the highest-leverage phase in the roadmap. LLM outputs are non-determini
 
 - The hierarchy, cheapest first: **code assertions** (parses, schema-valid, contains/excludes X, citation IDs exist) → **LLM-as-judge** for qualities code can't check (faithfulness, helpfulness, tone) → **human review** for calibrating the judges.
 - Golden datasets: harvest from real usage + hand-label; version them in git; grow them from every production failure ("regression tests, but for behavior").
-- LLM-as-judge, done properly: binary or few-level judgments (not 1–10 scores), a rubric with examples, a strong model as judge, and — non-negotiable — **validate the judge against human labels** before trusting it. Know pairwise comparison for A/Bs and position-bias to control for.
+- LLM-as-judge, done properly: binary or few-level judgments (not 1–10 scores), a rubric with examples, a strong model as judge, and — non-negotiable — **validate the judge against human labels** before trusting it, measuring its true-positive and true-negative rates rather than one raw agreement number. Know pairwise comparison for A/Bs and position-bias to control for.
 - Agent evals: end-state checks (did the file/record end up correct?) and trajectory checks (right tools, sane order, no loops) — not just final-text similarity.
 - Non-determinism management: run flaky cases N times, report pass rates, set thresholds rather than demanding 100%.
 
@@ -53,6 +53,7 @@ Retrofit `docs-chat` (Phase 4) and the research agent (Phase 5):
 ## Resources
 
 - Hamel Husain: ["Your AI Product Needs Evals"](https://hamel.dev/blog/posts/evals/) and the error-analysis follow-ups — the methodology backbone of this phase
+- Hamel Husain and Shreya Shankar, ["AI Evals: Everything You Need to Know"](https://hamel.dev/blog/posts/evals-faq/) — the FAQ behind this phase's method: error analysis first, binary pass/fail judgments, judges tested against human labels
 - [applied-llms.org](https://applied-llms.org) — evaluation & monitoring sections
 - [promptfoo docs](https://www.promptfoo.dev/docs/intro/) — getting started, assertions, model-graded, CI, red team
 - [DeepEval docs](https://deepeval.com/docs) — metrics reference and the pytest integration

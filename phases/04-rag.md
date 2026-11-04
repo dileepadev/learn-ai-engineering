@@ -6,7 +6,7 @@
 
 ## Why this phase exists
 
-RAG is how you make models answer from *your* data — the single most requested capability in industry. It's also where naive implementations quietly fail: the demo works, then real users ask real questions and retrieval misses. The skill isn't wiring up a vector DB (an afternoon); it's the retrieval quality engineering around it. Note the framing: RAG is a *retrieval* problem wearing an AI costume. Most of this phase is search engineering, and that's why it transfers.
+RAG is how you make models answer from *your* data — the single most requested capability in industry. (It is the most-requested generative-AI skill across 889 AI Engineer roles, at 35.9%, one of LinkedIn's top three AI Engineer skills, and "design a chatbot over our internal docs" is a stock system design prompt — [the role](the-role.md).) It's also where naive implementations quietly fail: the demo works, then real users ask real questions and retrieval misses. The skill isn't wiring up a vector DB (an afternoon); it's the retrieval quality engineering around it. Note the framing: RAG is a *retrieval* problem wearing an AI costume. Most of this phase is search engineering, and that's why it transfers.
 
 ## Core skills
 
@@ -58,6 +58,7 @@ Spec:
 
 - [Anthropic: Contextual Retrieval](https://www.anthropic.com/news/contextual-retrieval) — read even if you don't implement it; the failure analysis is the value
 - [pgvector README](https://github.com/pgvector/pgvector) — complete and short; plus any Supabase/Neon pgvector + hybrid search guide
+- [MTEB leaderboard](https://huggingface.co/spaces/mteb/leaderboard) — compare embedding models on retrieval tasks before you pick one, then confirm the choice against your own eval set
 - [DeepEval docs](https://deepeval.com/docs) — skim the RAG metrics pages (faithfulness, answer & context relevancy) for the vocabulary now; hands-on use comes in Phase 6
 - [applied-llms.org](https://applied-llms.org) — the RAG sections distill a year of practitioner scar tissue
 - Chip Huyen, *AI Engineering*, RAG chapter — best written treatment of the architecture decisions
