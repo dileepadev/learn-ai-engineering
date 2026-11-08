@@ -1,85 +1,158 @@
-# Phase 1 — Foundations: Python for AI Engineering
+# Phase 1 — Software & AI Foundations
 
-- **Goal:** Learn Python from the ground up — scoped ruthlessly to what AI engineering actually uses — plus the engineering substrate every later phase leans on: typing, async, streaming, a little SQL, and containers.  
-- **You build:** `wrangle`, a typed data-cleaning CLI (warm-up), then `mockstream`, a streaming "fake LLM" web service — typed, tested, Dockerized.  
-- **Effort:** ~30–50 hours if Python is new territory; a fraction of that as a refresher. Either way, don't skip the projects.
+**Goal:** Build and deploy reliable Python backend APIs and data pipelines, and understand how modern language models work and how to evaluate model behavior.
+**You build:** A production-shaped AI backend — an authenticated, streaming FastAPI service with a small TypeScript frontend, an idempotent background queue, tests, and Docker — plus a short lab that opens up the models themselves.
+**Effort:** ~90–130 hours (months 1–2 at 10–15 hours a week). Skim what you already know; never skip the project.
 
 ## Why this phase exists
 
-AI engineering is 80% ordinary software engineering under unusual constraints: everything is async and streamed, everything is untyped JSON until you force types onto it, and everything talks to slow, expensive, flaky external APIs. This phase teaches exactly the Python that serves those constraints — and skips the rest of the language's folklore. The filter for every topic below: *will a later phase use this?* If not, it's out. The job market agrees on the weighting: Python appears in 59–82.5% of 2026 AI Engineer postings, and most interview loops still include a standard coding round ([the role](the-role.md)).
+AI engineering is mostly software engineering under unusual constraints: everything is async and streamed, everything is untyped JSON until you force types onto it, and every dependency is a slow, expensive, flaky external API. The systems later phases build — retrieval with permissions, agents that take real actions, gated releases — fail on ordinary engineering long before they fail on the model: a retry that charges a customer twice, a queue that redelivers a poison message forever, a stream the UI cannot resume. So this phase builds the substrate first: Python and its modern tooling, backend and data engineering, the distributed-systems patterns that make retries safe, and enough frontend to put a streaming, trustworthy UI in front of a model.
 
-## Part A — Python, from the start (the AI engineering subset)
+Section 2 adds the theory you need to reason about models instead of treating them as magic: how they learn, how they are measured, and why inference behaves the way it does. Read it at literacy depth — enough to explain precision vs recall, a KV cache, or why numerical precision matters on a GPU. Building training pipelines is the ML Engineer track's job, not the core's.
 
-Work through these in order, writing small scripts at every step. Type-hint everything from day one — in this field, schemas are the job.
+> **Reading the tags:** untagged items are the core baseline. **[MUST]** essential production skill · **[IMPORTANT]** strong employability advantage · **[SPECIALIST]** deep skill for selected jobs · **[WATCH]** emerging, monitor rather than prioritize.
+
+## 1. Programming & Software Engineering
+
+### Python
 
 > [!TIP]
-> **[Part A is built out in `01-foundations/part-a/`](01-foundations/part-a/README.md)** — a lesson and a set of failing tests for each bullet below. Read the lesson, fill in the drills, run `uv run pytest phases/01-foundations/part-a` until it's green.
+> **[Part A is built out in `01-foundations/part-a/`](01-foundations/part-a/README.md)** — a lesson and a set of failing tests for each Python fundamentals topic, from core mechanics to type hints and SQL. Read the lesson, fill in the drills, and run `uv run pytest phases/01-foundations/part-a` until it's green, or run the same tests in the browser on the site. Test out of what you already know.
 
-- **Core mechanics:** variables, numbers, strings and f-strings, truthiness; `list`, `dict`, `set`, `tuple` and when each fits; slicing; control flow. Dicts get special attention — every API payload you'll ever touch is one.
-- **Functions, properly:** positional vs keyword args, defaults (and the mutable-default trap), `*args`/`**kwargs`, functions as values, closures. Provider SDKs and frameworks assume fluency here.
-- **Comprehensions & iteration:** list/dict comprehensions, `enumerate`, `zip`, sorting with `key=`.
-- **Errors:** `try/except/finally`, raising your own exceptions, exception chaining. API-calling code is mostly error handling; get comfortable early.
-- **Files & data:** `pathlib`, reading/writing text, and `json` deeply — JSON is the substrate of everything LLM. `csv` in passing.
-- **Modules & structure:** imports, packages, the `src/` layout, entry points.
-- **Just enough OOP:** classes, `@dataclass`, methods, properties, minimal inheritance; prefer `Protocol` (structural typing) over class hierarchies. You'll *use* many classes and *write* few.
-- **Generators & iterators:** `yield`, generator functions, lazy iteration. This is literally how token streaming works — Part B depends on it.
-- **Decorators & context managers:** at read-and-use level (`@app.get(...)`, `with open(...)`, `@pytest.fixture`) — FastAPI and pytest are built from them. Write one trivial decorator and one context manager to demystify the syntax, then move on.
-- **Type hints:** every signature typed; `Optional`/unions, `Literal`, `TypedDict`, generics as they come up.
-- **A little SQL:** `SELECT`, `JOIN`, `GROUP BY`, indexes at a practical level. From Phase 4 onward your app data, vectors, and full-text search all live in PostgreSQL.
+- Fundamentals, OOP, data structures, algorithms
+- Functions, decorators, generators, context managers
+- Async Python, concurrency, multiprocessing
+- Type hints, error handling, logging
+- Testing: pytest, mocking, unit/integration tests
+- Package management, virtual environments
+- **[MUST]** Modern project tooling: `uv`/pip, dependency locks, `ruff`, `mypy`/Pyright, pre-commit, reproducible environments
+- **[IMPORTANT]** Python profiling, memory profiling, `asyncio` cancellation, structured concurrency and safe task lifecycle
+- **[IMPORTANT]** AI-assisted software delivery: coding agents, repository context, test-first development and review of generated changes
 
-**Explicitly skipped:** metaclasses, multiple-inheritance puzzles, threading/multiprocessing internals (asyncio covers this roadmap's concurrency), NumPy/pandas, notebooks-as-a-lifestyle, classical ML (sklearn), statistics. If a tutorial starts with a gradient, close the tab.
+### Backend Engineering
 
-## Part B — the engineering substrate
+- HTTP, REST APIs, API design
+- FastAPI, Pydantic, JSON Schema
+- Authentication, authorization, JWT, OAuth
+- WebSockets, Server-Sent Events (SSE)
+- Background tasks, queues, webhooks
+- **[MUST]** Idempotency keys, request deduplication, circuit breakers, backpressure, graceful degradation
+- **[MUST]** API contract tests, OpenAPI, versioning, pagination and async job-status endpoints
+- **[IMPORTANT]** gRPC and service-to-service communication; safe file uploads and signed object storage URLs
 
-- **Modern Python tooling:** [uv](https://docs.astral.sh/uv/) for packages/environments/Python versions (it has effectively replaced pip + venv + pyenv + poetry), [ruff](https://docs.astral.sh/ruff/) for linting + formatting, `pyright` for type checking, `pytest` for tests. Set these up once as your default project template.
-- **Pydantic v2:** models, validators, `model_json_schema()`, serialization. This is *the* load-bearing library of Python AI engineering — it defines your API contracts, your LLM output schemas, and your tool signatures.
-- **asyncio:** `async`/`await`, `gather`, semaphores for concurrency limits, async generators. LLM apps are I/O-bound; concurrency is how you make 100 extraction calls take 30 seconds instead of 30 minutes.
-- **FastAPI:** routes, dependency injection, Pydantic request/response models, background tasks, `StreamingResponse`.
-- **Streaming over HTTP:** what Server-Sent Events (SSE) are and how to produce/consume them. Every chat UI you'll ever build streams tokens this way.
-- **Docker:** write a Dockerfile for a Python service, multi-stage builds, compose for app + database. Competence, not expertise.
-- **Git hygiene:** branches, meaningful commits, PR-shaped changes — your later projects are portfolio pieces.
+### Databases & Data Engineering
 
-## Warm-up project: `wrangle`
+- SQL, PostgreSQL, Redis
+- JSON, JSONL, Parquet
+- Database design, data modeling
+- ORM, migrations, transactions
+- ETL/ELT, data pipelines, data quality
+- **[MUST]** Data contracts, schema evolution, lineage, provenance, change-data-capture (CDC), deletion propagation
+- **[MUST]** Data permissions, retention, freshness guarantees, ingestion SLAs and quality checks
+- **[IMPORTANT]** Apache Spark, Kafka, event streaming, lakehouse concepts (Delta Lake/Iceberg), query engines
+- **[SPECIALIST]** Real-time feature pipelines and point-in-time correct feature stores (Feast or managed alternatives)
 
-A CLI that turns messy JSON into clean, typed data — pure Part A muscle, zero web code.
+### Software Engineering & DevOps
 
-1. Feed it a real messy export: browser bookmarks, a social/streaming data export, or any public JSON dataset.
-2. Parse → validate into Pydantic models → normalize (dates, URLs) and dedupe → emit clean JSON plus a terminal summary report (counts, top categories, rejects with reasons).
-3. Typed end-to-end, `pytest` coverage for the ugly edge cases, `ruff` clean, proper `src/` layout, installable entry point (`uv run wrangle ...`).
+- Git, GitHub, Linux, CLI
+- Docker, containers, environment management
+- Configuration and secret management
+- CI/CD fundamentals, GitHub Actions
+- Testing, debugging, documentation
+- **[MUST]** Infrastructure as Code fundamentals (Terraform/OpenTofu); dependency scanning, SBOMs, signed artifacts
+- **[IMPORTANT]** Automated API load tests and developer experience: scripts, templates, local staging and reproducible demos
 
-If Python is fresh, expect this to take a few evenings. That's the point — it exercises every Part A topic in one artifact.
+### Distributed Systems for AI · MUST
 
-## Main project: `mockstream`
+- Message delivery semantics, at-least-once processing, exactly-once effects through idempotency
+- Consistency, replication, partitioning, caching, distributed locks, race conditions
+- Retry storms, exponential backoff with jitter, dead-letter queues, poison messages
+- Queue-worker scaling, fan-out/fan-in, task deadlines, cancellation, resource budgets
+- Durable execution, workflow orchestration and compensating actions (saga patterns)
 
-A FastAPI service that *pretends* to be an LLM API — so you learn the transport layer with zero API cost, and get a reusable test double for later phases.
+### Full-Stack AI Product Engineering · IMPORTANT (basic capability is a MUST)
 
-1. `POST /v1/chat` accepts `{messages: [...], stream: bool}` validated by Pydantic; rejects malformed input with useful errors.
-2. Non-streaming mode returns a canned completion after an artificial delay.
-3. Streaming mode returns SSE, emitting word-by-word chunks with realistic pacing, terminated by a `[DONE]` event (mirror the shape of a real provider's streaming format).
-4. A `httpx`-based async client script consumes the stream and prints tokens as they arrive; run 20 concurrent requests bounded by a semaphore.
-5. Typed end-to-end (`pyright` clean), tested (`pytest` + `httpx` test client, including a streaming test), linted (`ruff`), Dockerized (compose file runs it).
+- TypeScript/JavaScript fundamentals; React/Next.js or a comparable web frontend
+- Streaming token/tool results with SSE or WebSockets; resumable jobs and partial failure UX
+- Structured AI output rendering, citation/source displays, feedback collection and error states
+- Human-approval interfaces, progress/step visualization and clearly distinguished AI-generated content
+- Accessibility, usability, user trust, uncertainty display and automation-bias mitigation
 
-**Stretch:** add a failure mode (random 429s with `Retry-After`) and make your client handle it with exponential backoff — you'll reuse this exact logic against real providers in Phase 2.
+**Outcome:** Build and deploy reliable Python backend APIs and data pipelines.
 
-## Resources
+## 2. AI & Machine Learning Foundations
 
-- [The official Python tutorial](https://docs.python.org/3/tutorial/) — chapters 1–9 map almost exactly onto Part A; read actively, typing every example
-- [Exercism Python track](https://exercism.org/tracks/python) — free drills; do a handful per Part A topic until it's automatic
-- [Real Python](https://realpython.com) — topical deep-dives for when a concept (decorators, generators, asyncio) won't click
-- [SQLBolt](https://sqlbolt.com) — interactive SQL basics in an afternoon
-- [uv docs](https://docs.astral.sh/uv/) — read "Working on projects" end to end; it's short
-- [Pydantic docs](https://docs.pydantic.dev) — Models, Validators, JSON Schema pages
-- [FastAPI tutorial](https://fastapi.tiangolo.com/tutorial/) — through "Bigger Applications"; skim the rest
-- [asyncio — Python docs](https://docs.python.org/3/library/asyncio.html) plus any good "asyncio for web APIs" walkthrough
-- [MDN on Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) — short and definitive
+Literacy depth: the aim is to reason about model behavior, metrics, and inference cost — not to train production models. The **[SPECIALIST]** items, and training pipelines generally, belong to the ML Engineer and Inference specializations.
+
+### Machine Learning
+
+- Supervised and unsupervised learning
+- Classification, regression, clustering
+- Feature engineering, data preprocessing
+- Train/validation/test splits
+- Accuracy, precision, recall, F1, ROC-AUC
+- Overfitting, underfitting, generalization
+- Model serving and inference
+- **[IMPORTANT]** Dataset labeling and annotation standards; class imbalance and data leakage
+- **[SPECIALIST]** Model registries, automated training pipelines, feature-store offline/online consistency
+
+### Deep Learning
+
+- Neural networks, backpropagation
+- Gradient descent, optimizers, loss functions
+- PyTorch basics, tensors, autograd
+- GPU fundamentals, batching, training loops
+- **[IMPORTANT]** CPU/GPU profiling, memory budgets, numerical precision (FP16/BF16) and accelerator trade-offs
+- **[SPECIALIST]** CUDA execution model, memory bandwidth, GPU scheduling and distributed training fundamentals
+
+### NLP & Embeddings
+
+- Text preprocessing, tokenization
+- Word embeddings, semantic similarity
+- Vector representations, cosine similarity
+- Sequence modeling, language modeling
+
+### Transformers
+
+- Attention, self-attention, multi-head attention
+- Positional encodings
+- Encoder, decoder, encoder-decoder
+- Pretraining, fine-tuning, inference
+- Transformer architecture and limitations
+- **[IMPORTANT]** Decoder prefill vs decode stages, attention cost, context-size trade-offs, KV cache fundamentals
+- **[SPECIALIST]** Reasoning-process and tool-use benchmarking, robustness to distribution shift
+
+**Outcome:** Understand how modern language models work and how to evaluate model behavior.
+
+## Hands-on project: a production-shaped AI backend
+
+A service shaped like the ones you will put real models behind from Phase 2 on — built here with a fake model, so you learn the engineering with zero API cost. Model the domain as a document job API ("summarize this document"), so later phases can swap a real model in without touching the plumbing.
+
+1. **Service:** FastAPI with Pydantic request/response models, a published OpenAPI contract, versioned routes (`/v1/...`), cursor pagination, and JWT authentication with at least two roles that see different data.
+2. **Streaming:** an SSE endpoint that streams fake tokens and fake tool-call events word by word, ends with a `[DONE]` event, and resumes from `Last-Event-ID` after a dropped connection.
+3. **Queue:** long jobs go to a Redis-backed worker with job-status endpoints; an `Idempotency-Key` header deduplicates client retries; handlers are idempotent under at-least-once delivery, with exponential backoff and jitter, a dead-letter queue, and a poison-message test.
+4. **Data:** Postgres with migrations and transactions; a versioned data contract on job inputs; deleting a document propagates to every record derived from it, and a test proves it.
+5. **Frontend:** a small TypeScript page (React or Next.js) that streams tokens, renders the structured result, shows error and partial-failure states, labels AI-generated content as such, and resumes after a reconnect.
+6. **Quality:** unit and integration tests (including a streaming test and an API contract test against the OpenAPI schema), `ruff` and `pyright` clean, pre-commit hooks, and an automated load test that reports p95 latency.
+7. **Ship:** a multi-stage Dockerfile, compose for app + worker + Postgres + Redis, GitHub Actions running lint, types, tests, a dependency scan, and an SBOM; deploy the container to any public host, and provision at least one piece of its infrastructure with Terraform/OpenTofu.
+
+**Stretch:** put a circuit breaker around a deliberately flaky downstream dependency and degrade gracefully in the UI; or feed a second store from Postgres with change-data-capture.
+
+## Hands-on lab: models from the inside
+
+Three short exercises, an afternoon each, that make Section 2 concrete.
+
+1. Train a small text classifier on a labeled public dataset and report accuracy, precision, recall, F1, and ROC-AUC on a held-out test split — then leak test data into training on purpose and watch the numbers lie.
+2. Write a training loop for a tiny neural network in PyTorch — tensors, autograd, a loss, an optimizer — and watch the loss fall; then set the learning rate too high and watch it diverge.
+3. Run a small open-weight model locally and time prefill against decode as the prompt grows; estimate its KV-cache memory for a long context with the arithmetic 2 × layers × KV heads × head dimension × tokens × bytes per value.
 
 ## Exit criteria
 
-- [ ] I can write a typed Python CLI — args, files, JSON, exceptions, tests — without reaching for a reference on every line
-- [ ] I can read generator-, decorator-, and context-manager-based code (any FastAPI example) and explain what it's doing
-- [ ] I can start a new Python project (uv + ruff + pyright + pytest, src layout) from scratch in under 10 minutes
-- [ ] I can explain when to reach for Pydantic vs a dataclass, and write a custom validator without looking it up
-- [ ] I can write an async function that fans out N API calls with bounded concurrency and collects results
-- [ ] I can write basic SQL (SELECT with JOINs and aggregates) against a Postgres database
-- [ ] `wrangle` and `mockstream` are complete: streaming works from a browser and from my async client, tests pass, `docker compose up` works
-- [ ] I can explain how SSE differs from WebSockets and why chat UIs use SSE
+- [ ] I can start a new Python project (uv, ruff, pyright, pytest, pre-commit, src layout) from scratch in under 10 minutes
+- [ ] I can explain how an idempotency key turns at-least-once delivery into exactly-once effects, and I have a test that proves it
+- [ ] My service streams over SSE to a TypeScript frontend that handles errors, partial failure, and reconnects
+- [ ] Long work runs through a queue with jittered retries, a dead-letter queue, and job-status endpoints
+- [ ] I can write SQL with joins, aggregates, and transactions against Postgres, and explain a migration and a data contract
+- [ ] `docker compose up` runs the whole stack; CI runs lint, types, tests, and a dependency scan; one resource is provisioned with Terraform/OpenTofu
+- [ ] I can explain precision vs recall, data leakage, and overfitting using my own lab results
+- [ ] I can explain attention, prefill vs decode, and the KV cache, and estimate a model's KV-cache memory for a given context length

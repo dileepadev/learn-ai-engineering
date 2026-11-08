@@ -11,7 +11,7 @@ import { topics, topicProgress, TOTAL_EXERCISES } from "../lib/curriculum.ts";
  * backup story, so it needs to be obvious and it needs to round-trip exactly.
  */
 interface ProgressManagerProps {
-  /** Every exit criterion across the eight phases, counted at build time. */
+  /** Every exit criterion across the phases, counted at build time. */
   criteriaTotal: number;
   /** Every current part key, so retired keys left in storage are not counted. */
   partKeys: string[];

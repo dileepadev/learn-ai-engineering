@@ -97,7 +97,7 @@ export function Dashboard({ phases }: DashboardProps) {
             Learn AI engineering by building
           </h1>
           <p className="mt-4 text-lg leading-relaxed text-muted">
-            Eight phases, from Python fundamentals to a deployed capstone. Every skill,
+            Six phases, from software foundations to a deployed capstone. Every skill,
             project step, and resource is a part you can tick, and Phase 1’s drills run in
             your browser against the real pytest suite. Already know something? Tick it or
             test out, and the plan below moves.
@@ -141,7 +141,7 @@ export function Dashboard({ phases }: DashboardProps) {
         <div className="mt-10 rounded-xl border border-line bg-raised p-5">
           <p className="font-semibold">Everything is complete. 🎉</p>
           <p className="mt-1 text-sm text-muted">
-            All eight phases are ticked off. Time to build something of your own.
+            All six phases are ticked off. Time to build something of your own.
           </p>
         </div>
       )}
@@ -203,7 +203,7 @@ export function Dashboard({ phases }: DashboardProps) {
         </ul>
       </section>
 
-      {/* ---- All eight phases: the whole journey ---- */}
+      {/* ---- Every phase: the whole journey ---- */}
       <section className="mt-16">
         <h2 className="text-xl font-semibold tracking-tight">The roadmap</h2>
         <p className="mt-1 text-sm text-muted">

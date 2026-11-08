@@ -1,178 +1,193 @@
 # Learn AI Engineering
 
-A self-paced, build-first roadmap for **modern AI engineering** — the discipline as it's actually practiced in industry today: LLM applications, agents, RAG, structured outputs, evals, and production deployment.
+A self-paced, build-first roadmap for **production AI engineering**: designing, building, evaluating, securing, deploying, operating, and scaling end-to-end AI applications, retrieval systems, agents, and multimodal workflows.
 
-This is **not** a machine learning or data science curriculum. There is no calculus, no training-from-scratch, no Kaggle. The premise: modern AI engineering is a *software engineering* discipline that treats models as components you build products around.
+It treats AI engineering as a *software engineering* discipline that builds products around models. Machine learning and deep learning appear at literacy depth — enough to reason about model behavior, metrics, and inference cost. Training models is a specialization, not the core.
 
 > [!NOTE]
 > This roadmap was created based on my own research, then optimized and enhanced with Claude Fable 5.
 
 > [!IMPORTANT]
-> **This is the 2026 edition**, built to be finished by **31 December 2026** — see [Finishing in 2026](#finishing-in-2026). The 2027 edition will be a new release with a refreshed curriculum.
+> **This is the 2027 edition** — the complete, in-depth roadmap, built to be finished by **31 December 2027**. The 2026 edition (`v1.0.0`) was the fast, hands-on preview of the same ground; this edition goes deep. Revision date: 9 November 2026.
 
 ## Work through it interactively
 
 **[dileepadev.github.io/learn-ai-engineering →](https://dileepadev.github.io/learn-ai-engineering/)**
 
-The roadmap is also a learning app. **Every part of every phase is trackable** — each skill bullet, project step, and resource is a checkbox, each section has a one-click "mark section done", and Part A topics you already know can be tested out. A **2026 sprint planner** on the dashboard turns what is left into the hours a week it takes and a finish-by date for each phase. Phase 1's drills run **in your browser** — the same pytest suites that live in this repo, executed against your code via WebAssembly. No clone, no setup, no API keys, no account; progress is saved locally and exportable.
+The roadmap is also a learning app. **Every part of every phase is trackable** — each skill bullet, project step, and exit criterion is a checkbox, each section has a one-click "mark section done", and Part A topics you already know can be tested out. A **sprint planner** on the dashboard turns what is left into the hours a week it takes and a finish-by date for each phase. Phase 1's Python drills run **in your browser** — the same pytest suites that live in this repo, executed against your code via WebAssembly. No clone, no setup, no API keys, no account; progress is saved locally and exportable.
 
 Everything it shows is generated from `phases/`, so the site and the docs cannot drift apart. Source and build instructions in [site/](site/).
 
 ## Who this is for
 
-Me — an Associate AI Engineer rebuilding skills from the ground up with current tools and current patterns. Python itself is taught from the start in Phase 1, scoped to exactly what AI engineering uses; prior ML theory is not required.
+Me — an Associate AI Engineer who worked through the 2026 edition's hands-on preview and is now going deep. The schedule assumes existing programming competence; Python itself is still drilled from the start in Phase 1, scoped to what AI engineering uses.
+
+## Goal
+
+Become a production-ready AI Engineer capable of designing, building, evaluating, securing, deploying, operating, and scaling end-to-end AI applications, retrieval systems, AI agents, and multimodal workflows — with measurable product value, cost, reliability, and governance. The roadmap therefore emphasizes complete production systems rather than chatbot demos.
+
+**Final objective:** Be able to take an AI use case from business requirements → data → models → context → RAG/agents → backend APIs → evaluation → security → monitoring → deployment → continuous improvement.
+
+**Learning path:**
+
+Software & Distributed Systems → Data & AI/ML Foundations → LLM & Multimodal Engineering → RAG & Agents → Evaluation & Security → AI SRE & Governance → Cloud & Inference Economics → Architecture & Product Impact
 
 ## Operating principles
 
 1. **Build first, read second.** Every phase is anchored to a project. Reading without shipping doesn't count as progress.
-2. **Raw APIs before frameworks.** Build the agent loop, the RAG pipeline, and structured-output parsing directly against raw APIs once. Then adopt frameworks knowing exactly what they abstract.
-3. **One primary tool per category.** Depth in one vector DB, one agent framework, one eval tool beats surface familiarity with five. "Also know about" lists exist so you can navigate job descriptions and migrations, not so you learn them all.
-4. **Evals are the core skill.** The difference between a demo and a product is a test suite that tells you when you made things worse. This gets its own phase and shows up early in small ways.
-5. **Exit by competence, not calendar.** Each phase ends with exit criteria. Move on when you can do the things — whether that took a week or a month.
-6. **AI assistants as teachers, not just typists.** Claude Code and friends are part of the modern workflow — this roadmap is built *with* them, agent-first. Let them write the code, including each phase's core learning target (the agent loop, the retrieval pipeline, the eval harness). The bar is comprehension, not authorship: every generated piece gets walked through — what it does, why it's built that way, what breaks without it — until you can explain it, modify it, and debug it unaided. Agent instructions live in [AGENTS.md](AGENTS.md), which encodes exactly that expectation.
+2. **Master the engineering concepts before exploring every framework.** Start with direct model APIs and simple workflows, then introduce RAG, agent frameworks, multi-agent systems and advanced infrastructure when requirements justify them.
+3. **Core first, then one specialization.** Build the core first. Select **one** primary specialization, and acquire literacy in adjacent domains.
+4. **One primary tool per category.** Depth in one vector DB, one agent framework, one eval tool beats surface familiarity with five.
+5. **Evals are the core skill.** The difference between a demo and a product is a test suite that tells you when you made things worse — with confidence intervals, not vibes.
+6. **Beat a baseline.** Every RAG system is compared against keyword retrieval, every agent against a deterministic workflow, every model against a cheaper one.
+7. **Exit by competence, not calendar.** Each phase ends with exit criteria. Move on when you can do the things — whether that took a week or a month.
+8. **AI assistants as teachers, not just typists.** Let them write the code, including each phase's core learning target. The bar is comprehension, not authorship: every generated piece gets walked through until you can explain it, modify it, and debug it unaided. Agent instructions live in [AGENTS.md](AGENTS.md), which encodes exactly that expectation.
+
+## Reading the tags
+
+Untagged items in a phase are the core baseline. Tagged items add production depth:
+
+| Tag | Meaning |
+| ---- | ---- |
+| **MUST** | Essential production skill |
+| **IMPORTANT** | Strong employability advantage |
+| **SPECIALIST** | Deep skill for selected jobs |
+| **WATCH** | Emerging — monitor rather than prioritize |
 
 ## The map
 
-| Phase | Focus | You build |
-| ------- | ------- | ----------- |
-| [1 — Foundations](phases/01-foundations.md) | Python for AI engineering (from the ground up), tooling, async, FastAPI, streaming, SQL, Docker | A typed data-wrangling CLI, then a streaming SSE service — tested, containerized |
-| [2 — LLMs & Model APIs](phases/02-llms-and-model-apis.md) | How LLMs behave, provider APIs, open-weight models, cost/latency | A terminal chat client from scratch (hosted + local models) |
-| [3 — Prompting & Structured Outputs](phases/03-prompting-and-structured-outputs.md) | Prompt engineering, JSON schema outputs, tool calling by hand | A document-extraction pipeline with measured accuracy |
-| [4 — RAG](phases/04-rag.md) | Embeddings, chunking, pgvector, hybrid search, reranking | Docs-chat over a real corpus, with citations and retrieval evals |
-| [5 — Agents](phases/05-agents.md) | Agent loops, LangGraph, MCP, human-in-the-loop, multi-agent | An agent three ways: raw loop, LangGraph, and an MCP server |
-| [6 — Evals & Observability](phases/06-evals-and-observability.md) | Golden sets, LLM-as-judge, tracing, CI regression gates | A 50+ case eval suite and full tracing on your Phase 4–5 apps |
-| [7 — Production](phases/07-production.md) | Architecture, gateways, caching, vLLM, cloud AI platforms (Azure/AWS), deployment, cost control | Docs-chat deployed for real: gateway, queue, cloud leg, dashboards, alerts |
-| [8 — Capstone](phases/08-capstone.md) | Everything, end to end | A complete AI product: deployed, evaluated, observable, documented |
+| Phase | Sections | You build | Months |
+| ---- | ---- | ---- | ---- |
+| [1 — Software & AI Foundations](phases/01-foundations.md) | 1. Programming & Software Engineering · 2. AI & Machine Learning Foundations | A production-shaped AI backend: authenticated streaming API, TypeScript frontend, idempotent queue | 1–2 |
+| [2 — Generative AI & LLM Engineering](phases/02-generative-ai-and-llm-engineering.md) | 3. Foundation Models & Context Engineering · 4. LLM Application Engineering | A provider-agnostic LLM service and the benchmark that picks its model | 3 |
+| [3 — Knowledge, Retrieval & Agent Systems](phases/03-knowledge-retrieval-and-agents.md) | 5. RAG & Knowledge Engineering · 6. AI Agents & Orchestration Engineering | An evaluated RAG system and a governed workflow agent | 4–6 |
+| [4 — Production Quality, Reliability & Safety](phases/04-quality-reliability-and-safety.md) | 7. AI Evaluation Engineering · 8. AI Observability Engineering · 9. AI Security & Guardrails | An AI reliability and cost lab | 7–8 |
+| [5 — Deployment, Cloud & Architecture](phases/05-deployment-cloud-and-architecture.md) | 10. AI Operations · 11. Cloud AI Engineering · 12. AI System Design & Architecture | The Phase 3–4 systems on one cloud, from IaC, with gated CI/CD | 9–10 |
+| [6 — Capstone](phases/06-capstone.md) | End-to-end production AI project | An enterprise AI knowledge & workflow assistant | 11–12 |
+| Specialization (optional) | One track from the table below | An inference or data-platform benchmark | 13–18 |
 
-Phases build on each other — projects from 4 and 5 get instrumented in 6 and deployed in 7. Work them in order. Phase 1 teaches the language itself, scoped to this field: skim what you already know, drill what you don't.
+Phases build on each other — the Phase 3 systems get evaluated and instrumented in Phase 4 and deployed in Phase 5. Work them in order.
 
-## What the 2026 market asks for
+## Recommended priority and timing
 
-The phases are weighted the way 2026 job postings are. [The role](phases/the-role.md) has the full research — what the job is, how it differs from ML engineering, what it pays, and how interviews run — with every figure linked to its source.
+The following schedule assumes existing programming competence and ~10–15 deliberate hours weekly; it is a planning estimate, not a guarantee.
 
-| Skill | Share of 2026 AI Engineer postings | Taught in |
-| ----- | ----- | ----- |
-| Python | 59–82.5% across three studies | Phase 1 |
-| LLMs / LLM integration | 63% / 25.4% | Phases 2–3 |
-| Evals | 56% | Phase 6, seeded from Phase 3 |
-| Agents | 14.4–50% | Phase 5 |
-| RAG | 26–35.9% | Phase 4 |
-| AWS · Docker · CI/CD | 40.1% · 31.0% · 29.3% | Phases 1, 7 |
-| Fine-tuning | 8.5–26% | Phase 7, deliberately brief |
+| Period | Focus | Proof of skill |
+| ---- | ---- | ---- |
+| Months 1–2 | Python/backend/SQL/TypeScript basics; distributed reliability patterns | Authenticated FastAPI service, streaming frontend, tests, Docker, idempotent queue |
+| Months 3–4 | Model APIs, context/structured outputs, retrieval with ACLs | Citation-grounded RAG app, hybrid retrieval, permission tests, benchmarks |
+| Months 5–6 | Agents, MCP, safe actions, durable workflow | Stateful approval-gated agent vs deterministic baseline, trace replay |
+| Months 7–8 | Evaluation statistics, observability, SRE, security | Versioned holdout eval suite, CIs, red-team tests, trace dashboard, failure drills |
+| Months 9–10 | Cloud deployment, governance, cost/latency optimization | IaC, CI/CD with quality gates, production-like deployment and runbooks |
+| Months 11–12 | Capstone, domain integration, targeted specialization | Public architecture, benchmark report, risk assessment, case-study narrative |
+| Months 13–18 (optional) | Inference/AI platform or advanced ML/data specialization | vLLM GPU benchmark, data platform, MLflow/Kubernetes or domain-specific project |
 
-LinkedIn's *Jobs on the Rise 2026* ranks AI Engineer first among the fastest-growing US jobs (its category includes machine learning engineers). Typical US pay is $167K–$176K across three 2026 datasets, and a full interview loop runs 3–6 rounds over 2–6 weeks — Phase 8's "Turning it into a job" covers the parts the capstone doesn't.
+## Portfolio: four increasingly rigorous projects
 
-## Rough effort
+1. **Evaluated RAG system (core).** Documents + structured data, permission-aware hybrid search, citations, negative test cases, recall@k and evaluation dashboard. Built in [Phase 3](phases/03-knowledge-retrieval-and-agents.md).
+2. **Governed workflow agent (core).** Read/write tool distinction, approvals, idempotent execution, MCP integration, failure injection and permission attack tests. Built in [Phase 3](phases/03-knowledge-retrieval-and-agents.md).
+3. **AI reliability and cost lab (core).** Load-test service, provider fallback, SLOs, chaos/timeout drills, cost per successful task and rollback report. Built in [Phase 4](phases/04-quality-reliability-and-safety.md).
+4. **Inference or data-platform benchmark (specialization).** Compare vLLM serving options with TTFT, throughput, VRAM and quality, **or** build governed CDC→lakehouse→RAG data architecture. Built after the [capstone](phases/06-capstone.md).
 
-Self-paced, but for planning: Phase 1 runs ~30–50 hours if Python is genuinely new territory (a fraction of that as a refresher), phases 2–3 run ~15–25 focused hours each, phases 4–7 run ~25–40 each, and the capstone is as big as you make it (aim for 40+). At ~10 hours/week that's roughly six months to a strong, defensible skill set.
+## Choose a career specialization (after the core)
 
-## Finishing in 2026
+| Track | Best fit | Deepen after baseline |
+| ---- | ---- | ---- |
+| **Applied AI / LLM Engineer** | Most product AI roles | Full-stack UI, RAG, tool workflows, evals, secure integrations, cost, deployment |
+| **Agent / Automation Engineer** | Workflow automation and enterprise agents | MCP, durable execution, browser/coding agents, idempotency, permissioning; A2A awareness |
+| **AI Platform / MLOps Engineer** | Internal tooling and shared AI services | Kubernetes, Terraform, model gateway, MLflow, observability, GPU quotas and governance |
+| **Inference / LLM Systems Engineer** | Model-serving infrastructure | GPU performance, KV cache, batching, quantization, vLLM, scheduling, profiling |
+| **ML Engineer** | Predictive models and customization | PyTorch, training/data pipelines, feature stores, evaluation, registry, serving |
+| **Forward-Deployed AI Engineer** | Customer implementations | Enterprise integration, domain systems, stakeholder discovery, full-stack, deployment and support |
+| **AI Security / Governance Engineer** | Regulated, sensitive AI systems | Threat modeling, privacy, authorization, auditability, risk assessments and standards |
 
-The 2026 edition runs to **31 December 2026**. From 4 November that is eight weeks, and at the midpoints above — with Phase 1 as a refresher — the full scope is about 220 hours, or roughly **27 hours a week**. If you already work in the field, tick or test out what you know and that number falls. The dashboard's sprint planner starts from every phase's full budget (Phase 1 included, so it reads higher until you test out) and recalculates from your own progress every time you open it.
+**Depth principle:** Build the core first. Select **one** primary specialization, and acquire literacy in adjacent domains. Agent frameworks, GPU kernel development, multimodal video, and all three clouds are *not* universal prerequisites.
 
-| Dates (2026) | Phase |
-| ----- | ----- |
-| Nov 4–8 | Phase 1 — test out what you know, drill the rest |
-| Nov 9–15 | Phase 2 — LLMs & Model APIs |
-| Nov 16–22 | Phase 3 — Prompting & Structured Outputs |
-| Nov 23–29 | Phase 4 — RAG |
-| Nov 30–Dec 6 | Phase 5 — Agents |
-| Dec 7–13 | Phase 6 — Evals & Observability |
-| Dec 14–20 | Phase 7 — Production |
-| Dec 21–31 | Phase 8 — Capstone, then "Turning it into a job" |
+## The 12 layers of production AI engineering
 
-Skipping is not covering: test out only what you could do unaided today. Every part still has a checkbox, so nothing is missed by accident — an unticked part is a part you have not done.
+These layers describe the engineering responsibilities across the full roadmap, rather than 12 additional courses.
+
+| Layer | Core responsibility |
+| ---- | ---- |
+| 1. Business Understanding | Problem, requirements, value and success metrics |
+| 2. Data Understanding | Data sources, structure, quality and access |
+| 3. Knowledge Engineering | Ingestion, indexing, retrieval and provenance |
+| 4. Model Engineering | Model selection, inference, tuning and serving |
+| 5. Context Engineering | Prompts, memory, context selection and compression |
+| 6. Semantic Engineering | Meaning, embeddings, entities and relationships |
+| 7. Agent Engineering | Agents, tools, planning and orchestration |
+| 8. Loop Engineering | Execution cycles, control flow, retries and feedback |
+| 9. Evaluation Engineering | Tests, benchmarks, metrics and quality gates |
+| 10. Harness Engineering | Agent runtime, state, tool execution and sandboxing |
+| 11. Infrastructure Engineering | APIs, pipelines, cloud, deployment and monitoring |
+| 12. Continual Learning | Feedback, experiments, updates and optimization |
+
+**Cross-cutting dimensions:** security/privacy, reliability/SRE, governance/provenance, product impact/AI economics. These are *not* replacements for the twelve engineering layers; they are recurring acceptance criteria in every layer.
+
+## Recommended practical technology stack
+
+| Category | Recommended starting stack |
+| ---- | ---- |
+| Language | Python |
+| Backend | FastAPI, Pydantic |
+| Databases | PostgreSQL, Redis |
+| Vector Search | pgvector or Qdrant |
+| LLM Providers | OpenAI, Anthropic, Google |
+| LLM Framework | LangChain (as needed) |
+| Agent Framework | LangGraph or OpenAI Agents SDK |
+| Integrations | MCP, HTTP APIs |
+| Evaluation | pytest, custom eval datasets, RAG/agent eval tools |
+| Observability | Langfuse or LangSmith, OpenTelemetry |
+| CI/CD | GitHub Actions |
+| Containers | Docker |
+| Cloud | AWS, Azure or GCP (choose one first) |
+| Infrastructure | Managed cloud services, then Kubernetes when needed |
+| Full-stack UI | TypeScript + React/Next.js for streaming, citations, feedback and approvals |
+| Distributed workflows | Redis/managed queue first; Temporal when durable long-running workflows are needed |
+| Data streaming | Batch + CDC; Kafka/Spark/Delta/Iceberg if enterprise scale justifies them |
+| ML lifecycle | MLflow, only if experiment/model lifecycle is materially complex |
+| AI governance | NIST AI RMF-informed risk register, model cards, provenance/retention audit records |
+| SRE and FinOps | OpenTelemetry + service metrics + load tests + cost-per-success dashboards |
+| Inference specialist | vLLM + accelerator/GPU profiler; KServe/Ray/Kubeflow as needed |
+| Platform evaluation | Databricks/Snowflake/managed cloud AI platforms if job targets require them |
+
+The repo's own Python toolchain — uv, ruff, pyright, pytest, Pydantic v2, httpx — is fixed in [AGENTS.md](AGENTS.md). Where a row offers a choice, the picks carried over from the 2026 edition stand until they are reviewed: pgvector, LangGraph, Langfuse, and Azure first, with Instructor for structured outputs, promptfoo and DeepEval for evals, LiteLLM as the gateway, and Redis + arq for queues.
+
+## What NOT to overlearn early
+
+- Do not master every agent framework or build multi-agent teams before establishing a single-agent baseline.
+- Do not treat prompt engineering as a substitute for datasets, evaluation, access control and software reliability.
+- Do not start with Kubernetes when managed container/serverless deployment meets requirements.
+- Do not learn low-level CUDA, distributed model training or complex Graph RAG unless target roles require them.
+- Do not treat certifications, framework popularity or benchmark leaderboards as a substitute for maintained software and measured results.
 
 ## Before you start
 
-- **Keys & spend caps:** create an Anthropic API key and set a hard monthly spend limit in the console *before* writing any code — $10–20/month is plenty through Phase 5. Keys live in environment variables, never in code or git.
-- **Budget reality:** worked carefully (cheap model tiers for drills, prompt caching, Ollama for free local calls), the whole roadmap costs roughly $50–150 in API spend, plus ~$10–30 of rented GPU time in Phase 7.
-- **Hardware:** an ordinary laptop is enough for everything — no GPU needed. Ollama on CPU is slow but fine for learning; the only real GPU work (Phase 7's vLLM leg) uses serverless GPU rented by the hour.
-- **Day-zero installs:** uv, Docker, git, and an editor with pyright wired in. That's the entire toolchain until Phase 4 adds Postgres (which runs in Docker anyway).
-- **Rhythm:** short frequent sessions beat weekend marathons; end sessions mid-task so restarting is cheap, and tick exit criteria as you go. The classic failure mode of self-paced plans is the tutorial loop — the guard is simple: start each phase's project no later than a third of the way through the reading, before it feels like you're "ready."
+- **Keys & spend caps:** create provider API keys and set a hard monthly spend limit in each console *before* writing any code. Keys live in environment variables, never in code or git.
+- **Budget reality:** worked carefully — cheap model tiers for drills, prompt caching, local models for free calls — API spend stays modest. The cloud work in Phase 5 and any GPU work in a specialization cost extra; set budget alerts before you start them.
+- **Hardware:** an ordinary laptop is enough for the core — no GPU needed. Local models on CPU are slow but fine for learning; GPU work (self-hosted inference, the Inference specialization) uses GPUs rented by the hour.
+- **Day-zero installs:** uv, Docker, git, Node.js (for the Phase 1 frontend), and an editor with pyright wired in. Terraform/OpenTofu arrives with Phase 1's DevOps work; a cloud account with Phase 5.
+- **Rhythm:** short frequent sessions beat weekend marathons; end sessions mid-task so restarting is cheap, and tick exit criteria as you go. The guard against the tutorial loop is simple: start each phase's project no later than a third of the way through its reading, before it feels like you're "ready."
 
-## The stack
-
-Everything this roadmap uses, what it is, and why it earned the slot. Primary picks get real depth; "aware" rows exist so job descriptions and migration decisions never surprise you.
-
-### Languages & core engineering
-
-| Tool | What it is | Why it's in the roadmap | Phases |
-| ---- | ---- | ---- | ---- |
-| [Python](https://www.python.org) | The language | Industry default for AI engineering; every major framework here is Python-first | 1+ |
-| [SQL / PostgreSQL](https://www.postgresql.org) | Relational database & query language | App data, vectors, and full-text search all live in Postgres from Phase 4 on | 1, 4+ |
-| [uv](https://docs.astral.sh/uv/) | Python package & project manager | Replaces pip/venv/poetry/pyenv with one fast tool; the current standard | 1+ |
-| [ruff](https://docs.astral.sh/ruff/) | Linter + formatter | One instant tool, no config debates | 1+ |
-| [pyright](https://microsoft.github.io/pyright/) | Static type checker | AI apps are schema-heavy; typing catches contract breaks before runtime | 1+ |
-| [pytest](https://docs.pytest.org) | Test framework | Tests in every phase; later carries eval suites too | 1+ |
-| [Pydantic](https://docs.pydantic.dev) | Data validation & serialization | The load-bearing library of the field: API contracts, LLM output schemas, tool signatures | 1+ |
-| [FastAPI](https://fastapi.tiangolo.com) | Async web framework | Serves every app in this roadmap; Pydantic-native, streaming-friendly | 1+ |
-| [httpx](https://www.python-httpx.org) | Async HTTP client | Raw provider API calls, SSE consumption, concurrent fan-out | 1+ |
-| [Docker](https://docs.docker.com) | Containers | Local infra (Postgres, Langfuse) and the deployment artifact | 1+ |
-| [GitHub Actions](https://docs.github.com/en/actions) | CI/CD | Runs tests and eval regression gates on every change | 6–7 |
-
-### Models & model access
-
-| Tool | What it is | Why it's in the roadmap | Phases |
-| ---- | ---- | ---- | ---- |
-| [Anthropic API](https://docs.anthropic.com) | Hosted frontier models (Claude) | The API studied in depth: streaming, tool use, prompt caching, batches | 2+ |
-| [OpenAI API](https://platform.openai.com/docs) | Hosted frontier models | The de facto wire-format standard most tooling speaks | 2 |
-| [Ollama](https://ollama.com) | Local model runner | Run open-weight models (Llama/Qwen/DeepSeek families) on your own machine | 2 |
-| [OpenRouter](https://openrouter.ai) | Model aggregator | Aware: many models behind one key | 2 |
-| [Microsoft Foundry](https://learn.microsoft.com/en-us/azure/foundry/) | Microsoft's unified AI platform (rebranded from Azure AI Foundry) | Enterprise route to frontier models with quotas, content filters, private networking; first-choice cloud | 2, 7 |
-| [Amazon Bedrock](https://aws.amazon.com/bedrock/) | AWS managed model access | Claude and other models with AWS governance; Knowledge Bases, Guardrails | 2, 7 |
-| [Vertex AI](https://cloud.google.com/vertex-ai) | GCP's AI platform | Aware: same concepts, third ecosystem | 7 |
-
-### Structured outputs, RAG & agents
-
-| Tool | What it is | Why it's in the roadmap | Phases |
-| ---- | ---- | ---- | ---- |
-| [Instructor](https://python.useinstructor.com) | Structured-output library | Pydantic-validated LLM outputs with retries — adopted after hand-rolling the same loop | 3 |
-| [pgvector](https://github.com/pgvector/pgvector) | Vector extension for Postgres | Vectors + metadata + BM25 in one boring, correct database | 4+ |
-| [sentence-transformers](https://sbert.net) | Open-source embeddings & rerankers | Local embedding and cross-encoder reranking without API costs | 4 |
-| [Cohere Rerank](https://docs.cohere.com/docs/rerank-overview) | Hosted reranker | The biggest retrieval-quality jump per line of code | 4 |
-| [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview) | Agent orchestration framework | Primary framework: durable state, human-in-the-loop, streaming | 5 |
-| [MCP](https://modelcontextprotocol.io) | Model Context Protocol | The open standard for exposing tools to AI apps; you build a server | 5, 8 |
-| [Pydantic AI](https://ai.pydantic.dev) | Type-safe agent framework | Aware: the lighter-weight alternative worth watching | 5 |
-| [Claude Agent SDK](https://docs.anthropic.com/en/api/agent-sdk/overview) | Agent harness SDK | Aware: the production harness behind Claude Code | 5 |
-
-### Evals, observability & production
-
-| Tool | What it is | Why it's in the roadmap | Phases |
-| ---- | ---- | ---- | ---- |
-| [promptfoo](https://www.promptfoo.dev) | Eval & red-team CLI | Config-driven eval suites wired into CI; automated red-teaming | 6 |
-| [DeepEval](https://deepeval.com) | Pytest-native eval library | Prebuilt LLM/RAG metrics (faithfulness, relevancy) inside the pytest you already use | 6 |
-| [Ragas](https://docs.ragas.io) | RAG evaluation library | Aware: RAG-metric vocabulary; overlaps DeepEval | 4, 6 |
-| [Langfuse](https://langfuse.com) | LLM observability platform | Open-source tracing, cost tracking, datasets, feedback capture; self-hostable | 6+ |
-| [LiteLLM](https://docs.litellm.ai) | LLM gateway/proxy | One choke point for budgets, rate limits, fallbacks, model routing | 7 |
-| [vLLM](https://docs.vllm.ai) | Inference server | The standard for self-hosting open-weight models on GPUs | 7 |
-| [Redis](https://redis.io) + [arq](https://arq-docs.helpmanual.io) | Queue + async worker | Background jobs (ingestion, long agent runs) off the request path | 7 |
-| [Fly.io](https://fly.io) / [Railway](https://railway.com) | Container hosting | Simple, cheap deploys for containerized apps | 7 |
-| [Modal](https://modal.com) | Python-native serverless + GPU | Serverless GPUs for vLLM legs and spiky workloads | 7 |
-| [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) | Managed retrieval service | The managed version of the RAG stack you built by hand | 7 |
-| [Azure Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/) | Serverless containers on Azure | Primary cloud deploy target (Azure-first) | 7 |
+**Regional note:** Hiring expectations and regulatory duties depend on country, employer, industry and seniority. Treat frontier infrastructure as a specialization, while backend reliability, data permissions, safe integrations, measurable evaluations and product impact are transferable across markets.
 
 ## Progress
 
-- [ ] Phase 1 — Foundations
-- [ ] Phase 2 — LLMs & Model APIs
-- [ ] Phase 3 — Prompting & Structured Outputs
-- [ ] Phase 4 — RAG
-- [ ] Phase 5 — Agents
-- [ ] Phase 6 — Evals & Observability
-- [ ] Phase 7 — Production
-- [ ] Phase 8 — Capstone
+- [ ] Phase 1 — Software & AI Foundations
+- [ ] Phase 2 — Generative AI & LLM Engineering
+- [ ] Phase 3 — Knowledge, Retrieval & Agent Systems
+- [ ] Phase 4 — Production Quality, Reliability & Safety
+- [ ] Phase 5 — Deployment, Cloud & Architecture
+- [ ] Phase 6 — Capstone
+- [ ] Specialization (optional)
 
 ## Project code
 
-Phase projects live in this repo under `projects/`, as [uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/) members — one lockfile, one environment, one set of standards across all eight phases:
+Phase projects live in this repo under `projects/`, as [uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/) members — one lockfile, one environment, one set of standards across every phase:
 
 ```text
 projects/
-  01-wrangle/        # Phase 1 — typed data-cleaning CLI
-  01-mockstream/     # Phase 1 — streaming SSE service
-  02-chat-client/    # Phase 2 — terminal chat client
-  ...                # one directory per phase project
+  <NN>-<name>/       # one directory per phase project, NN = the phase number
 ```
 
 Tick them off in **Progress** above as you go.
@@ -185,6 +200,6 @@ This repo is set up agent-first. [AGENTS.md](AGENTS.md) is the single source of 
 
 ## Interactive site deployment
 
-If you add the interactive learning site under `site/` (Astro static app), GitHub Pages deployment
-is handled by [.github/workflows/deploy-site.yml](.github/workflows/deploy-site.yml). It builds
-`site/` and deploys `site/dist` on pushes to `main`.
+GitHub Pages deployment of the learning site under `site/` is handled by
+[.github/workflows/deploy-site.yml](.github/workflows/deploy-site.yml). It builds `site/` and
+deploys `site/dist` on pushes to `main`.

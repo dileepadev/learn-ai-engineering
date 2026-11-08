@@ -26,15 +26,15 @@ Huyen splits any AI application stack into three layers — application developm
 | Skill | Share of 2026 AI Engineer postings | Where it's taught |
 | --- | --- | --- |
 | Python | 59% · 62% · 82.5% (three studies, below) | [Phase 1](01-foundations.md) |
-| LLMs / LLM integration | 63% / 25.4% | [Phase 2](02-llms-and-model-apis.md), [Phase 3](03-prompting-and-structured-outputs.md) |
-| Prompt engineering | 29.1% | [Phase 3](03-prompting-and-structured-outputs.md) |
-| Evals | 56% | [Phase 6](06-evals-and-observability.md), seeded in phases 3 and 4 |
-| Agents | 50% (July) / 14.4% (January) | [Phase 5](05-agents.md) |
-| RAG | 26% / 35.9% | [Phase 4](04-rag.md) |
-| AWS · Docker · CI/CD · Kubernetes | 40.1% · 31.0% · 29.3% · 29.1% | [Phase 1](01-foundations.md), [Phase 7](07-production.md) |
-| Fine-tuning | 26% / 8.5% | [Phase 7](07-production.md) — an afternoon, on purpose |
-| PyTorch | 33% / 22.0% | Not taught: this roadmap does not train models |
-| TypeScript · React | 23.4% · 14.8% | Not taught: the curriculum is Python-only by design |
+| LLMs / LLM integration | 63% / 25.4% | [Phase 2](02-generative-ai-and-llm-engineering.md) |
+| Prompt engineering | 29.1% | [Phase 2](02-generative-ai-and-llm-engineering.md) |
+| Evals | 56% | [Phase 4](04-quality-reliability-and-safety.md), seeded in phases 2 and 3 |
+| Agents | 50% (July) / 14.4% (January) | [Phase 3](03-knowledge-retrieval-and-agents.md) |
+| RAG | 26% / 35.9% | [Phase 3](03-knowledge-retrieval-and-agents.md) |
+| AWS · Docker · CI/CD · Kubernetes | 40.1% · 31.0% · 29.3% · 29.1% | [Phase 1](01-foundations.md), [Phase 5](05-deployment-cloud-and-architecture.md) |
+| Fine-tuning | 26% / 8.5% | [Phase 2](02-generative-ai-and-llm-engineering.md) as one option among several; post-training is a specialization |
+| PyTorch | 33% / 22.0% | [Phase 1](01-foundations.md) at literacy depth; training is the ML Engineer specialization |
+| TypeScript · React | 23.4% · 14.8% | [Phase 1](01-foundations.md) and the [capstone](06-capstone.md) UI |
 
 The samples: [390 postings at 69 companies, July 2026](https://dev.to/ali_82f3409ed625e8ba8515b/ai-engineer-roadmap-2026-what-390-job-postings-actually-require-3jdo); [889 roles in Berlin, Amsterdam, London, Los Angeles, and New York, January 2026](https://aishippinglabs.com/blog/what-is-an-ai-engineer-based-on-job-descriptions) (its table reports share of roles; parts of its text report share of all skill mentions); and [43,480 US postings since January 2026](https://axialsearch.com/insights/ai-engineering-jobs), which found Python in 62%, cloud platforms in 55%, and foundation models in 51%. LinkedIn's top three AI Engineer skills are LangChain, RAG, and PyTorch ([LinkedIn](https://www.linkedin.com/pulse/linkedin-jobs-rise-2026-25-fastest-growing-roles-us-linkedin-news-dlb1c/)).
 
@@ -110,7 +110,7 @@ A full loop runs 3–6 rounds over 2–6 weeks. Loops reported in 2025–2026:
 - **LangChain** (AI Engineer): a take-home to build an agent, a discussion of the solution, then an applied system design interview.
 - **Amazon** (GenAI Innovation Center): the standard software-engineer coding bar, plus GenAI depth.
 
-System design prompts look like "Design a chatbot that answers questions over your company's internal documents," "Design an agent that books meetings on behalf of a user across calendars and email," and "Design a customer-support assistant that must never leak PII or make commitments the company cannot honor." Interviewers probe six areas: data flow, retrieval, evaluation, failure modes, cost and latency, and safety ([AI Engineer Insights](https://aiengineerinsights.com/blog/ai-engineer-interview-questions/)). [Phase 8](08-capstone.md) turns all of this into practice.
+System design prompts look like "Design a chatbot that answers questions over your company's internal documents," "Design an agent that books meetings on behalf of a user across calendars and email," and "Design a customer-support assistant that must never leak PII or make commitments the company cannot honor." Interviewers probe six areas: data flow, retrieval, evaluation, failure modes, cost and latency, and safety ([AI Engineer Insights](https://aiengineerinsights.com/blog/ai-engineer-interview-questions/)). [Phase 6](06-capstone.md) turns all of this into practice.
 
 ## Getting in
 
@@ -121,10 +121,10 @@ System design prompts look like "Design a chatbot that answers questions over yo
 ## What this roadmap leaves out, on purpose
 
 - **Training models from scratch.** Model training appears in only 6.4% of AI Engineer roles (Grigorev and Kuka).
-- **Fine-tuning first.** 57% of organizations don't fine-tune at all; Phase 7 gives it an afternoon, after evals exist to tell you whether it helped.
+- **Fine-tuning first.** 57% of organizations don't fine-tune at all; Phase 2 treats it as one option among several, judged by the same benchmark as every other choice.
 - **Every framework.** LangChain, LangGraph, or LlamaIndex appear in 10% of the July 2026 postings. Learn the concepts by hand, then one framework.
 - **Heavy math up front.** "ML knowledge is no longer a must-have for building AI applications" (Huyen). Pick up the theory when debugging calls for it.
-- **TypeScript and React.** 23.4% and 14.8% of roles ask for them, mostly AI Product Engineer roles. This curriculum stays Python-only so each tool gets real depth; add a frontend later if you target those roles.
+- **A frontend-heavy curriculum.** 23.4% and 14.8% of roles ask for TypeScript and React, mostly AI Product Engineer roles. Phase 1 and the capstone build one thin frontend for streaming, citations, feedback, and approvals; deeper frontend work belongs to the Applied AI track.
 
 ## Sources
 

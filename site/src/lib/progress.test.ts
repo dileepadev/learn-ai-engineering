@@ -17,6 +17,7 @@ import {
   setSqlDrillDone,
   setTestedOut,
 } from "./progress.ts";
+import { EDITION } from "./edition.ts";
 
 const STORAGE_KEY = "lai:progress:v1";
 
@@ -139,7 +140,7 @@ describe("emptyState", () => {
   it("is versioned and fully populated", () => {
     const state = emptyState();
     expect(state.version).toBe(1);
-    expect(state.edition).toBe("2026");
+    expect(state.edition).toBe(EDITION);
     expect(state.plan).toEqual({ hoursPerWeek: null });
     for (const key of [
       "exercises",

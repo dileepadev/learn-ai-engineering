@@ -149,8 +149,10 @@ describe("annotateCheckboxes", () => {
 describe("the real phase docs", () => {
   const files = readdirSync(PHASES_DIR).filter((name) => /^\d{2}-.+\.md$/.test(name));
 
-  it("finds all eight phase docs", () => {
-    expect(files).toHaveLength(8);
+  // Pinned to the 2027 edition's six phases, so a broken filename pattern cannot silently
+  // drop a doc from the site. Update it when an edition changes the number of phases.
+  it("finds all six phase docs", () => {
+    expect(files).toHaveLength(6);
   });
 
   for (const file of files) {

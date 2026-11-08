@@ -49,7 +49,7 @@ export interface ExitCriterion {
  * Pull a phase doc's exit-criteria checklist out of the prose.
  *
  * The checklist is removed from the body because the page renders it as a persisted,
- * tickable list instead — across the eight phases these are the main progress signal for
+ * tickable list instead — across the phases these are the main progress signal for
  * everything that has no lessons yet.
  *
  * The section is located by **content, not by name**: whichever H2 contains `- [ ]` items

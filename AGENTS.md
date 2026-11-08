@@ -11,7 +11,8 @@ Canonical instructions for AI coding agents working in this repository.
 A **learning monorepo** for modern AI engineering: LLM applications, agents, RAG, structured
 outputs, evals, and production deployment. It holds two kinds of content:
 
-1. **Roadmap documentation** (`README.md`, `phases/*.md`) — an 8-phase curriculum.
+1. **Roadmap documentation** (`README.md`, `phases/*.md`) — a 6-phase curriculum, then one
+   specialization track.
 2. **Phase projects** (`projects/*`) — the Python applications built while working the phases.
 
 The owner is an Associate AI Engineer rebuilding skills with current tools. **The purpose of
@@ -19,8 +20,11 @@ this repo is learning, not shipping a product.** That single fact drives the rul
 
 ### What this repo is NOT
 
-- Not a machine learning or data science curriculum. No training-from-scratch, no calculus,
-  no notebooks-as-a-lifestyle, no sklearn/NumPy/pandas work. Do not suggest them.
+- Not a model-training or data science curriculum. Phase 1 teaches machine learning and deep
+  learning at **literacy depth** — enough to reason about model behavior, metrics, and
+  inference cost, with a few small hands-on exercises. Training pipelines, CUDA, and
+  distributed training belong to the ML Engineer and Inference specializations: do not pull
+  them into the core. No notebooks-as-a-lifestyle.
 - Not a library others depend on. There is no public API to keep stable.
 
 ## Teaching mode (the rule that makes this repo different)
@@ -54,7 +58,7 @@ learn-ai-engineering/
 ├── README.md                     <- roadmap overview, stack table, progress
 ├── pyproject.toml                <- uv workspace root; shared ruff/pyright/pytest config
 ├── .mcp.json                     <- project-scoped MCP servers
-├── phases/                       <- curriculum docs, 01..08
+├── phases/                       <- curriculum docs, 01..06
 │   ├── 01-foundations.md
 │   ├── 01-foundations/part-a/    <- lessons, drills, tests, solutions
 │   └── the-role.md               <- the 2026 research on the role; rendered at /role, not a phase
@@ -81,8 +85,9 @@ yet, ask rather than guessing at its contents.
 ## The learning site (`site/`)
 
 `site/` is a static [Astro](https://astro.build) app that turns this curriculum into an
-interactive one, deployed to GitHub Pages. It is the **only** place TypeScript, React, or
-CSS belongs in this repo. It is not a uv workspace member and has no Python at runtime.
+interactive one, deployed to GitHub Pages. Apart from the frontends phase projects build on
+purpose (Phase 1's full-stack work, the capstone UI), it is the only place TypeScript, React,
+or CSS belongs in this repo. It is not a uv workspace member and has no Python at runtime.
 
 The rule that matters: **`phases/` is the source of truth; the site is derived.**
 
@@ -104,7 +109,7 @@ a **part**: the site renders it with a checkbox and saves the tick. Rules when e
 
 - **Want something tracked? Make it a list item.** Paragraphs (intros, `**Stretch:**` lines)
   are not tracked. Stretch goals are optional by design; keep them as paragraphs.
-- **Options are not tasks.** A section whose bullets are choices (Phase 8's "Alternatives")
+- **Options are not tasks.** A section whose bullets are choices to pick between
   opts out with `<!-- track: off -->` on its own line under the heading; a reason may follow
   the word `off`.
 - **Part keys are hashed from the wording.** Inserting or reordering bullets keeps every
@@ -118,8 +123,8 @@ a **part**: the site renders it with a checkbox and saves the tick. Rules when e
 
 ### Editions
 
-The roadmap ships as a yearly edition. This one is the **2026 edition**, built to be finished
-by 31 December 2026; the 2027 edition is a new release. `site/src/lib/edition.ts` holds the
+The roadmap ships as a yearly edition. This one is the **2027 edition**, built to be finished
+by 31 December 2027; the 2028 edition is a new release. `site/src/lib/edition.ts` holds the
 edition, its deadline, and the next edition's name — the only year-specific values the site
 reads. Saved progress records the edition it was made against. To cut the next edition:
 
@@ -155,11 +160,10 @@ npm run verify:browser  # end-to-end in real Firefox
 
 The last two need a server already running (`npm run dev` or `npm run preview`).
 
-Note the exception this creates: the MCP section below says Playwright is not configured
-because "this roadmap builds CLIs and APIs, not browser UIs." That still holds for the
-*curriculum* — no phase project should acquire a browser dependency. `site/` is tooling for
-the curriculum, and Playwright is a `site/` devDependency used solely to prove the WASM
-drill runner works in a real browser, which nothing else can check.
+Note the exception this creates: Playwright is a `site/` devDependency used solely to prove
+the WASM drill runner works in a real browser, which nothing else can check. `site/` is
+tooling for the curriculum; a phase project's frontend picks its own test tooling and never
+depends on `site/`.
 
 ## Toolchain (non-negotiable)
 
@@ -218,7 +222,8 @@ v1 idioms are wrong here and are a frequent AI-generated error. Use:
 - LLM work is I/O-bound. Use `async`/`await` throughout; never block the event loop.
 - Fan-out uses `asyncio.gather` **with a bounding `asyncio.Semaphore`**. Unbounded fan-out
   against a provider API earns rate limits — always bound it and say what the bound is.
-- No `threading` or `multiprocessing`. asyncio is this repo's concurrency model.
+- No `threading` or `multiprocessing` in project code. Phase 1 covers multiprocessing as a
+  concept; asyncio is this repo's concurrency model.
 
 ### Style
 
@@ -239,8 +244,9 @@ v1 idioms are wrong here and are a frequent AI-generated error. Use:
   `mockstream` service as a test double. Tests must run offline, free, and deterministically.
 - Async tests use `pytest-asyncio`. Streaming endpoints get an explicit streaming test.
 - When you fix a bug, add the regression test that would have caught it.
-- From Phase 6 on, **evals are separate from tests**: tests assert correctness and must be
-  deterministic; evals score quality and may be non-deterministic. Never mix them in one run.
+- Wherever a project has evals (from Phase 2's model benchmark on), **evals are separate
+  from tests**: tests assert correctness and must be deterministic; evals score quality and
+  may be non-deterministic. Never mix them in one run.
 
 ## Documentation requirements
 
@@ -250,7 +256,9 @@ v1 idioms are wrong here and are a frequent AI-generated error. Use:
   obvious private helpers.
 - **Phase docs** (`phases/*.md`) follow the structure established in
   [phases/01-foundations.md](phases/01-foundations.md): goal / you build / effort, why the
-  phase exists, content parts, project(s), resources, exit criteria as a checklist. Match its
+  phase exists, numbered content sections (tagged items, then an outcome), project(s), exit
+  criteria as a checklist. Items carry the MUST / IMPORTANT / SPECIALIST / WATCH tags the
+  README defines; untagged items are the core baseline. Match its
   voice — direct, opinionated, second person, no filler.
 - When a project is completed, tick its box in the README **Progress** list and link it under
   **Project code**.
@@ -318,8 +326,8 @@ Further rules:
 - **Do not invent APIs.** The libraries in this stack (uv, Pydantic v2, FastAPI, LangGraph,
   Instructor, pgvector) move fast. If unsure of a signature, look it up — the Context7 MCP
   server is configured for exactly this. Verify before asserting.
-- **Do not invent links, file paths, or phase content.** Only 1 of 8 phase docs exists at the
-  time of writing. Check what is actually on disk before referencing it.
+- **Do not invent links, file paths, or phase content.** Check what is actually on disk before
+  referencing it.
 - **Do not fabricate command output, test results, or benchmarks.** Run the command, or say
   you did not.
 - **Do not add dependencies outside the stack table in the README** without flagging it and
@@ -336,12 +344,12 @@ Configured in `.mcp.json`, deliberately minimal:
   hallucinated APIs for fast-moving libraries. Use it before writing against an unfamiliar
   library surface.
 - **Microsoft Learn** *(connected via the Claude client, not `.mcp.json`)* — official Azure
-  docs. Relevant because Phase 7 is Azure-first: Microsoft Foundry, Azure AI Search, Azure
-  Container Apps.
+  docs. Relevant while Azure is the first cloud for Phase 5: Microsoft Foundry, Azure AI
+  Search, Azure Container Apps.
 
 Deliberately **not** configured, to avoid bloat: filesystem, fetch, and git servers (built-in
-tools already cover these), GitHub (the `gh` CLI is available), and Playwright (this roadmap
-builds CLIs and APIs, not browser UIs).
+tools already cover these), GitHub (the `gh` CLI is available), and Playwright (the frontends
+here are small, and the site's browser checks run as scripts).
 
-**Add at Phase 4**, when a database actually exists: a Postgres MCP server, for inspecting
-pgvector schemas and query plans during RAG work. It provides no value before then.
+**Add at Phase 3**, when RAG work starts: a Postgres MCP server, for inspecting pgvector
+schemas and query plans. It provides little value before then.

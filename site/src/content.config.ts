@@ -18,7 +18,7 @@ const part = z.object({
   text: z.string(),
 });
 
-/** The eight roadmap docs, `phases/NN-name.md`. */
+/** The roadmap's phase docs, `phases/NN-name.md`. */
 const phases = defineCollection({
   loader: curriculumLoader({
     dir: "phases",

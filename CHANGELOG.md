@@ -9,6 +9,28 @@ Changes are organized into the following categories:
 - **Fixed:** Bug fixes that resolve issues or correct unintended behavior.
 - **Removed:** Features or components that have been removed from the project.
 
+## [2.0.0] — 2027 edition (in progress, on `feat/2027-edition`)
+
+The **2027 edition**: the complete, in-depth roadmap, built to be finished by 31 December 2027. It replaces the 2026 edition's eight phases with six, and lands after `v1.0.0` (the 2026 edition) is tagged.
+
+### Added
+
+- Six phase docs covering twelve numbered sections: Software & AI Foundations; Generative AI & LLM Engineering; Knowledge, Retrieval & Agent Systems; Production Quality, Reliability & Safety; Deployment, Cloud & Architecture; and the Capstone. Every item carries a priority tag — MUST, IMPORTANT, SPECIALIST, or WATCH — or is untagged core baseline.
+- New ground the 2026 edition did not cover: distributed systems for AI, full-stack AI product engineering (a thin TypeScript frontend), ML and deep-learning foundations at literacy depth, multimodal AI, permission-aware retrieval, durable workflows, AI SRE, responsible AI and governance, AI/LLMOps, three cloud platforms, and AI system design.
+- A hands-on project and exit criteria for every phase, a short "models from the inside" lab in Phase 1, and a "Turning it into a job" section in the capstone.
+- README sections for career specializations, the 12 layers of production AI engineering, the recommended stack, priority and timing, the four-project portfolio, and what not to overlearn early.
+
+### Changed
+
+- `site/src/lib/edition.ts` moves to the 2027 edition (deadline 31 December 2027, next edition 2028).
+- Saves made before editions existed are labelled with the 2026 edition explicitly, instead of with whatever the current edition is.
+- `AGENTS.md`: the curriculum is six phases plus a specialization; ML is taught at literacy depth; phase projects may build their own frontends.
+- `phases/the-role.md` points each skill at the 2027 phase that teaches it.
+
+### Removed
+
+- The 2026 edition's phase docs for phases 2–8 (`02-llms-and-model-apis.md` through `08-capstone.md`). They stay in the 2026 edition on `main`.
+
 ## [Unreleased]
 
 This is the **2026 edition** — built to be finished by 31 December 2026. Suggested release: tag `v1.0.0` once merged; the 2027 edition will be `v2.0.0` (see "Editions" in `AGENTS.md`).

@@ -22,6 +22,9 @@
 
 import { EDITION } from "./edition.ts";
 
+/** The edition every save made before `ProgressState.edition` existed belongs to. */
+const PRE_EDITION_SAVE = "2026";
+
 const STORAGE_KEY = "lai:progress:v1";
 const SCHEMA_VERSION = 1;
 
@@ -108,9 +111,13 @@ function reconcile(input: unknown): ProgressState {
 
   return {
     version: SCHEMA_VERSION,
-    // A save from before editions existed was made against the 2026 curriculum.
+    // A save from before editions existed was made against the 2026 curriculum. That is a
+    // fixed fact about old saves, so it must not follow `EDITION` when the edition moves on —
+    // labelling an old save with the current edition would hide that its ticks are stale.
     edition:
-      typeof candidate.edition === "string" && candidate.edition !== "" ? candidate.edition : EDITION,
+      typeof candidate.edition === "string" && candidate.edition !== ""
+        ? candidate.edition
+        : PRE_EDITION_SAVE,
     exercises: record<ExerciseRecord>(candidate.exercises),
     lessons: record<{ readAt: string }>(candidate.lessons),
     checks: record<{ correct: boolean; attempts: number }>(candidate.checks),
