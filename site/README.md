@@ -21,8 +21,15 @@ No backend, no database, no accounts. Everything runs in the browser.
 - **A year-end sprint planner** on the dashboard: days left in the edition, hours left, the
   pace it takes, and a finish-by date per phase (`src/lib/sprint.ts`). The edition and its
   deadline live in `src/lib/edition.ts`.
+- **Easy to get around.** A course sidebar with live status on every reading page, a
+  slide-out menu on phones, "On this page" contents that follow your scroll, breadcrumbs,
+  and previous/next links on lessons and phases.
+- **Search and shortcuts.** Ctrl/⌘K or `/` searches every phase, lesson, and section
+  (`src/lib/search.ts`, over an index built into `search-index.json`). `←`/`→` move between
+  lessons and phases, and `?` lists the shortcuts. Single-key shortcuts never fire while you
+  type or inside the drill editor (`src/lib/keys.ts`).
 - **Progress that persists**, in `localStorage`, with export/import so it is not trapped in
-  one browser.
+  one browser. The labelled **Progress** button in the header opens a per-phase breakdown.
 
 ## The one rule
 
@@ -46,7 +53,7 @@ npm run dev             # export the curriculum, then serve with hot reload
 npm run build           # prebuild exports, then builds to dist/
 npm run preview         # serve dist/ exactly as Pages will
 npm run check           # astro check (TypeScript)
-npm run test            # vitest: progress store, completion math, link rewriting
+npm run test            # vitest: progress store, completion math, links, search, shortcuts
 npm run verify:drills   # run all 207 Part A tests through Pyodide
 npm run verify:pages    # sweep every page for console errors and a11y issues
 npm run verify:browser  # end-to-end in a real browser
@@ -73,8 +80,14 @@ CI runs it on every deploy.
 
 `verify:browser` goes one step further and drives a real Firefox through Playwright: it
 types an answer into the editor, boots Pyodide, runs the suite, and checks the pass is
-written to `localStorage` and survives a reload. It needs a preview server running, so it is
-a local check rather than a CI step.
+written to `localStorage` and survives a reload. It also checks search, arrow-key
+navigation (and that arrows inside the editor never leave the page), the Progress button,
+and the phone menu. It needs a preview server running, so it is a local check rather than
+a CI step. Both browser scripts need Playwright's Firefox once: `npx playwright install firefox`.
+
+Astro 7's `astro dev` and `astro preview` may start in the background. If they return at
+once, `npx astro dev logs` shows the output and `npx astro dev stop` stops the server
+(likewise `preview`).
 
 ## Architecture notes
 
@@ -90,8 +103,19 @@ a local check rather than a CI step.
 - **Some drills omit an import on purpose** — topic 09 expects you to reach for `functools`,
   topic 08 for `itertools.islice`. The UI therefore exposes an editable module preamble.
   Without it those topics would be impossible to finish here.
-- **Tailwind is wired through PostCSS**, not its Vite plugin, which bound to a different Vite
-  copy than the one Astro runs and crashed on a native-binding mismatch.
+- **Tailwind runs as a Vite plugin** (`@tailwindcss/vite`). Under Astro 6 it went through
+  PostCSS, because Astro nested its own Vite and the plugin bound to the wrong copy. Astro 7
+  is on Vite 8 with a single Vite in the tree (`npm ls vite`), and Vite 8 broke the PostCSS
+  route. If `npm ls vite` ever shows two copies, expect the build to break again.
+- **Phase counts ship once per page**, as JSON in `Base.astro`, read by `usePhaseCounts()`.
+  Passing them as island props would embed ~15KB per island.
+- **The header must not move on hydration.** Progress and the theme are only known in the
+  browser, so the server-rendered header has to take exactly the same space as the
+  hydrated one, or every page change jumps. `HeaderProgress` uses fixed-size slots and
+  `ThemeToggle` picks its icon with CSS, not React state.
+- **The type scale lives in `@theme` in `src/styles/global.css`**: `text-xs` is 14px and
+  `text-sm` 15px, a notch above Tailwind's defaults, so interface text reads comfortably
+  next to 17px lesson prose. Change it there, not per component.
 
 ## Deployment
 

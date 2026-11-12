@@ -53,14 +53,92 @@ check(
 check("lists all 12 Part A topics", (await page.locator('a[href*="/learn/"]').count()) >= 12);
 check("lists all 8 phases", (await page.locator('a[href*="/phases/"]').count()) >= 8);
 
+/** Islands lose their `ssr` attribute once hydrated; shortcuts do nothing before that. */
+const hydrated = (name) =>
+  page.waitForSelector(`astro-island[component-export="${name}"]:not([ssr])`, { timeout: 15_000 });
+
+console.log("\nFinding your progress");
+await hydrated("HeaderProgress");
+const progressLink = page.locator("header").getByRole("link", { name: /^Progress/ });
+check("the header has a link labelled Progress", await progressLink.isVisible());
+await Promise.all([page.waitForURL(/\/progress$/), progressLink.click()]);
+await page.getByRole("heading", { level: 1, name: "Your progress" }).waitFor({ timeout: 10_000 });
+check(
+  "it opens a page that lists every phase",
+  (await page.locator('section[aria-labelledby="by-phase"] a[href*="/phases/"]').count()) === 8,
+);
+check(
+  "the Progress link is marked as the current page",
+  (await progressLink.getAttribute("aria-current")) === "page",
+);
+await page.goto(BASE, { waitUntil: "networkidle" });
+check(
+  "the dashboard ring links to it in words",
+  (await page.getByRole("link", { name: /See your progress/ }).count()) === 1,
+);
+
+console.log("\nSearch and keyboard navigation");
+await hydrated("CommandPalette");
+await page.keyboard.press("Control+K");
+const searchBox = page.getByRole("combobox", { name: /Search phases/ });
+await searchBox.waitFor({ timeout: 10_000 });
+check("Ctrl+K opens search", await searchBox.isVisible());
+check(
+  "an empty query offers quick actions",
+  (await page.getByRole("option").count()) >= 4,
+  `${await page.getByRole("option").count()} options`,
+);
+await searchBox.fill("decorators");
+await page.getByRole("option", { name: /Decorators/ }).first().waitFor({ timeout: 10_000 });
+await Promise.all([page.waitForURL(/\/learn\/09-/), page.keyboard.press("Enter")]);
+check("Enter on a result opens the lesson", /\/learn\/09-/.test(page.url()), page.url());
+
+await hydrated("LessonNav");
+await Promise.all([page.waitForURL(/\/learn\/10-/), page.keyboard.press("ArrowRight")]);
+check("→ goes to the next lesson", /\/learn\/10-/.test(page.url()), page.url());
+// A new page means a new island: wait for this page's pager before pressing again.
+await hydrated("LessonNav");
+await Promise.all([page.waitForURL(/\/learn\/09-/), page.keyboard.press("ArrowLeft")]);
+check("← goes back", /\/learn\/09-/.test(page.url()), page.url());
+
+console.log("\nMobile menu");
+await page.setViewportSize({ width: 390, height: 844 });
+await page.goto(`${BASE}/phases/04-rag`, { waitUntil: "networkidle" });
+await hydrated("MobileNav");
+// Not "in the menu": on a phone the progress link must be there without opening anything.
+check(
+  "Progress is in the phone header, not only in the menu",
+  await page.locator("header").getByRole("link", { name: /^Progress/ }).isVisible(),
+);
+await page.getByRole("button", { name: "Open menu" }).click();
+const drawer = page.getByRole("dialog", { name: "Menu" });
+await drawer.waitFor({ timeout: 10_000 });
+check(
+  "the drawer lists every phase",
+  (await drawer.locator('a[href*="/phases/"]').count()) >= 8,
+);
+check(
+  "the drawer marks the current page",
+  (await drawer.locator('[aria-current="page"]').innerText()).includes("RAG"),
+);
+await page.keyboard.press("Escape");
+await drawer.waitFor({ state: "hidden", timeout: 5_000 });
+check("Esc closes the drawer", !(await drawer.isVisible()));
+check(
+  "no sideways scroll at phone width",
+  await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth),
+);
+await page.setViewportSize({ width: 1280, height: 800 });
+
 console.log("\nLesson page");
 await page.goto(LESSON, { waitUntil: "networkidle" });
 check("renders the lesson prose", (await page.locator("article.prose table").count()) > 0);
 check("renders comprehension checks", (await page.getByText("Predict the output").count()) > 0);
 
 // Answering a check should persist. The checks are a `client:visible` island, so they
-// have to be scrolled to before they hydrate and respond to a click.
-const firstOption = page.locator("aside button").first();
+// have to be scrolled to before they hydrate and respond to a click. Scoped to the checks
+// section so no other `aside` on the page (a sidebar, say) can satisfy it by accident.
+const firstOption = page.locator("#checks aside button").first();
 await firstOption.scrollIntoViewIfNeeded();
 await page.waitForTimeout(600);
 await firstOption.click();
@@ -83,6 +161,13 @@ await editor.click();
 await page.keyboard.press("ControlOrMeta+A");
 await page.keyboard.insertText(UNIQUE);
 check("accepts an edit in the editor", (await editor.innerText()).includes("seen.add(item)"));
+
+// The guarantee the ←/→ shortcuts depend on: inside the editor, an arrow moves the cursor
+// and never leaves the page (taking the learner's unsaved edit with it).
+await page.keyboard.press("ArrowRight");
+await page.keyboard.press("ArrowLeft");
+await page.waitForTimeout(500);
+check("arrows inside the editor stay on the page", page.url().startsWith(LESSON), page.url());
 
 // Boot Pyodide and run the real suite. The component warms the runtime on idle, so the
 // button reads "Starting Python…" and stays disabled until the ~10MB of wheels have

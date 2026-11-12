@@ -24,7 +24,7 @@ export function InlineMarkdown({ text }: { text: string }): ReactNode {
           return (
             <code
               key={index}
-              className="rounded border border-line bg-sunken px-1 py-0.5 font-mono text-[0.85em]"
+              className="rounded border border-line bg-sunken px-1 py-0.5 font-mono text-[0.9em]"
             >
               {part.slice(1, -1)}
             </code>
