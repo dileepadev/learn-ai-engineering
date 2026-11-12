@@ -21,3 +21,14 @@ export function href(route: string): string {
   if (route === "/") return BASE === "" ? "/" : `${BASE}/`;
   return `${BASE}${route.startsWith("/") ? route : `/${route}`}`;
 }
+
+/**
+ * Whether two paths name the same page.
+ *
+ * `trailingSlash: "ignore"` means `/learn/x` and `/learn/x/` both serve the same page, and
+ * the browser may report either, so "is this the current page?" must not depend on it.
+ */
+export function isSamePath(a: string, b: string): boolean {
+  const trim = (path: string): string => (path.length > 1 ? path.replace(/\/+$/, "") : path);
+  return trim(a) === trim(b);
+}

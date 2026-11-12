@@ -32,7 +32,8 @@ export function ExitCriteria({ phaseSlug, criteria, heading = "Exit criteria" }:
   const done = criteria.filter((c) => state.criteria[criterionKey(phaseSlug, c.index)]).length;
 
   return (
-    <section className="mt-12 rounded-xl border border-line bg-raised p-5 sm:p-6">
+    // `id` is what "On this page" and search link to; the criteria are not in the markdown.
+    <section id="exit-criteria" className="mt-12 rounded-xl border border-line bg-raised p-5 sm:p-6">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <h2 className="text-xl font-semibold tracking-tight">{heading}</h2>
         <span className="text-sm tabular-nums text-muted">
@@ -61,7 +62,7 @@ export function ExitCriteria({ phaseSlug, criteria, heading = "Exit criteria" }:
                   onChange={(event) => setCriterion(key, event.target.checked)}
                   className="mt-1 size-4 shrink-0 cursor-pointer accent-accent"
                 />
-                <span className={`text-[0.95rem] leading-relaxed ${checked ? "line-through decoration-faint" : ""}`}>
+                <span className={`text-base leading-relaxed ${checked ? "line-through decoration-faint" : ""}`}>
                   <InlineMarkdown text={criterion.text} />
                 </span>
               </label>

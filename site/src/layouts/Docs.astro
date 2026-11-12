@@ -1,0 +1,91 @@
+---
+/**
+ * The reading layout: course sidebar, the page, and an "On this page" column.
+ *
+ *   xl (≥1280px)  sidebar · content · on-this-page
+ *   lg            sidebar · content          (contents fold into a disclosure above the text)
+ *   below lg      content                    (sidebar lives in the header's menu drawer)
+ *
+ * Pages pass their masthead into the `header` slot so the folded contents can sit between
+ * the title and the text. Above the title they would be the first thing read, before you
+ * even know which page you are on.
+ */
+import Base from "./Base.astro";
+import { loadPhases } from "../lib/phaseList.ts";
+import { CourseNav } from "../components/CourseNav.tsx";
+import { OnThisPage, ReadingProgress, type TocItem } from "../components/OnThisPage.tsx";
+
+interface Props {
+  title: string;
+  description?: string;
+  activePage?: string;
+  /** Headings for "On this page", already filtered to the depths worth listing. */
+  toc: TocItem[];
+}
+
+const { title, description, activePage, toc } = Astro.props;
+const navPhases = (await loadPhases()).map(({ slug, number, title: phaseTitle }) => ({
+  slug,
+  number,
+  title: phaseTitle,
+}));
+---
+
+<Base title={title} description={description} activePage={activePage}>
+  <ReadingProgress client:idle />
+
+  <div class="mx-auto flex max-w-7xl gap-10 px-4 sm:px-6">
+    <!-- w-72, up from w-64: with larger text, phase titles were cutting off even earlier. -->
+    <div class="course-sidebar hidden w-72 shrink-0 lg:block">
+      <div
+        class="thin-scrollbar sticky top-16 -ml-2 h-[calc(100dvh-4rem)] overflow-y-auto py-10 pr-3"
+        data-scroll-container
+      >
+        <CourseNav client:idle phases={navPhases} currentPath={Astro.url.pathname} idPrefix="sidebar" />
+      </div>
+    </div>
+
+    <div class="min-w-0 flex-1 py-10 sm:py-14">
+      <div class="mx-auto max-w-3xl">
+        <slot name="header" />
+
+        {
+          toc.length > 0 && (
+            <details class="toc-disclosure mt-8 rounded-xl border border-line bg-raised xl:hidden">
+              <summary class="flex cursor-pointer list-none items-center justify-between px-4 py-3 text-sm font-medium">
+                On this page
+                <svg
+                  viewBox="0 0 24 24"
+                  class="toc-chevron size-4 text-faint transition-transform"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                  aria-hidden="true"
+                >
+                  <path d="M6 9l6 6 6-6" stroke-linecap="round" stroke-linejoin="round" />
+                </svg>
+              </summary>
+              <ol class="space-y-1 border-t border-line px-4 py-3 text-sm">
+                {toc.map((item) => (
+                  <li class:list={[item.depth > 2 && "pl-4"]}>
+                    <a href={`#${item.slug}`} class="block py-0.5 text-muted transition-colors hover:text-ink">
+                      {item.text}
+                    </a>
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )
+        }
+
+        <slot />
+      </div>
+    </div>
+
+    <div class="hidden w-56 shrink-0 xl:block">
+      <div class="thin-scrollbar sticky top-16 max-h-[calc(100dvh-4rem)] overflow-y-auto py-14">
+        <OnThisPage client:idle items={toc} />
+      </div>
+    </div>
+  </div>
+</Base>

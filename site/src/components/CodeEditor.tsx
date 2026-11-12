@@ -32,7 +32,7 @@ const highlightStyle = HighlightStyle.define([
 
 const theme = EditorView.theme({
   "&": {
-    fontSize: "0.855rem",
+    fontSize: "0.9375rem",
     backgroundColor: "transparent",
     color: "var(--text)",
   },

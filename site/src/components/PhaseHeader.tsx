@@ -1,7 +1,8 @@
-import { href } from "../lib/href.ts";
 import { useProgress, useHydrated } from "../lib/useProgress.ts";
 import { describeBreakdown, phaseProgress, type PhaseCounts } from "../lib/curriculum.ts";
 import { ProgressBar } from "./ProgressRing.tsx";
+import { Breadcrumbs } from "./Breadcrumbs.tsx";
+import { Celebration } from "./Celebration.tsx";
 
 interface PhaseHeaderProps {
   slug: string;
@@ -35,20 +36,18 @@ export function PhaseHeader({
 
   return (
     <header>
-      <a
-        href={href("/")}
-        className="inline-flex items-center gap-1.5 text-sm text-muted transition-colors hover:text-ink"
-      >
-        <svg viewBox="0 0 24 24" className="size-3.5" fill="none" stroke="currentColor" strokeWidth="2.5" aria-hidden="true">
-          <path d="M15 18l-6-6 6-6" strokeLinecap="round" strokeLinejoin="round" />
-        </svg>
-        All phases
-      </a>
+      <Breadcrumbs
+        items={[
+          { label: "Dashboard", route: "/" },
+          { label: "Roadmap", route: "/#roadmap" },
+          { label: `Phase ${Number(number)}` },
+        ]}
+      />
 
       <p className="mt-5 font-mono text-sm text-accent">Phase {number}</p>
       <h1 className="mt-1.5 text-3xl font-bold tracking-tight sm:text-4xl">{title}</h1>
 
-      <dl className="mt-6 space-y-3 rounded-xl border border-line bg-raised p-5 text-[0.95rem]">
+      <dl className="mt-6 space-y-3 rounded-xl border border-line bg-raised p-5 text-base">
         {goal ? (
           <div className="flex flex-col gap-1 sm:flex-row sm:gap-3">
             <dt className="w-24 shrink-0 font-medium text-faint">Goal</dt>
@@ -82,6 +81,8 @@ export function PhaseHeader({
           </p>
         </div>
       ) : null}
+
+      <Celebration status={progress.status} hydrated={hydrated} message={`Phase ${Number(number)} complete. Well done!`} />
     </header>
   );
 }

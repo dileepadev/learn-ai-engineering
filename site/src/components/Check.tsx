@@ -73,7 +73,7 @@ export function Check({ check }: { check: CheckData }) {
         </p>
 
         {check.code ? (
-          <pre className="mt-3 overflow-x-auto rounded-lg border border-line bg-sunken p-3 font-mono text-[0.8rem] leading-relaxed">
+          <pre className="mt-3 overflow-x-auto rounded-lg border border-line bg-sunken p-3 font-mono text-sm leading-relaxed">
             {check.code}
           </pre>
         ) : null}
@@ -89,7 +89,7 @@ export function Check({ check }: { check: CheckData }) {
                 <button
                   type="button"
                   onClick={() => choose(optionIndex)}
-                  className={`w-full rounded-lg border px-3.5 py-2.5 text-left text-[0.925rem] transition-colors ${
+                  className={`w-full rounded-lg border px-3.5 py-2.5 text-left text-base transition-colors ${
                     showAsCorrect
                       ? "border-done/60 bg-done/10"
                       : showAsWrong
@@ -153,7 +153,8 @@ export function Check({ check }: { check: CheckData }) {
 export function LessonChecks({ checks }: { checks: CheckData[] }) {
   if (checks.length === 0) return null;
   return (
-    <section aria-label="Comprehension checks">
+    // `id` is the target of the "Check yourself" link in "On this page".
+    <section id="checks" aria-label="Comprehension checks">
       {checks.map((check) => (
         <Check key={check.id} check={check} />
       ))}

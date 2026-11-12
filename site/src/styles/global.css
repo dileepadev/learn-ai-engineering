@@ -12,6 +12,23 @@
   --font-sans: "Inter var", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
 
+  /*
+   * Type scale for interface text, one notch up from Tailwind's defaults.
+   *
+   * Lesson prose is 17px, but everything around it (labels, hints, badges, nav, card
+   * descriptions) used Tailwind's 12px `text-xs` and 14px `text-sm`, which read as
+   * noticeably small next to it, especially in dark mode. Redefining the two tokens here,
+   * rather than editing each use, moves all ~60 of them together and keeps them in step
+   * if a component adds a new one. Line heights are set explicitly because Tailwind's
+   * defaults are tied to the old sizes.
+   *
+   *   text-xs   12px -> 14px     text-sm   14px -> 15px
+   */
+  --text-xs: 0.875rem;
+  --text-xs--line-height: 1.45;
+  --text-sm: 0.9375rem;
+  --text-sm--line-height: 1.5;
+
   /* Status colours carry meaning across the whole app: complete, in progress, upcoming.
      They are defined once here so a phase card, a topic row, and a test result cannot
      drift apart. */
@@ -29,9 +46,12 @@
   --text: oklch(0.24 0.02 260);
   --text-muted: oklch(0.52 0.015 260);
   --text-faint: oklch(0.64 0.012 260);
-  --accent: oklch(0.55 0.19 274);
-  --accent-hover: oklch(0.48 0.2 274);
-  --accent-soft: oklch(0.95 0.03 274);
+  /* Blue, hue 255. The old accent was indigo (274), which read as purple; 255 sits
+     squarely in blue. Lightness stays at 0.55 so white button text (accent-text) keeps
+     roughly 4.5:1 contrast. */
+  --accent: oklch(0.55 0.19 255);
+  --accent-hover: oklch(0.48 0.19 255);
+  --accent-soft: oklch(0.95 0.03 255);
   --accent-text: oklch(1 0 0);
   --shadow: 0 1px 2px oklch(0.2 0.02 260 / 0.06), 0 4px 16px oklch(0.2 0.02 260 / 0.06);
 
@@ -49,26 +69,29 @@
 }
 
 .dark {
-  --surface: oklch(0.17 0.012 265);
-  --surface-raised: oklch(0.21 0.014 265);
-  --surface-sunken: oklch(0.14 0.01 265);
-  --border: oklch(0.29 0.016 265);
-  --border-strong: oklch(0.38 0.02 265);
-  --text: oklch(0.94 0.008 265);
-  --text-muted: oklch(0.71 0.014 265);
-  --text-faint: oklch(0.58 0.014 265);
-  --accent: oklch(0.72 0.16 280);
-  --accent-hover: oklch(0.79 0.15 280);
-  --accent-soft: oklch(0.27 0.05 280);
-  --accent-text: oklch(0.16 0.02 280);
+  /* Neutral blacks: chroma 0 means no hue at all, so nothing reads as navy or slate.
+     These were hue 265 (blue) with a little chroma, which is what tinted every surface.
+     Lightness steps are kept so the layering still works: sunken < surface < raised. */
+  --surface: oklch(0.15 0 0);
+  --surface-raised: oklch(0.2 0 0);
+  --surface-sunken: oklch(0.11 0 0);
+  --border: oklch(0.28 0 0);
+  --border-strong: oklch(0.38 0 0);
+  --text: oklch(0.95 0 0);
+  --text-muted: oklch(0.72 0 0);
+  --text-faint: oklch(0.58 0 0);
+  --accent: oklch(0.72 0.15 250);
+  --accent-hover: oklch(0.79 0.13 250);
+  --accent-soft: oklch(0.27 0.06 255);
+  --accent-text: oklch(0.16 0.02 255);
   --shadow: 0 1px 2px oklch(0 0 0 / 0.3), 0 4px 20px oklch(0 0 0 / 0.28);
 
   --cm-keyword: oklch(0.76 0.15 305);
-  --cm-name: oklch(0.9 0.01 265);
+  --cm-name: oklch(0.9 0 0);
   --cm-function: oklch(0.78 0.13 245);
   --cm-string: oklch(0.79 0.13 150);
   --cm-number: oklch(0.8 0.12 60);
-  --cm-comment: oklch(0.56 0.02 265);
+  --cm-comment: oklch(0.56 0 0);
   --cm-type: oklch(0.79 0.1 195);
   --cm-operator: oklch(0.78 0.08 320);
   --cm-property: oklch(0.8 0.08 250);
@@ -324,7 +347,7 @@
     width: 100%;
     overflow-x: auto;
     border-collapse: collapse;
-    font-size: 0.92rem;
+    font-size: 0.97rem;
   }
 
   .prose th,
@@ -350,5 +373,155 @@
   .prose img {
     max-width: 100%;
     height: auto;
+  }
+}
+
+/* ------------------------------------------------------------------------------------------
+ * Navigation and interaction polish (sidebar, search, dialogs, transitions)
+ * ---------------------------------------------------------------------------------------- */
+
+/*
+ * One hover treatment for every clickable card: border, shadow, and a 1px lift. It is a
+ * utility so cards opt in by name instead of each repeating (and slowly varying) the same
+ * class string.
+ */
+@utility card-interactive {
+  transition:
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 150ms ease;
+
+  &:hover {
+    border-color: var(--border-strong);
+    box-shadow: var(--shadow);
+    transform: translateY(-1px);
+  }
+}
+
+/* A visible key, as in "press ⌘K". */
+@utility kbd {
+  display: inline-grid;
+  place-items: center;
+  min-width: 1.75rem;
+  height: 1.6rem;
+  padding: 0 0.4rem;
+  border: 1px solid var(--border);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  background: var(--surface-sunken);
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 0.8125rem;
+  font-weight: 500;
+  line-height: 1;
+}
+
+/* Scroll areas that sit beside the content (sidebar, contents, palette results). */
+@utility thin-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-strong) transparent;
+}
+
+@layer components {
+  /* Native dialogs: dim and slightly blur the page behind them. */
+  dialog::backdrop {
+    background: oklch(0 0 0 / 0.45);
+    backdrop-filter: blur(2px);
+  }
+
+  /*
+   * A modal dialog does not stop the page behind it from scrolling, so a scroll that
+   * reaches the end of the menu carries on into the lesson. `:has()` locks the page
+   * while any modal is open, with no JavaScript to forget to undo.
+   */
+  html:has(dialog[open]:modal) {
+    overflow: hidden;
+  }
+
+  .drawer[open] {
+    animation: drawer-in 200ms ease-out;
+  }
+
+  .palette[open] {
+    animation: pop-in 140ms ease-out;
+  }
+
+  .toast-in {
+    animation: toast-in 220ms ease-out;
+  }
+
+  .confetti {
+    animation: burst 900ms cubic-bezier(0.2, 0.7, 0.3, 1) forwards;
+  }
+
+  /* The folded "On this page" on narrower screens: turn its chevron when open. */
+  .toc-disclosure[open] .toc-chevron {
+    transform: rotate(180deg);
+  }
+
+  .toc-disclosure summary::-webkit-details-marker {
+    display: none;
+  }
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(-100%);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(-6px) scale(0.98);
+  }
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+@keyframes burst {
+  from {
+    transform: translate(-50%, -50%) rotate(0);
+    opacity: 1;
+  }
+  to {
+    transform: translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot));
+    opacity: 0;
+  }
+}
+
+/*
+ * Page transitions: a short cross-fade between pages, done by the browser.
+ *
+ * Cross-document View Transitions need no JavaScript and leave every page a normal page
+ * load. Astro's <ClientRouter /> was the alternative, but it turns the site into a
+ * single-page app, which would mean reworking the pre-paint theme script, the Pyodide
+ * worker's lifecycle, and island hydration. That's a lot of risk for a visual nicety.
+ * Browsers without support navigate exactly as before.
+ *
+ * Opted into only when motion is welcome. The header and sidebar get their own names,
+ * so they stay put while only the content fades.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  @view-transition {
+    navigation: auto;
+  }
+
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 160ms;
+  }
+
+  .site-header {
+    view-transition-name: site-header;
+  }
+
+  .course-sidebar {
+    view-transition-name: course-sidebar;
   }
 }

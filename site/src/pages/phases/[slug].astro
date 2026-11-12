@@ -1,19 +1,24 @@
 ---
 import { getCollection, render } from "astro:content";
-import Base from "../../layouts/Base.astro";
+import Docs from "../../layouts/Docs.astro";
 import { ExitCriteria } from "../../components/ExitCriteria.tsx";
 import { PhaseHeader } from "../../components/PhaseHeader.tsx";
 import { PartATopicList } from "../../components/PartATopicList.tsx";
 import { PartsTracker } from "../../components/PartsTracker.tsx";
+import { Pager, type PagerLink } from "../../components/Pager.tsx";
+import type { TocItem } from "../../components/OnThisPage.tsx";
 import { PHASE_WITH_LESSONS } from "../../lib/curriculum.ts";
 
 export async function getStaticPaths() {
-  const phases = await getCollection("phases");
-  return phases.map((phase) => ({ params: { slug: phase.id }, props: { phase } }));
+  const phases = (await getCollection("phases")).sort((a, b) => a.id.localeCompare(b.id));
+  return phases.map((phase, index) => ({
+    params: { slug: phase.id },
+    props: { phase, previous: phases[index - 1], next: phases[index + 1] },
+  }));
 }
 
-const { phase } = Astro.props;
-const { Content } = await render(phase);
+const { phase, previous, next } = Astro.props;
+const { Content, headings } = await render(phase);
 const hasLessons = phase.id === PHASE_WITH_LESSONS;
 const counts = {
   criteria: phase.data.exitCriteria.length,
@@ -25,39 +30,54 @@ const partRefs = phase.data.parts.map(({ key, section, sectionTitle }) => ({
   section,
   sectionTitle,
 }));
+
+// Phase docs are long and flat: their h2s are the useful level. The exit criteria are
+// hoisted out of the markdown into an island, so they are added by hand.
+const toc: TocItem[] = headings.filter((heading) => heading.depth === 2);
+if (phase.data.exitCriteria.length > 0) {
+  toc.push({ depth: 2, slug: "exit-criteria", text: phase.data.exitCriteriaHeading });
+}
+
+const pagerLink = (entry: typeof previous): PagerLink | undefined =>
+  entry && {
+    route: `/phases/${entry.id}`,
+    eyebrow: `Phase ${Number(entry.data.number)}`,
+    title: entry.data.title,
+  };
 ---
 
-<Base title={`Phase ${phase.data.number} — ${phase.data.title}`} activePhase={phase.id}>
-  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-    <PhaseHeader
-      client:load
-      slug={phase.id}
-      number={phase.data.number}
-      title={phase.data.title}
-      goal={phase.data.goal}
-      youBuild={phase.data.youBuild}
-      effort={phase.data.effort}
-      counts={counts}
-    />
+<Docs title={`Phase ${phase.data.number} — ${phase.data.title}`} toc={toc}>
+  <PhaseHeader
+    slot="header"
+    client:load
+    slug={phase.id}
+    number={phase.data.number}
+    title={phase.data.title}
+    goal={phase.data.goal}
+    youBuild={phase.data.youBuild}
+    effort={phase.data.effort}
+    counts={counts}
+  />
 
-    {hasLessons && <PartATopicList client:load />}
+  {hasLessons && <PartATopicList client:load />}
 
-    <article class="prose mt-12">
-      <Content />
-    </article>
+  <article class="prose mt-12">
+    <Content />
+  </article>
 
-    {/* Enhances the checkboxes already in the article above; renders only section controls. */}
-    <PartsTracker client:idle parts={partRefs} />
+  {/* Enhances the checkboxes already in the article above; renders only section controls. */}
+  <PartsTracker client:idle parts={partRefs} />
 
-    {
-      phase.data.exitCriteria.length > 0 && (
-        <ExitCriteria
-          client:visible
-          phaseSlug={phase.id}
-          criteria={phase.data.exitCriteria}
-          heading={phase.data.exitCriteriaHeading}
-        />
-      )
-    }
-  </div>
-</Base>
+  {
+    phase.data.exitCriteria.length > 0 && (
+      <ExitCriteria
+        client:visible
+        phaseSlug={phase.id}
+        criteria={phase.data.exitCriteria}
+        heading={phase.data.exitCriteriaHeading}
+      />
+    )
+  }
+
+  <Pager client:idle label="Phase" previous={pagerLink(previous)} next={pagerLink(next)} />
+</Docs>

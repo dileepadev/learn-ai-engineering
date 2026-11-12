@@ -3,6 +3,7 @@ import { useProgress, useHydrated } from "../lib/useProgress.ts";
 import { ProgressRing, ProgressBar } from "./ProgressRing.tsx";
 import { SprintPanel } from "./SprintPanel.tsx";
 import { EDITION } from "../lib/edition.ts";
+import { emit, OPEN_SEARCH } from "../lib/events.ts";
 import {
   describeBreakdown,
   nextUp,
@@ -84,6 +85,9 @@ export function Dashboard({ phases }: DashboardProps) {
   );
 
   const started = overall.done > 0;
+  const currentPhase = phases.find(
+    (phase) => phaseProgress(phase.slug, phase.counts, state).status !== "complete",
+  )?.slug;
 
   return (
     <div className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
@@ -104,39 +108,66 @@ export function Dashboard({ phases }: DashboardProps) {
           </p>
         </div>
 
-        {hydrated ? (
-          <ProgressRing
-            percent={overall.percent}
-            label={`${overall.percent}%`}
-            sublabel={`${overall.done} / ${overall.total}`}
-          />
-        ) : (
-          <div className="size-33 shrink-0 animate-pulse rounded-full bg-sunken" />
-        )}
+        {/* The ring is the first place anyone looks for their progress, so it is the link to
+            the full breakdown, and says so in words rather than hoping people try clicking it. */}
+        <a
+          href={href("/progress")}
+          className="group flex shrink-0 flex-col items-center gap-2 rounded-xl p-2 transition-colors hover:bg-sunken"
+        >
+          {hydrated ? (
+            <ProgressRing
+              percent={overall.percent}
+              label={`${overall.percent}%`}
+              sublabel={`${overall.done} / ${overall.total}`}
+            />
+          ) : (
+            <div className="size-33 shrink-0 animate-pulse rounded-full bg-sunken" />
+          )}
+          <span className="text-sm font-medium text-accent group-hover:underline">
+            See your progress →
+          </span>
+        </a>
       </section>
 
       {/* ---- The single next action ---- */}
       {next ? (
-        <a
-          href={href(next.href)}
-          className="group mt-10 flex items-center gap-4 rounded-xl border border-accent/30 bg-accent-soft p-5 transition-colors hover:border-accent/60"
-        >
-          <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-accent text-accent-ink">
-            <svg viewBox="0 0 24 24" className="size-5" fill="currentColor" aria-hidden="true">
-              <path d="M8 5v14l11-7z" />
-            </svg>
-          </span>
-          <span className="min-w-0">
-            <span className="block text-xs font-medium uppercase tracking-wide text-accent">
-              {started ? "Continue where you left off" : "Start here"}
+        <>
+          <a
+            href={href(next.href)}
+            className="group mt-10 flex items-center gap-4 rounded-xl border border-accent/30 bg-accent-soft p-5 transition-colors hover:border-accent/60"
+          >
+            <span className="grid size-11 shrink-0 place-items-center rounded-lg bg-accent text-accent-ink">
+              <svg viewBox="0 0 24 24" className="size-5" fill="currentColor" aria-hidden="true">
+                <path d="M8 5v14l11-7z" />
+              </svg>
             </span>
-            <span className="mt-0.5 block truncate font-semibold">{next.label}</span>
-            <span className="block text-sm text-muted">{next.detail}</span>
-          </span>
-          <span className="ml-auto hidden shrink-0 text-sm font-medium text-accent group-hover:underline sm:block">
-            Open →
-          </span>
-        </a>
+            <span className="min-w-0">
+              <span className="block text-xs font-medium uppercase tracking-wide text-accent">
+                {started ? "Continue where you left off" : "Start here"}
+              </span>
+              <span className="mt-0.5 block truncate font-semibold">{next.label}</span>
+              <span className="block text-sm text-muted">{next.detail}</span>
+            </span>
+            <span className="ml-auto hidden shrink-0 text-sm font-medium text-accent group-hover:underline sm:block">
+              Open →
+            </span>
+          </a>
+          {/* Shortcuts are only useful if people find out they exist. This is the one place
+              every learner passes, so the hint lives here as well as in the footer. */}
+          <p className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-faint">
+            Looking for something specific?
+            <button
+              type="button"
+              onClick={() => emit(OPEN_SEARCH)}
+              className="inline-flex items-center gap-1.5 text-accent hover:underline"
+            >
+              Search the roadmap
+            </button>
+            <span className="hidden sm:inline">
+              or press <kbd className="kbd">/</kbd>. Press <kbd className="kbd">?</kbd> for all shortcuts.
+            </span>
+          </p>
+        </>
       ) : (
         <div className="mt-10 rounded-xl border border-line bg-raised p-5">
           <p className="font-semibold">Everything is complete. 🎉</p>
@@ -171,7 +202,7 @@ export function Dashboard({ phases }: DashboardProps) {
               <li key={topic.id}>
                 <a
                   href={href(`/learn/${topic.lessonSlug}`)}
-                  className="flex h-full flex-col gap-2.5 rounded-lg border border-line bg-raised p-4 transition-all hover:border-line-strong hover:shadow-(--shadow)"
+                  className="card-interactive flex h-full flex-col gap-2.5 rounded-lg border border-line bg-raised p-4"
                 >
                   <div className="flex items-start gap-3">
                     <span className="mt-0.5 font-mono text-xs text-faint">{topic.number}</span>
@@ -204,7 +235,8 @@ export function Dashboard({ phases }: DashboardProps) {
       </section>
 
       {/* ---- All eight phases: the whole journey ---- */}
-      <section className="mt-16">
+      {/* `id` is where the header's "Roadmap" link lands. */}
+      <section id="roadmap" className="mt-16 scroll-mt-20">
         <h2 className="text-xl font-semibold tracking-tight">The roadmap</h2>
         <p className="mt-1 text-sm text-muted">
           Every phase tracks its parts and exit criteria; Phase 1 also counts its drills.
@@ -213,18 +245,34 @@ export function Dashboard({ phases }: DashboardProps) {
         <ul className="mt-5 grid gap-4 md:grid-cols-2">
           {phases.map((phase) => {
             const progress = phaseProgress(phase.slug, phase.counts, state);
+            // The phase you are in is the first one not yet finished. Marking it saves
+            // reading eight status pills to find your place.
+            const current = hydrated && phase.slug === currentPhase;
             return (
               <li key={phase.slug}>
                 <a
                   href={href(`/phases/${phase.slug}`)}
-                  className="flex h-full flex-col rounded-xl border border-line bg-raised p-5 transition-all hover:border-line-strong hover:shadow-(--shadow)"
+                  aria-current={current ? "step" : undefined}
+                  className={`card-interactive flex h-full flex-col rounded-xl border bg-raised p-5 ${
+                    current ? "border-accent/50 ring-1 ring-accent/20" : "border-line"
+                  }`}
                 >
                   <div className="flex items-center gap-3">
-                    <span className="grid size-9 shrink-0 place-items-center rounded-lg bg-sunken font-mono text-sm font-semibold text-muted">
+                    <span
+                      className={`grid size-9 shrink-0 place-items-center rounded-lg font-mono text-sm font-semibold ${
+                        current ? "bg-accent text-accent-ink" : "bg-sunken text-muted"
+                      }`}
+                    >
                       {phase.number}
                     </span>
                     <h3 className="flex-1 font-semibold leading-tight">{phase.title}</h3>
-                    <StatusPill status={progress.status} />
+                    {current ? (
+                      <span className="rounded-full bg-accent-soft px-2 py-0.5 text-xs font-medium text-accent">
+                        You are here
+                      </span>
+                    ) : (
+                      <StatusPill status={progress.status} />
+                    )}
                   </div>
 
                   {phase.goal ? (

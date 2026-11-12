@@ -60,7 +60,7 @@ export function ProgressRing({
           {label ?? `${clamped}%`}
         </span>
         {sublabel ? (
-          <span className="mt-0.5 text-[0.7rem] text-faint">{sublabel}</span>
+          <span className="mt-0.5 text-xs text-faint">{sublabel}</span>
         ) : null}
       </div>
     </div>

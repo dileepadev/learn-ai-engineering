@@ -1,33 +1,47 @@
 ---
 import "../styles/global.css";
 import { href } from "../lib/href.ts";
+import { loadPhases, countsBySlug } from "../lib/phaseList.ts";
+import { PHASE_COUNTS_ID, serialiseCounts } from "../lib/phaseCounts.ts";
 import { HeaderProgress } from "../components/HeaderProgress.tsx";
 import { ThemeToggle } from "../components/ThemeToggle.tsx";
-import { getCollection } from "astro:content";
+import { MobileNav } from "../components/MobileNav.tsx";
+import { CommandPalette } from "../components/CommandPalette.tsx";
+import { ShortcutsHelp } from "../components/ShortcutsHelp.tsx";
 import { EDITION, NEXT_EDITION } from "../lib/edition.ts";
 
 interface Props {
   title: string;
   description?: string;
-  /** Slug of the phase this page belongs to, so the header can show where you are. */
-  activePhase?: string;
+  /** Which top-level link to mark current. Phase and lesson pages show place in the sidebar. */
   activePage?: string;
 }
 
-const { title, description, activePhase, activePage } = Astro.props;
+const { title, description, activePage } = Astro.props;
 
-const phases = await getCollection("phases");
-// Part *keys*, not counts: a retired key left in storage must not count (see curriculum.ts).
-const phaseCounts = Object.fromEntries(
-  phases.map((phase) => [
-    phase.id,
-    { criteria: phase.data.exitCriteria.length, parts: phase.data.parts.map((part) => part.key) },
-  ]),
-);
+const phases = await loadPhases();
+// Titles and links only. Counts travel once, in the JSON script below (see phaseCounts.ts).
+const navPhases = phases.map(({ slug, number, title: phaseTitle }) => ({ slug, number, title: phaseTitle }));
+const currentPath = Astro.url.pathname;
 
 const fullTitle = title === "Learn AI Engineering" ? title : `${title} · Learn AI Engineering`;
 const summary =
   description ?? "An interactive, build-first roadmap for modern AI engineering.";
+
+// `from` is the width at which a link appears in the header; below it, it lives in the menu
+// drawer. Full class names (not `${from}:block`) so Tailwind can see them at build time.
+// "Progress" is not in this list: it is its own component and shows at every width, because
+// being unable to find your progress was the problem it was added to solve.
+const SHOW_FROM = { md: "md:block", lg: "lg:block" } as const;
+const NAV_BEFORE_PROGRESS = [
+  { label: "Dashboard", route: "/", page: "dashboard", from: "md" },
+  { label: "Roadmap", route: "/#roadmap", page: "roadmap", from: "md" },
+] as const;
+const NAV_AFTER_PROGRESS = [
+  // `lg`, not `md`: with the labelled Progress button, a 768px header has no room for it.
+  { label: "Role", route: "/role", page: "role", from: "lg" },
+  { label: "About", route: "/about", page: "about", from: "lg" },
+] as const;
 ---
 
 <!doctype html>
@@ -47,7 +61,12 @@ const summary =
     -->
     <script is:inline>
       (() => {
-        const stored = localStorage.getItem("lai:theme");
+        let stored = null;
+        try {
+          stored = localStorage.getItem("lai:theme");
+        } catch {
+          // Storage blocked: fall back to the system setting.
+        }
         const dark =
           stored === "dark" ||
           (stored === null && window.matchMedia("(prefers-color-scheme: dark)").matches);
@@ -64,73 +83,77 @@ const summary =
       Skip to content
     </a>
 
-    <header
-      class="sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur-md"
-    >
-      <div class="mx-auto flex h-16 max-w-6xl items-center gap-4 px-4 sm:px-6">
+    <!-- Read by usePhaseCounts(). One copy per page instead of one per island. -->
+    <script
+      is:inline
+      type="application/json"
+      id={PHASE_COUNTS_ID}
+      set:html={serialiseCounts(countsBySlug(phases))}
+    />
+
+    <header class="site-header sticky top-0 z-40 border-b border-line bg-surface/85 backdrop-blur-md">
+      <div class="mx-auto flex h-16 max-w-7xl items-center gap-1 px-3 sm:gap-2 sm:px-6">
+        <!--
+          The header fits one row from 320px up (WCAG 1.4.10 reflow). Nothing is dropped
+          to make that happen any more: below `md` the text links move into the menu drawer,
+          and below `lg` so does the progress gauge. The menu button is hidden once the
+          desktop sidebar takes over.
+        -->
+        <MobileNav client:idle phases={navPhases} currentPath={currentPath} />
+
         <a
           href={href("/")}
-          class="flex items-center gap-2.5 font-semibold tracking-tight transition-opacity hover:opacity-75"
+          class="flex items-center gap-2.5 rounded-md font-semibold tracking-tight transition-opacity hover:opacity-75"
         >
           <span
             class="grid size-8 place-items-center rounded-lg bg-accent text-sm font-bold text-accent-ink"
             aria-hidden="true">AI</span
           >
           <!--
-            Below `sm` the logo is the only way home (the Dashboard link is dropped to make
-            room), so the name stays in the accessibility tree via sr-only instead of
-            display:none — otherwise the link would have no accessible name on phones.
+            Below `sm` the mark is all that shows, so the name stays in the accessibility
+            tree via sr-only instead of display:none, or the link would have no name.
           -->
           <span class="sr-only sm:not-sr-only">Learn AI Engineering</span>
           <span
-            class="hidden rounded-full border border-line px-1.5 py-0.5 text-[0.7rem] font-medium leading-none text-muted lg:inline"
+            class="hidden rounded-full border border-line px-1.5 py-0.5 text-xs font-medium leading-none text-muted xl:inline"
             title={`The ${EDITION} edition of the roadmap`}>{EDITION}</span
           >
         </a>
 
-        <!--
-          The header must fit one row from 320px up (WCAG 1.4.10 reflow), so it sheds pieces
-          by width: below sm the Dashboard link (the logo covers it) and tighter padding;
-          below md the progress gauge; below lg the edition badge.
-        -->
         <nav class="ml-auto flex items-center gap-1 text-sm" aria-label="Main">
-          <a
-            href={href("/")}
-            class:list={[
-              "hidden rounded-md px-2 py-1.5 transition-colors hover:bg-sunken hover:text-ink sm:block sm:px-3",
-              activePage === "dashboard" ? "text-ink font-medium" : "text-muted",
-            ]}
-          >
-            Dashboard
-          </a>
-          <a
-            href={href("/phases/01-foundations")}
-            class:list={[
-              "rounded-md px-2 py-1.5 transition-colors hover:bg-sunken hover:text-ink sm:px-3",
-              activePhase ? "text-ink font-medium" : "text-muted",
-            ]}
-          >
-            Phases
-          </a>
-          <a
-            href={href("/role")}
-            class:list={[
-              "rounded-md px-2 py-1.5 transition-colors hover:bg-sunken hover:text-ink sm:px-3",
-              activePage === "role" ? "text-ink font-medium" : "text-muted",
-            ]}
-          >
-            Role
-          </a>
-          <a
-            href={href("/about")}
-            class:list={[
-              "rounded-md px-2 py-1.5 transition-colors hover:bg-sunken hover:text-ink sm:px-3",
-              activePage === "about" ? "text-ink font-medium" : "text-muted",
-            ]}
-          >
-            About
-          </a>
-          <HeaderProgress client:idle phaseCounts={phaseCounts} />
+          {
+            NAV_BEFORE_PROGRESS.map((link) => (
+              <a
+                href={href(link.route)}
+                aria-current={activePage === link.page ? "page" : undefined}
+                class:list={[
+                  "hidden rounded-md px-3 py-1.5 transition-colors hover:bg-sunken hover:text-ink",
+                  SHOW_FROM[link.from],
+                  activePage === link.page ? "font-medium text-ink" : "text-muted",
+                ]}
+              >
+                {link.label}
+              </a>
+            ))
+          }
+          <HeaderProgress client:idle current={activePage === "progress"} />
+          {
+            NAV_AFTER_PROGRESS.map((link) => (
+              <a
+                href={href(link.route)}
+                aria-current={activePage === link.page ? "page" : undefined}
+                class:list={[
+                  "hidden rounded-md px-3 py-1.5 transition-colors hover:bg-sunken hover:text-ink",
+                  SHOW_FROM[link.from],
+                  activePage === link.page ? "font-medium text-ink" : "text-muted",
+                ]}
+              >
+                {link.label}
+              </a>
+            ))
+          }
+          <span class="mx-1 hidden h-5 w-px bg-line md:block" aria-hidden="true"></span>
+          <CommandPalette client:idle />
           <ThemeToggle client:idle />
         </nav>
       </div>
@@ -142,25 +165,32 @@ const summary =
 
     <footer class="mt-20 border-t border-line py-8 text-sm text-faint">
       <div
-        class="mx-auto flex max-w-6xl flex-col gap-2 px-4 sm:flex-row sm:items-center sm:justify-between sm:px-6"
+        class="mx-auto flex max-w-7xl flex-col gap-4 px-4 sm:px-6 md:flex-row md:items-center md:justify-between"
       >
         <div class="space-y-1">
           <p>
             Lessons and drills are generated from
-            <code class="rounded bg-sunken px-1 py-0.5 text-[0.8em]">phases/</code> in the repo.
+            <code class="rounded bg-sunken px-1 py-0.5 text-[0.9em]">phases/</code> in the repo.
           </p>
           <p>{EDITION} edition, finishing 31 December. The {NEXT_EDITION} edition will be a new release.</p>
         </div>
-        <p class="flex flex-wrap items-center gap-4">
+        <!--
+          A <nav>, not a <p>: the shortcuts island renders a <dialog>, and a <p> may only hold
+          inline content. The HTML parser closes the paragraph when it meets <dialog> and
+          moves the dialog out, so React's hydration finds a DOM that differs from what the
+          server sent and throws (React error #418) on every page.
+        -->
+        <nav class="flex flex-wrap items-center gap-x-4 gap-y-2" aria-label="Footer">
           <a class="transition-colors hover:text-ink" href={href("/role")}>The role</a>
           <a class="transition-colors hover:text-ink" href={href("/about")}>About</a>
+          <a class="transition-colors hover:text-ink" href={href("/progress")}>Your progress</a>
+          <ShortcutsHelp client:idle />
           <a
             class="transition-colors hover:text-ink"
             href="https://github.com/dileepadev/learn-ai-engineering"
             rel="noreferrer">Source on GitHub</a
           >
-          <a class="transition-colors hover:text-ink" href={href("/progress")}>Manage progress</a>
-        </p>
+        </nav>
       </div>
     </footer>
   </body>

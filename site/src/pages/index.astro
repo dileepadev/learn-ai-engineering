@@ -1,24 +1,9 @@
 ---
-import { getCollection } from "astro:content";
 import Base from "../layouts/Base.astro";
-import { Dashboard, type PhaseMeta } from "../components/Dashboard.tsx";
+import { Dashboard } from "../components/Dashboard.tsx";
+import { loadPhases } from "../lib/phaseList.ts";
 
-const phaseEntries = await getCollection("phases");
-
-const phases: PhaseMeta[] = phaseEntries
-  .sort((a, b) => a.id.localeCompare(b.id))
-  .map((entry) => ({
-    slug: entry.id,
-    number: entry.data.number,
-    title: entry.data.title,
-    goal: entry.data.goal,
-    youBuild: entry.data.youBuild,
-    effort: entry.data.effort,
-    counts: {
-      criteria: entry.data.exitCriteria.length,
-      parts: entry.data.parts.map((part) => part.key),
-    },
-  }));
+const phases = await loadPhases();
 ---
 
 <Base title="Learn AI Engineering" activePage="dashboard">

@@ -426,7 +426,7 @@ function ExerciseCard({
                 keeps the layout the author intended; InlineMarkdown renders the code spans
                 rather than showing the backticks raw.
               */}
-              <div className="mt-1.5 whitespace-pre-wrap text-[0.9rem] leading-relaxed text-muted">
+              <div className="mt-1.5 whitespace-pre-wrap text-sm leading-relaxed text-muted">
                 <InlineMarkdown text={exercise.docstring} />
               </div>
             </div>

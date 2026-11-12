@@ -1,6 +1,7 @@
 ---
 import { getCollection, render } from "astro:content";
-import Base from "../layouts/Base.astro";
+import Docs from "../layouts/Docs.astro";
+import { Breadcrumbs } from "../components/Breadcrumbs.tsx";
 import { EDITION } from "../lib/edition.ts";
 
 // Rendered from `phases/the-role.md`, like every other page's content. Failing the build
@@ -9,19 +10,24 @@ const [entry] = await getCollection("role");
 if (!entry) {
   throw new Error("phases/the-role.md is missing, so the /role page has nothing to render.");
 }
-const { Content } = await render(entry);
+const { Content, headings } = await render(entry);
+const toc = headings.filter((heading) => heading.depth === 2);
 ---
 
-<Base
+<Docs
   title="The AI Engineer role"
   description="What an AI Engineer does in 2026, what job postings ask for, how interviews run, and what it pays: the research behind this roadmap."
   activePage="role"
+  toc={toc}
 >
-  <div class="mx-auto max-w-3xl px-4 py-10 sm:px-6 sm:py-14">
-    <p class="font-mono text-sm text-accent">{EDITION} research</p>
+  <header slot="header">
+    <!-- Static: no client directive, so it renders to plain HTML and ships no JavaScript. -->
+    <Breadcrumbs items={[{ label: "Dashboard", route: "/" }, { label: "The role" }]} />
+    <p class="mt-5 font-mono text-sm text-accent">{EDITION} research</p>
     <h1 class="mt-1.5 text-3xl font-bold tracking-tight sm:text-4xl">{entry.data.title}</h1>
-    <article class="prose mt-8">
-      <Content />
-    </article>
-  </div>
-</Base>
+  </header>
+
+  <article class="prose mt-8">
+    <Content />
+  </article>
+</Docs>
