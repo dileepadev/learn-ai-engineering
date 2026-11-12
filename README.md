@@ -6,21 +6,22 @@ This is **not** a machine learning or data science curriculum. There is no calcu
 
 > [!NOTE]
 > This roadmap was created based on my own research, then optimized and enhanced with Claude Fable 5.
-
+<!--  -->
 > [!IMPORTANT]
-> **This is the 2026 edition**, built to be finished by **31 December 2026** — see [Finishing in 2026](#finishing-in-2026). The 2027 edition will be a new release with a refreshed curriculum.
+> **This is the 2026 edition**, released as a preview ([`v1.0.0-beta.1`](https://github.com/dileepadev/learn-ai-engineering/releases/tag/v1.0.0-beta.1)): the fast, hands-on pass over the roadmap. The 2027 edition, the complete in-depth curriculum, will be the first stable release, `v1.0.0`. See the [CHANGELOG](CHANGELOG.md).
 
 ## Work through it interactively
 
 **[dileepadev.github.io/learn-ai-engineering →](https://dileepadev.github.io/learn-ai-engineering/)**
 
-The roadmap is also a learning app. **Every part of every phase is trackable** — each skill bullet, project step, and resource is a checkbox, each section has a one-click "mark section done", and Part A topics you already know can be tested out. A **2026 sprint planner** on the dashboard turns what is left into the hours a week it takes and a finish-by date for each phase. Phase 1's drills run **in your browser** — the same pytest suites that live in this repo, executed against your code via WebAssembly. No clone, no setup, no API keys, no account; progress is saved locally and exportable.
+The roadmap is also a learning app:
 
-Everything it shows is generated from `phases/`, so the site and the docs cannot drift apart. Source and build instructions in [site/](site/).
+- **Every part is trackable.** Every skill, project step, and resource is a checkbox; Part A topics you already know can be tested out.
+- **Real drills in your browser.** Phase 1's pytest suites run against your code via WebAssembly.
+- **Easy to navigate.** Course sidebar, "On this page" contents, Ctrl/⌘K search, and `←`/`→` between lessons.
+- **Progress you can see.** The **Progress** button shows every phase at a glance; a sprint planner turns what is left into hours a week.
 
-## Who this is for
-
-Me — an Associate AI Engineer rebuilding skills from the ground up with current tools and current patterns. Python itself is taught from the start in Phase 1, scoped to exactly what AI engineering uses; prior ML theory is not required.
+No setup, no API keys, no account. Everything is generated from `phases/`, so the site and the docs cannot drift apart. Source in [site/](site/).
 
 ## Operating principles
 
@@ -29,7 +30,7 @@ Me — an Associate AI Engineer rebuilding skills from the ground up with curren
 3. **One primary tool per category.** Depth in one vector DB, one agent framework, one eval tool beats surface familiarity with five. "Also know about" lists exist so you can navigate job descriptions and migrations, not so you learn them all.
 4. **Evals are the core skill.** The difference between a demo and a product is a test suite that tells you when you made things worse. This gets its own phase and shows up early in small ways.
 5. **Exit by competence, not calendar.** Each phase ends with exit criteria. Move on when you can do the things — whether that took a week or a month.
-6. **AI assistants as teachers, not just typists.** Claude Code and friends are part of the modern workflow — this roadmap is built *with* them, agent-first. Let them write the code, including each phase's core learning target (the agent loop, the retrieval pipeline, the eval harness). The bar is comprehension, not authorship: every generated piece gets walked through — what it does, why it's built that way, what breaks without it — until you can explain it, modify it, and debug it unaided. Agent instructions live in [AGENTS.md](AGENTS.md), which encodes exactly that expectation.
+6. **AI assistants as teachers, not just typists.** Let Claude Code and friends write the code, core learning targets included. The bar is comprehension, not authorship: walk through every generated piece until you can explain, modify, and debug it unaided. [AGENTS.md](AGENTS.md) encodes that rule.
 
 ## The map
 
@@ -48,7 +49,7 @@ Phases build on each other — projects from 4 and 5 get instrumented in 6 and d
 
 ## What the 2026 market asks for
 
-The phases are weighted the way 2026 job postings are. [The role](phases/the-role.md) has the full research — what the job is, how it differs from ML engineering, what it pays, and how interviews run — with every figure linked to its source.
+The phases are weighted the way 2026 job postings are. [The role](phases/the-role.md) has the full research (the job, pay, and interview loops), with every figure linked to its source.
 
 | Skill | Share of 2026 AI Engineer postings | Taught in |
 | ----- | ----- | ----- |
@@ -60,112 +61,25 @@ The phases are weighted the way 2026 job postings are. [The role](phases/the-rol
 | AWS · Docker · CI/CD | 40.1% · 31.0% · 29.3% | Phases 1, 7 |
 | Fine-tuning | 8.5–26% | Phase 7, deliberately brief |
 
-LinkedIn's *Jobs on the Rise 2026* ranks AI Engineer first among the fastest-growing US jobs (its category includes machine learning engineers). Typical US pay is $167K–$176K across three 2026 datasets, and a full interview loop runs 3–6 rounds over 2–6 weeks — Phase 8's "Turning it into a job" covers the parts the capstone doesn't.
-
 ## Rough effort
 
-Self-paced, but for planning: Phase 1 runs ~30–50 hours if Python is genuinely new territory (a fraction of that as a refresher), phases 2–3 run ~15–25 focused hours each, phases 4–7 run ~25–40 each, and the capstone is as big as you make it (aim for 40+). At ~10 hours/week that's roughly six months to a strong, defensible skill set.
-
-## Finishing in 2026
-
-The 2026 edition runs to **31 December 2026**. From 4 November that is eight weeks, and at the midpoints above — with Phase 1 as a refresher — the full scope is about 220 hours, or roughly **27 hours a week**. If you already work in the field, tick or test out what you know and that number falls. The dashboard's sprint planner starts from every phase's full budget (Phase 1 included, so it reads higher until you test out) and recalculates from your own progress every time you open it.
-
-| Dates (2026) | Phase |
-| ----- | ----- |
-| Nov 4–8 | Phase 1 — test out what you know, drill the rest |
-| Nov 9–15 | Phase 2 — LLMs & Model APIs |
-| Nov 16–22 | Phase 3 — Prompting & Structured Outputs |
-| Nov 23–29 | Phase 4 — RAG |
-| Nov 30–Dec 6 | Phase 5 — Agents |
-| Dec 7–13 | Phase 6 — Evals & Observability |
-| Dec 14–20 | Phase 7 — Production |
-| Dec 21–31 | Phase 8 — Capstone, then "Turning it into a job" |
-
-Skipping is not covering: test out only what you could do unaided today. Every part still has a checkbox, so nothing is missed by accident — an unticked part is a part you have not done.
+Phase 1 runs ~30–50 hours if Python is new (a fraction as a refresher), phases 2–3 ~15–25 each, phases 4–7 ~25–40 each, and the capstone 40+. At ~10 hours a week that is about six months. Test out only what you could do unaided today: skipping is not covering.
 
 ## Before you start
 
-- **Keys & spend caps:** create an Anthropic API key and set a hard monthly spend limit in the console *before* writing any code — $10–20/month is plenty through Phase 5. Keys live in environment variables, never in code or git.
-- **Budget reality:** worked carefully (cheap model tiers for drills, prompt caching, Ollama for free local calls), the whole roadmap costs roughly $50–150 in API spend, plus ~$10–30 of rented GPU time in Phase 7.
-- **Hardware:** an ordinary laptop is enough for everything — no GPU needed. Ollama on CPU is slow but fine for learning; the only real GPU work (Phase 7's vLLM leg) uses serverless GPU rented by the hour.
-- **Day-zero installs:** uv, Docker, git, and an editor with pyright wired in. That's the entire toolchain until Phase 4 adds Postgres (which runs in Docker anyway).
-- **Rhythm:** short frequent sessions beat weekend marathons; end sessions mid-task so restarting is cheap, and tick exit criteria as you go. The classic failure mode of self-paced plans is the tutorial loop — the guard is simple: start each phase's project no later than a third of the way through the reading, before it feels like you're "ready."
+- **Keys & spend caps:** set a hard monthly limit on your Anthropic key *before* writing code; $10–20/month covers Phases 1–5. Keys live in environment variables, never in code or git.
+- **Budget:** roughly $50–150 of API spend for the whole roadmap, plus ~$10–30 of rented GPU time in Phase 7.
+- **Hardware:** an ordinary laptop. No GPU needed; Phase 7's vLLM leg rents one by the hour.
+- **Installs:** uv, Docker, git, and an editor with pyright. Postgres arrives in Phase 4, in Docker.
+- **Rhythm:** short, frequent sessions. Start each phase's project a third of the way through the reading, before it feels like you're "ready."
 
 ## The stack
 
-Everything this roadmap uses, what it is, and why it earned the slot. Primary picks get real depth; "aware" rows exist so job descriptions and migration decisions never surprise you.
-
-### Languages & core engineering
-
-| Tool | What it is | Why it's in the roadmap | Phases |
-| ---- | ---- | ---- | ---- |
-| [Python](https://www.python.org) | The language | Industry default for AI engineering; every major framework here is Python-first | 1+ |
-| [SQL / PostgreSQL](https://www.postgresql.org) | Relational database & query language | App data, vectors, and full-text search all live in Postgres from Phase 4 on | 1, 4+ |
-| [uv](https://docs.astral.sh/uv/) | Python package & project manager | Replaces pip/venv/poetry/pyenv with one fast tool; the current standard | 1+ |
-| [ruff](https://docs.astral.sh/ruff/) | Linter + formatter | One instant tool, no config debates | 1+ |
-| [pyright](https://microsoft.github.io/pyright/) | Static type checker | AI apps are schema-heavy; typing catches contract breaks before runtime | 1+ |
-| [pytest](https://docs.pytest.org) | Test framework | Tests in every phase; later carries eval suites too | 1+ |
-| [Pydantic](https://docs.pydantic.dev) | Data validation & serialization | The load-bearing library of the field: API contracts, LLM output schemas, tool signatures | 1+ |
-| [FastAPI](https://fastapi.tiangolo.com) | Async web framework | Serves every app in this roadmap; Pydantic-native, streaming-friendly | 1+ |
-| [httpx](https://www.python-httpx.org) | Async HTTP client | Raw provider API calls, SSE consumption, concurrent fan-out | 1+ |
-| [Docker](https://docs.docker.com) | Containers | Local infra (Postgres, Langfuse) and the deployment artifact | 1+ |
-| [GitHub Actions](https://docs.github.com/en/actions) | CI/CD | Runs tests and eval regression gates on every change | 6–7 |
-
-### Models & model access
-
-| Tool | What it is | Why it's in the roadmap | Phases |
-| ---- | ---- | ---- | ---- |
-| [Anthropic API](https://docs.anthropic.com) | Hosted frontier models (Claude) | The API studied in depth: streaming, tool use, prompt caching, batches | 2+ |
-| [OpenAI API](https://platform.openai.com/docs) | Hosted frontier models | The de facto wire-format standard most tooling speaks | 2 |
-| [Ollama](https://ollama.com) | Local model runner | Run open-weight models (Llama/Qwen/DeepSeek families) on your own machine | 2 |
-| [OpenRouter](https://openrouter.ai) | Model aggregator | Aware: many models behind one key | 2 |
-| [Microsoft Foundry](https://learn.microsoft.com/en-us/azure/foundry/) | Microsoft's unified AI platform (rebranded from Azure AI Foundry) | Enterprise route to frontier models with quotas, content filters, private networking; first-choice cloud | 2, 7 |
-| [Amazon Bedrock](https://aws.amazon.com/bedrock/) | AWS managed model access | Claude and other models with AWS governance; Knowledge Bases, Guardrails | 2, 7 |
-| [Vertex AI](https://cloud.google.com/vertex-ai) | GCP's AI platform | Aware: same concepts, third ecosystem | 7 |
-
-### Structured outputs, RAG & agents
-
-| Tool | What it is | Why it's in the roadmap | Phases |
-| ---- | ---- | ---- | ---- |
-| [Instructor](https://python.useinstructor.com) | Structured-output library | Pydantic-validated LLM outputs with retries — adopted after hand-rolling the same loop | 3 |
-| [pgvector](https://github.com/pgvector/pgvector) | Vector extension for Postgres | Vectors + metadata + BM25 in one boring, correct database | 4+ |
-| [sentence-transformers](https://sbert.net) | Open-source embeddings & rerankers | Local embedding and cross-encoder reranking without API costs | 4 |
-| [Cohere Rerank](https://docs.cohere.com/docs/rerank-overview) | Hosted reranker | The biggest retrieval-quality jump per line of code | 4 |
-| [LangGraph](https://docs.langchain.com/oss/python/langgraph/overview) | Agent orchestration framework | Primary framework: durable state, human-in-the-loop, streaming | 5 |
-| [MCP](https://modelcontextprotocol.io) | Model Context Protocol | The open standard for exposing tools to AI apps; you build a server | 5, 8 |
-| [Pydantic AI](https://ai.pydantic.dev) | Type-safe agent framework | Aware: the lighter-weight alternative worth watching | 5 |
-| [Claude Agent SDK](https://docs.anthropic.com/en/api/agent-sdk/overview) | Agent harness SDK | Aware: the production harness behind Claude Code | 5 |
-
-### Evals, observability & production
-
-| Tool | What it is | Why it's in the roadmap | Phases |
-| ---- | ---- | ---- | ---- |
-| [promptfoo](https://www.promptfoo.dev) | Eval & red-team CLI | Config-driven eval suites wired into CI; automated red-teaming | 6 |
-| [DeepEval](https://deepeval.com) | Pytest-native eval library | Prebuilt LLM/RAG metrics (faithfulness, relevancy) inside the pytest you already use | 6 |
-| [Ragas](https://docs.ragas.io) | RAG evaluation library | Aware: RAG-metric vocabulary; overlaps DeepEval | 4, 6 |
-| [Langfuse](https://langfuse.com) | LLM observability platform | Open-source tracing, cost tracking, datasets, feedback capture; self-hostable | 6+ |
-| [LiteLLM](https://docs.litellm.ai) | LLM gateway/proxy | One choke point for budgets, rate limits, fallbacks, model routing | 7 |
-| [vLLM](https://docs.vllm.ai) | Inference server | The standard for self-hosting open-weight models on GPUs | 7 |
-| [Redis](https://redis.io) + [arq](https://arq-docs.helpmanual.io) | Queue + async worker | Background jobs (ingestion, long agent runs) off the request path | 7 |
-| [Fly.io](https://fly.io) / [Railway](https://railway.com) | Container hosting | Simple, cheap deploys for containerized apps | 7 |
-| [Modal](https://modal.com) | Python-native serverless + GPU | Serverless GPUs for vLLM legs and spiky workloads | 7 |
-| [Azure AI Search](https://learn.microsoft.com/en-us/azure/search/) | Managed retrieval service | The managed version of the RAG stack you built by hand | 7 |
-| [Azure Container Apps](https://learn.microsoft.com/en-us/azure/container-apps/) | Serverless containers on Azure | Primary cloud deploy target (Azure-first) | 7 |
-
-## Progress
-
-- [ ] Phase 1 — Foundations
-- [ ] Phase 2 — LLMs & Model APIs
-- [ ] Phase 3 — Prompting & Structured Outputs
-- [ ] Phase 4 — RAG
-- [ ] Phase 5 — Agents
-- [ ] Phase 6 — Evals & Observability
-- [ ] Phase 7 — Production
-- [ ] Phase 8 — Capstone
+One primary tool per category: uv, ruff, pyright, pytest, Pydantic, FastAPI, httpx, and Docker; the Anthropic API; pgvector; LangGraph and MCP; promptfoo, DeepEval, and Langfuse; LiteLLM and vLLM. [STACK.md](STACK.md) lists every tool, what it is, why it earned its slot, and the phases that use it.
 
 ## Project code
 
-Phase projects live in this repo under `projects/`, as [uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/) members — one lockfile, one environment, one set of standards across all eight phases:
+Phase projects live under `projects/` as [uv workspace](https://docs.astral.sh/uv/concepts/projects/workspaces/) members: one lockfile, one environment, one set of standards.
 
 ```text
 projects/
@@ -175,16 +89,8 @@ projects/
   ...                # one directory per phase project
 ```
 
-Tick them off in **Progress** above as you go.
+## Working on this repo
 
-## Working with AI agents
-
-This repo is set up agent-first. [AGENTS.md](AGENTS.md) is the single source of truth — project context, toolchain, coding standards, testing expectations, and the "explain what you generate" rule. [CLAUDE.md](CLAUDE.md), [.github/copilot-instructions.md](.github/copilot-instructions.md), and [.cursor/rules/](.cursor/rules/) are thin pointers to it, so the standards can't drift apart.
-
-`.mcp.json` configures [Context7](https://github.com/upstash/context7) for up-to-date library documentation — the stack here moves fast, and looking up a real signature beats guessing at one.
-
-## Interactive site deployment
-
-If you add the interactive learning site under `site/` (Astro static app), GitHub Pages deployment
-is handled by [.github/workflows/deploy-site.yml](.github/workflows/deploy-site.yml). It builds
-`site/` and deploys `site/dist` on pushes to `main`.
+- **AI agents:** [AGENTS.md](AGENTS.md) is the single source of truth for context, standards, and the "explain what you generate" rule. [CLAUDE.md](CLAUDE.md), [Copilot](.github/copilot-instructions.md), and [Cursor](.cursor/rules/) configs point to it. `.mcp.json` adds [Context7](https://github.com/upstash/context7) for current library docs.
+- **The site:** [deploy-site.yml](.github/workflows/deploy-site.yml) tests, builds, and deploys [site/](site/) to GitHub Pages on every push to `main` that touches `phases/` or `site/`.
+- **Releases:** see [VERSIONING.md](VERSIONING.md) and [CHANGELOG.md](CHANGELOG.md).

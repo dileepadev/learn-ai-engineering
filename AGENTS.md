@@ -51,7 +51,8 @@ Concretely:
 learn-ai-engineering/
 ├── AGENTS.md                     <- canonical agent instructions (this file)
 ├── CLAUDE.md                     <- pointer + Claude Code specifics
-├── README.md                     <- roadmap overview, stack table, progress
+├── README.md                     <- roadmap overview: the map, effort, getting started
+├── STACK.md                      <- the stack table: every tool and why it is here
 ├── pyproject.toml                <- uv workspace root; shared ruff/pyright/pytest config
 ├── .mcp.json                     <- project-scoped MCP servers
 ├── phases/                       <- curriculum docs, 01..08
@@ -254,8 +255,8 @@ v1 idioms are wrong here and are a frequent AI-generated error. Use:
   [phases/01-foundations.md](phases/01-foundations.md): goal / you build / effort, why the
   phase exists, content parts, project(s), resources, exit criteria as a checklist. Match its
   voice — direct, opinionated, second person, no filler.
-- When a project is completed, tick its box in the README **Progress** list and link it under
-  **Project code**.
+- When a project is completed, link it under **Project code** in the README. Progress itself
+  is tracked on the site, not in the README.
 - Update `CHANGELOG.md` for notable changes, following the categories it defines
   (Added / Changed / Fixed / Removed).
 
@@ -324,7 +325,7 @@ Further rules:
   time of writing. Check what is actually on disk before referencing it.
 - **Do not fabricate command output, test results, or benchmarks.** Run the command, or say
   you did not.
-- **Do not add dependencies outside the stack table in the README** without flagging it and
+- **Do not add dependencies outside the stack table in [STACK.md](STACK.md)** without flagging it and
   saying what it replaces. Stack discipline is a stated project principle: one primary tool per
   category.
 - If a request is ambiguous or the repo contradicts it, ask. A wrong assumption compounds
