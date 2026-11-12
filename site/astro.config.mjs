@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import react from "@astrojs/react";
+import tailwindcss from "@tailwindcss/vite";
 
 // GitHub Pages serves this repo as a *project page*, i.e. at
 // https://dileepadev.github.io/learn-ai-engineering/ — not at the domain root.
@@ -14,6 +15,11 @@ export default defineConfig({
   base: BASE,
   output: "static",
   trailingSlash: "ignore",
+  // Astro 7 changed the default to "jsx", which drops whitespace containing a line
+  // break between text and an element, so "generated from\n<code>phases/</code>" rendered as
+  // "generated fromphases/". `true` is the Astro 6 behaviour: collapse runs of whitespace
+  // but keep one space. Templates in this repo wrap prose across lines and rely on it.
+  compressHTML: true,
   integrations: [react()],
   markdown: {
     // The lessons are dense with fenced Python. Shiki's dual-theme output lets one
@@ -25,7 +31,13 @@ export default defineConfig({
     },
   },
   vite: {
-    // Tailwind is loaded via postcss.config.mjs — see the note there.
+    // Tailwind runs as a Vite plugin. Under Astro 6 it went through PostCSS instead,
+    // because Astro nested its own Vite 7 copy while vitest hoisted Vite 8, and the plugin
+    // bound to the wrong one. Astro 7 is on Vite 8, so the tree has a single Vite again
+    // (check with `npm ls vite`). The PostCSS route also stopped working: Vite 8 resolves
+    // CSS `@import`s itself before PostCSS plugins run, and it could not resolve
+    // `@import "tailwindcss"`. If `npm ls vite` ever shows two copies, expect this to break.
+    plugins: [tailwindcss()],
     worker: {
       // The Pyodide worker is an ES module; the default `iife` worker format cannot
       // carry the dynamic import it uses to pull the runtime.
