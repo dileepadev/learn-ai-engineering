@@ -23,6 +23,12 @@ This file tracks tasks, improvements, and features planned for upcoming updates 
       to GitHub Pages
 - [x] 2026 edition — `phases/the-role.md` and the `/role` page, every part of every phase
       trackable, Part A test-out, and the year-end sprint planner on the dashboard
+- [x] Site upgraded to Astro 7 (Vite 8, Sätteri markdown, `@tailwindcss/vite`)
+- [x] Site navigation — course sidebar, phone menu, "On this page", Ctrl/⌘K search,
+      keyboard shortcuts, breadcrumbs, a labelled Progress button and a per-phase progress
+      page, and a larger interface type scale
+- [x] 2026 edition released as the preview `v1.0.0-beta.1` (pre-release); site version
+      `1.0.0-beta.1`
 
 ## Upcoming Tasks
 
@@ -54,8 +60,9 @@ This file tracks tasks, improvements, and features planned for upcoming updates 
 
 - [ ] Keep `CHANGELOG.md` updated as each phase's content/projects land
 - [ ] Keep README **Progress** checklist and **Project code** links in sync with `projects/`
-- [ ] Tag `v1.0.0` for the 2026 edition once it is merged (see `CHANGELOG.md`)
-- [ ] Cut the 2027 edition as a new release — the steps are in `AGENTS.md` under "Editions"
+- [ ] Ship any 2026 fixes as `v1.0.0-beta.2`, `beta.3`, … (see `CHANGELOG.md`)
+- [ ] Cut the 2027 edition as the first stable release, `v1.0.0` — the steps are in
+      `AGENTS.md` under "Editions"
 
 <!-- Example Task List Format
 

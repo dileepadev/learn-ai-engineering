@@ -129,8 +129,10 @@ reads. Saved progress records the edition it was made against. To cut the next e
    edition notes in the README.
 3. Decide what happens to the previous edition's progress (keep, archive via export, or start
    fresh), and implement it in `progress.ts` with a test that loads an old save.
-4. Release it per [VERSIONING.md](VERSIONING.md): the 2026 edition is `v1.0.0`; the 2027
-   edition, a breaking curriculum change, is `v2.0.0`.
+4. Release it per [VERSIONING.md](VERSIONING.md). The 2026 edition is a preview, released as
+   the `v1.0.0-beta.N` series (a GitHub pre-release; fixes bump `N`). The 2027 edition, the
+   complete curriculum, is the first stable release, `v1.0.0`; a later breaking curriculum
+   change is the next major version.
 
 Drills run for real in the browser via [Pyodide](https://pyodide.org) — the same
 `conftest.py` and the same pytest suites, compiled to WASM. Two consequences:
