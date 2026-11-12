@@ -6,8 +6,10 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
 // Astro's own markdown pipeline (it ships with `astro`), so these tests render task items
-// exactly the way a real build does rather than against a guess at its output.
-import { createMarkdownProcessor } from "@astrojs/markdown-remark";
+// exactly the way a real build does rather than against a guess at its output. Astro 7
+// replaced remark with Sätteri as the default processor; if Astro switches again, this
+// import has to follow, or the test checks a renderer the site no longer uses.
+import { createSatteriMarkdownProcessor as createMarkdownProcessor } from "@astrojs/markdown-satteri";
 import { annotateCheckboxes, extractParts, hashText, plainText, slugify } from "./parts.ts";
 
 const PHASES_DIR = fileURLToPath(new URL("../../../phases", import.meta.url));
